@@ -1,0 +1,121 @@
+.to-do {
+    background-color: #F6E3CE;
+  }
+  .in-progress {
+    background-color: #C9E4CA;
+  }
+  .done {
+    background-color: #D6EAF8;
+  }
+
+.RoadmapColumnHeader h2 {
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .roadmap {
+    flex-basis: 33.33%;
+  }
+  .RoadmapColumn {
+
+    box-sizing: border-box;
+  }
+
+  ul {
+    list-style-type: none;;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 0px;
+  }
+
+  li {
+    background-color: #FBEFEF;
+    margin: 0;
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    list-style-type: none;
+    height: 50px;
+    cursor: pointer;
+  }
+
+  li:hover {
+    border: 2px solid #2196F3;
+  }
+
+  li.selected {
+    border: 2px solid #2196F3 !important;
+  }
+
+  /* styles.css */
+.item {
+    background-color: #FBEFEF;
+    margin: 0;
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    list-style-type: none;
+    height: 50px;
+    cursor: pointer;
+  }
+  
+  .item[to-do] {
+    background-color: #FBEFEF;
+    color: #F44336;
+  }
+  
+  .item[in-progress] {
+    background-color: #F2FBEF;
+    color: #FFC107;
+  }
+  
+  .item[done] {
+    background-color: #E5F5E5;
+    color: #4CAF50;
+  }
+  
+  .item[selected] {
+    border: 2px solid #2196F3;
+  }
+  
+  .roadmap-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  .roadmap-column {
+    flex-basis: 33.33%;
+    flex: 1;
+    margin-right: 20px;
+  }
+  
+  .roadmap-column:last-child {
+    margin-right: 0;
+  }
+  
+  .roadmap-column-header {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    border-radius: 5px 5px 0 0;
+  }
+
+  .item-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  .item-description {
+    font-size: 0.9rem;
+    color: #999;
+  }
+  
+  
