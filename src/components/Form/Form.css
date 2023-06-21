@@ -4,10 +4,22 @@ h2 {
   }
   
   button[type="submit"] {
+    margin: 1%;
     padding: 10px;
     border-radius: 5px;
     border: none;
     background-color: #4CAF50;
+    color: #FFF;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button[type="button"] {
+    margin: 1%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #4c514c;
     color: #FFF;
     font-weight: bold;
     cursor: pointer;

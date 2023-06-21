@@ -39,7 +39,6 @@
     border-radius: 5px;
     margin-bottom: 10px;
     list-style-type: none;
-    height: 50px;
     cursor: pointer;
   }
 
@@ -60,7 +59,7 @@
     border-radius: 5px;
     margin-bottom: 10px;
     list-style-type: none;
-    height: 50px;
+    height: 100px;
     cursor: pointer;
   }
   
@@ -111,11 +110,27 @@
   .item-title {
     font-size: 1.2rem;
     font-weight: bold;
+    padding: 3%;
   }
   
   .item-description {
     font-size: 0.9rem;
     color: #999;
+  }
+
+  .item-details {
+    margin-top: 10px;
+  }
+  
+  .item-assignee {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .item-priority {
+    font-size: 14px;
+    color: #555;
+    font-weight: bold;
   }
   
   
