@@ -141,5 +141,32 @@ h2 {
     font-weight: bold;
     cursor: pointer;
   }
+
+  .tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e0d268;
+    color: #333;
+    padding: 4px 8px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  
+  .tag-remove {
+    background: none;
+    border: none;
+    color: #666;
+    margin-left: 4px;
+    cursor: pointer;
+  }
+  
   
   

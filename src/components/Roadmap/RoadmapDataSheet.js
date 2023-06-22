@@ -16,16 +16,22 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
           `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
         );
         const data = await response.json();
-    
+
         if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
           const headers = data.values[0];
+          const tagsColumnIndex = headers.indexOf('Tags');
           const parsedData = data.values.slice(1).map(row => {
             return headers.reduce((obj, key, index) => {
               obj[key] = row[index] || '';
               return obj;
             }, {});
           });
-    
+
+          // Agregar tags al objeto de cada elemento
+          parsedData.forEach(item => {
+            item.tags = item[headers[tagsColumnIndex]];
+          });
+
           setItems(parsedData);
         } else {
           console.error('No se encontraron datos válidos en la respuesta API');
@@ -77,7 +83,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
               .filter((item) => item.Estado === Estado)
               .map((item) => (
                 <li
-                  key={item.Id} // Asegúrate de usar una propiedad única del objeto como la clave
+                  key={item.Id}
                   className={`roadmap-item ${item.Estado} ${selectedItem === item ? 'selected' : ''}`}
                   onClick={() => handleSelectItem(item)}
                   onDoubleClick={() => onEditItem(item)}
@@ -88,6 +94,11 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
                   <div className="item-details">
                     <p className="item-assignee">Asignado: {item.Assignee}</p>
                     <p className="item-priority">Prioridad: {item.Priority}</p>
+                  </div>
+                  <div className="item-tags">
+                    {item.tags.split(',').map(tag => (
+                      <span key={tag} className="item-tag">{tag.trim()}</span>
+                    ))}
                   </div>
                 </li>
               ))}

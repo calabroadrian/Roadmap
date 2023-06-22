@@ -12,6 +12,8 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [Estado, setEstado] = useState('');
   const [Titulo, setTitulo] = useState('');
   const [idExists, setIdExists] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     if (item) {
@@ -19,12 +21,14 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       SetDescripcion(item.Descripcion);
       setEstado(item.Estado);
       setTitulo(item.Titulo);
+      setTags(item.Tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''));
       setIdExists(true);
     } else {
       setId('');
       SetDescripcion('');
       setEstado('');
       setTitulo('');
+      setTags([]);
       setIdExists(false);
     }
   }, [item]);
@@ -74,6 +78,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       rowToUpdate.Descripcion = Descripcion;
       rowToUpdate.Estado = Estado;
       rowToUpdate.Titulo = Titulo;
+      rowToUpdate.Tags = tags.join(',');
 
       await rowToUpdate.save();
 
@@ -82,7 +87,8 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Id,
         Descripcion,
         Estado,
-        Titulo
+        Titulo,
+        Tags: tags.join(',')
       });
     } else {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
@@ -93,6 +99,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       await doc.loadInfo();
       const sheet = doc.sheetsByIndex[0];
       const rows = await sheet.getRows();
+      
       const exists = rows.some(row => row.Id === Id);
 
       if (exists) {
@@ -100,14 +107,15 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         return;
       }
 
-      await sheet.addRow({ Id, Descripcion, Estado, Titulo });
+      await sheet.addRow({ Id, Descripcion, Estado, Titulo, Tags: tags.join(',') });
 
       onAddItem({
         id: Date.now(),
         Id,
         Descripcion,
         Estado,
-        Titulo
+        Titulo,
+        Tags: tags.join(',')
       });
     }
 
@@ -117,6 +125,28 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     console.log(item);
   };
 
+  const addTag = (tag) => {
+    if (tag.trim() !== '') {
+      setTags([...tags, tag]);
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (index) => {
+    const updatedTags = [...tags];
+    updatedTags.splice(index, 1);
+    setTags(updatedTags);
+  };
+
+  const handleTagKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const tag = event.target.value.trim();
+      if (tag !== '') {
+        addTag(tag);
+      }
+    }
+  };
 
   const handleDelete = async () => {
     onDeleteItem(item);
@@ -131,6 +161,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     const rowToDelete = rows.find(row => row._rawData[0] === item.Id);
     await rowToDelete.delete();
     onDeselectItem();
+    window.location.reload();
     onCloseModal();
   };
 
@@ -142,7 +173,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           <button className="form-close" onClick={onCloseModal}>X</button>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className='form-group-1'>
+          <div className="form-group-1">
             <div>
               <label>Id:</label>
               <input type="text" value={Id} onChange={(e) => setId(e.target.value)} required />
@@ -165,16 +196,34 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                 <option value="done">Hecho</option>
               </select>
             </div>
+            <div>
+              <label>Tags:</label>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+              />
+              <div className="tag-container">
+                {tags.map((tag, index) => (
+                  <div key={index} className="tag">
+                    {tag}
+                    <button className="tag-remove" onClick={() => removeTag(index)}>×</button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="form-group-2">
-            <button className="form-submit" type="submit">{item ? 'Modificar' : 'Agregar'}</button>
-            {item && <button className="form-delete" type="button" onClick={handleDelete}>Eliminar</button>}
-            {item && <button className="form-cancel" type="button" onClick={onDeselectItem}>Cancelar</button>}
+            <button type="submit">Guardar</button>
+            {item && (
+              <button type="button" className="form-delete" onClick={handleDelete}>Eliminar</button>
+            )}
           </div>
         </form>
       </div>
     </div>
   );
-};
+}
 
 export default Form;

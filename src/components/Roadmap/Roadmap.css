@@ -37,6 +37,7 @@
     margin: 0;
     padding: 0;
     border-radius: 5px;
+    border: 2px solid #363737;
     margin-bottom: 10px;
     list-style-type: none;
     cursor: pointer;
@@ -99,6 +100,7 @@
   }
   
   .roadmap-column-header {
+    border: 2px solid #363737;
     height: 100px;
     display: flex;
     align-items: center;
@@ -119,7 +121,7 @@
   }
 
   .item-details {
-    margin-top: 10px;
+    padding-left: 3%;
   }
   
   .item-assignee {
@@ -133,4 +135,23 @@
     font-weight: bold;
   }
   
+  .item-tag {
+
+    display: inline-block;
+    margin-right: 1%;
+    margin-bottom: 1%;
+    padding: 4px 8px;
+    background-color: #e0d268;
+    color: #333;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .item-tag:empty {
+    padding: 0;
+  }
+  
+  .item-tags {
+    margin-left: 3%;
+  }
   
