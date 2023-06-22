@@ -92,8 +92,8 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
                   <h3 className="item-title">{item.Descripcion}</h3>
                   <p className="item-description">{item.description}</p>
                   <div className="item-details">
-                    <p className="item-assignee">Asignado: {item.Assignee}</p>
-                    <p className="item-priority">Prioridad: {item.Priority}</p>
+                    <p className="item-assignee">Asignado: {item.UsuarioAsignado}</p>
+                    <p className="item-priority">Prioridad: {item.Prioridad}</p>
                   </div>
                   <div className="item-tags">
                     {item.tags.split(',').map(tag => (

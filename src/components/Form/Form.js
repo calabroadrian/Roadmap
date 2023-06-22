@@ -11,9 +11,45 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [Descripcion, SetDescripcion] = useState('');
   const [Estado, setEstado] = useState('');
   const [Titulo, setTitulo] = useState('');
+  const [UsuarioAsignado, setUsuarioAsignado] = useState('');
+  const [Prioridad, setPrioridad] = useState('');
   const [idExists, setIdExists] = useState(false);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
+  const [userList, setUserList] = useState([]);
+  const [priorityList, setPriorityList] = useState([]);
+
+  useEffect(() => {
+    // Obtener el listado de usuarios de la hoja de Google Sheets
+    const fetchUserList = async () => {
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+      await doc.useServiceAccountAuth({
+        client_email: CLIENT_EMAIL,
+        private_key: PRIVATE_KEY,
+      });
+      await doc.loadInfo();
+      const sheet = doc.sheetsByIndex[1]; // Suponiendo que el listado de usuarios está en la segunda hoja
+      const rows = await sheet.getRows();
+      const users = rows.map(row => row.NombreUsuario); // Ajusta esto según la estructura de tus datos de usuarios
+      setUserList(users);
+    };
+
+    const fetchPriorityList = async () => {
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+      await doc.useServiceAccountAuth({
+        client_email: CLIENT_EMAIL,
+        private_key: PRIVATE_KEY,
+      });
+      await doc.loadInfo();
+      const sheet = doc.sheetsByIndex[1]; // Suponiendo que el listado de prioridades está en la segunda hoja
+      const rows = await sheet.getRows();
+      const priorities = rows.map(row => row.Prioridad); // Ajusta esto según la estructura de tus datos de prioridades
+      setPriorityList(priorities);
+    };
+
+    fetchUserList();
+    fetchPriorityList();
+  }, []);
 
   useEffect(() => {
     if (item) {
@@ -21,14 +57,18 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       SetDescripcion(item.Descripcion);
       setEstado(item.Estado);
       setTitulo(item.Titulo);
+      setUsuarioAsignado(item.UsuarioAsignado);
       setTags(item.Tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''));
+      setPrioridad(item.Prioridad);
       setIdExists(true);
     } else {
       setId('');
       SetDescripcion('');
       setEstado('');
       setTitulo('');
+      setUsuarioAsignado('');
       setTags([]);
+      setPrioridad('');
       setIdExists(false);
     }
   }, [item]);
@@ -79,6 +119,8 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       rowToUpdate.Estado = Estado;
       rowToUpdate.Titulo = Titulo;
       rowToUpdate.Tags = tags.join(',');
+      rowToUpdate.UsuarioAsignado = UsuarioAsignado;
+      rowToUpdate.Prioridad = Prioridad;
 
       await rowToUpdate.save();
 
@@ -88,7 +130,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Descripcion,
         Estado,
         Titulo,
-        Tags: tags.join(',')
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad
       });
     } else {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
@@ -99,7 +143,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       await doc.loadInfo();
       const sheet = doc.sheetsByIndex[0];
       const rows = await sheet.getRows();
-      
+
       const exists = rows.some(row => row.Id === Id);
 
       if (exists) {
@@ -107,7 +151,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         return;
       }
 
-      await sheet.addRow({ Id, Descripcion, Estado, Titulo, Tags: tags.join(',') });
+      await sheet.addRow({ Id, Descripcion, Estado, Titulo, Tags: tags.join(','), UsuarioAsignado, Prioridad });
 
       onAddItem({
         id: Date.now(),
@@ -115,7 +159,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Descripcion,
         Estado,
         Titulo,
-        Tags: tags.join(',')
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad
       });
     }
 
@@ -194,6 +240,24 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                 <option value="to-do">Por hacer</option>
                 <option value="in-progress">En progreso</option>
                 <option value="done">Hecho</option>
+              </select>
+            </div>
+            <div>
+              <label>Usuario Asignado:</label>
+              <select value={UsuarioAsignado} onChange={(e) => setUsuarioAsignado(e.target.value)}>
+                <option value="">Select a user</option>
+                {userList.map(user => (
+                  <option key={user} value={user}>{user}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Prioridad:</label>
+              <select value={Prioridad} onChange={(e) => setPrioridad(e.target.value)}>
+                <option value="">Select a priority</option>
+                {priorityList.map(priority => (
+                  <option key={priority} value={priority}>{priority}</option>
+                ))}
               </select>
             </div>
             <div>
