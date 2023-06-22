@@ -45,6 +45,7 @@
 
   li:hover {
     border: 2px solid #2196F3;
+    background-color: #e0d268;
   }
 
   li.selected {

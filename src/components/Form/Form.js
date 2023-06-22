@@ -218,73 +218,75 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           <h2>Agregar nueva tarea</h2>
           <button className="form-close" onClick={onCloseModal}>X</button>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group-1">
-            <div>
-              <label>Id:</label>
-              <input type="text" value={Id} onChange={(e) => setId(e.target.value)} required />
-              {idExists && <p className="form-error">El ID ya existe en el sheet. Por favor, elige otro ID único.</p>}
-            </div>
-            <div>
-              <label>Título:</label>
-              <input type="text" value={Titulo} onChange={(e) => setTitulo(e.target.value)} required />
-            </div>
-            <div>
-              <label>Descripción:</label>
-              <textarea value={Descripcion} onChange={(e) => SetDescripcion(e.target.value)} required></textarea>
-            </div>
-            <div>
-              <label>Estado:</label>
-              <select value={Estado} onChange={(event) => setEstado(event.target.value)} required>
-                <option value="">Select a status</option>
-                <option value="to-do">Por hacer</option>
-                <option value="in-progress">En progreso</option>
-                <option value="done">Hecho</option>
-              </select>
-            </div>
-            <div>
-              <label>Usuario Asignado:</label>
-              <select value={UsuarioAsignado} onChange={(e) => setUsuarioAsignado(e.target.value)}>
-                <option value="">Select a user</option>
-                {userList.map(user => (
-                  <option key={user} value={user}>{user}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label>Prioridad:</label>
-              <select value={Prioridad} onChange={(e) => setPrioridad(e.target.value)}>
-                <option value="">Select a priority</option>
-                {priorityList.map(priority => (
-                  <option key={priority} value={priority}>{priority}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label>Tags:</label>
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-              />
-              <div className="tag-container">
-                {tags.map((tag, index) => (
-                  <div key={index} className="tag">
-                    {tag}
-                    <button className="tag-remove" onClick={() => removeTag(index)}>×</button>
-                  </div>
-                ))}
+        <div className="form-scroll-container">
+          <form onSubmit={handleSubmit}>
+            <div className="form-group-1">
+              <div>
+                <label>Id:</label>
+                <input type="text" value={Id} onChange={(e) => setId(e.target.value)} required />
+                {idExists && <p className="form-error">El ID ya existe en el sheet. Por favor, elige otro ID único.</p>}
+              </div>
+              <div>
+                <label>Título:</label>
+                <input type="text" value={Titulo} onChange={(e) => setTitulo(e.target.value)} required />
+              </div>
+              <div>
+                <label>Descripción:</label>
+                <textarea value={Descripcion} onChange={(e) => SetDescripcion(e.target.value)} required></textarea>
+              </div>
+              <div>
+                <label>Estado:</label>
+                <select value={Estado} onChange={(event) => setEstado(event.target.value)} required>
+                  <option value="">Select a status</option>
+                  <option value="to-do">Por hacer</option>
+                  <option value="in-progress">En progreso</option>
+                  <option value="done">Hecho</option>
+                </select>
+              </div>
+              <div>
+                <label>Usuario Asignado:</label>
+                <select value={UsuarioAsignado} onChange={(e) => setUsuarioAsignado(e.target.value)}>
+                  <option value="">Select a user</option>
+                  {userList.map(user => (
+                    <option key={user} value={user}>{user}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Prioridad:</label>
+                <select value={Prioridad} onChange={(e) => setPrioridad(e.target.value)}>
+                  <option value="">Select a priority</option>
+                  {priorityList.map(priority => (
+                    <option key={priority} value={priority}>{priority}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="tag-general">
+                <label>Tags:</label>
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                />
               </div>
             </div>
-          </div>
-          <div className="form-group-2">
-            <button type="submit">Guardar</button>
-            {item && (
-              <button type="button" className="form-delete" onClick={handleDelete}>Eliminar</button>
-            )}
-          </div>
-        </form>
+            <div className="tag-container">
+              {tags.map((tag, index) => (
+                <div key={index} className="tag">
+                  {tag}
+                  <button className="tag-remove" onClick={() => removeTag(index)}>×</button>
+                </div>
+              ))}
+            </div>
+            <div className="form-group-2">
+              <button type="submit">Guardar</button>
+              {item && (
+                <button type="button" className="form-delete" onClick={handleDelete}>Eliminar</button>
+              )}
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

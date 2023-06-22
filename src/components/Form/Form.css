@@ -143,21 +143,32 @@ h2 {
   }
 
   .tag-container {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
     margin-top: 8px;
   }
   
+  .tag-container-inline {
+    flex-wrap: wrap;
+    margin-top: 8px;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  
+  
+
+  
   .tag {
-    display: inline-flex;
     align-items: center;
     background-color: #e0d268;
     color: #333;
-    padding: 4px 8px;
+    padding: 8px 15px;
     margin-right: 4px;
     margin-bottom: 4px;
     border-radius: 4px;
     font-size: 12px;
+    width: auto;
+    position: relative; /* Habilitar posicionamiento relativo */
   }
   
   .tag-remove {
@@ -166,7 +177,23 @@ h2 {
     color: #666;
     margin-left: 4px;
     cursor: pointer;
+    position: absolute; /* Habilitar posicionamiento absoluto */
+    top: -4px; /* Ajustar posición vertical */
+    right: -2px; /* Ajustar posición horizontal */
   }
   
-  
-  
+
+  .form-scroll-container {
+    max-height: 750px;
+    overflow-y: auto;
+  }
+
+  .form-group-1 div.tag-container {
+    flex-wrap: nowrap;
+  }
+
+  .form-group-1 div.tag {
+    margin-right: 4px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
