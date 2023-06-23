@@ -18,6 +18,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [tagInput, setTagInput] = useState('');
   const [userList, setUserList] = useState([]);
   const [priorityList, setPriorityList] = useState([]);
+  const [isNewItem, setIsNewItem] = useState(true);
+  const [showIdExistsError, setShowIdExistsError] = useState(false);
+
 
   useEffect(() => {
     // Obtener el listado de usuarios de la hoja de Google Sheets
@@ -52,6 +55,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   }, []);
 
   useEffect(() => {
+    setIdExists(false);
     if (item) {
       setId(item.Id);
       SetDescripcion(item.Descripcion);
@@ -60,7 +64,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setUsuarioAsignado(item.UsuarioAsignado);
       setTags(item.Tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''));
       setPrioridad(item.Prioridad);
-      setIdExists(true);
+      setIsNewItem(false);
     } else {
       setId('');
       SetDescripcion('');
@@ -69,16 +73,19 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setUsuarioAsignado('');
       setTags([]);
       setPrioridad('');
-      setIdExists(false);
+      setIsNewItem(true);
     }
   }, [item]);
 
-  useEffect(() => {
-    const checkIdExists = async () => {
-      if (!Id) {
-        return;
-      }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
+    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) {
+      console.error('Faltan campos obligatorios.');
+      return;
+    }
+
+    if (isNewItem) {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({
         client_email: CLIENT_EMAIL,
@@ -89,16 +96,35 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       const rows = await sheet.getRows();
       const exists = rows.some(row => row.Id === Id);
 
-      setIdExists(exists);
-    };
+      if (exists) {
+        console.error('El ID ya existe en el sheet. Por favor, elige otro ID único.');
+        setShowIdExistsError(true);
+        return;
+      } else {
+        setShowIdExistsError(false);
+      }
 
-    checkIdExists();
-  }, [Id]);
+      await sheet.addRow({
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+      });
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (item) {
+      onAddItem({
+        id: Date.now(),
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+      });
+    } else {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({
         client_email: CLIENT_EMAIL,
@@ -132,41 +158,12 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Titulo,
         Tags: tags.join(','),
         UsuarioAsignado,
-        Prioridad
-      });
-    } else {
-      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY,
-      });
-      await doc.loadInfo();
-      const sheet = doc.sheetsByIndex[0];
-      const rows = await sheet.getRows();
-
-      const exists = rows.some(row => row.Id === Id);
-
-      if (exists) {
-        console.error('El ID ya existe en el sheet. Por favor, elige otro ID único.');
-        return;
-      }
-
-      await sheet.addRow({ Id, Descripcion, Estado, Titulo, Tags: tags.join(','), UsuarioAsignado, Prioridad });
-
-      onAddItem({
-        id: Date.now(),
-        Id,
-        Descripcion,
-        Estado,
-        Titulo,
-        Tags: tags.join(','),
-        UsuarioAsignado,
-        Prioridad
+        Prioridad,
       });
     }
 
     onCloseModal();
-    console.log("Formulario enviado");
+    console.log('Formulario enviado');
     window.location.reload();
     console.log(item);
   };
@@ -216,28 +213,52 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       <div className="form-container">
         <div className="form-header">
           <h2>Agregar nueva tarea</h2>
-          <button className="form-close" onClick={onCloseModal}>X</button>
+          <button className="form-close" onClick={onCloseModal}>
+            X
+          </button>
         </div>
         <div className="form-scroll-container">
           <form onSubmit={handleSubmit}>
             <div className="form-group-1">
               <div>
                 <label>Id:</label>
-                <input type="text" value={Id} onChange={(e) => setId(e.target.value)} required />
-                {idExists && <p className="form-error">El ID ya existe en el sheet. Por favor, elige otro ID único.</p>}
+                <input
+                  type="text"
+                  value={Id}
+                  onChange={(e) => setId(e.target.value)}
+                  required
+                />
+                {showIdExistsError && (
+                  <p className="form-error">
+                    El ID ya existe en el sheet. Por favor, elige otro ID único.
+                  </p>
+                )}
               </div>
               <div>
                 <label>Título:</label>
-                <input type="text" value={Titulo} onChange={(e) => setTitulo(e.target.value)} required />
+                <input
+                  type="text"
+                  value={Titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  required
+                />
               </div>
               <div>
                 <label>Descripción:</label>
-                <textarea value={Descripcion} onChange={(e) => SetDescripcion(e.target.value)} required></textarea>
+                <textarea
+                  value={Descripcion}
+                  onChange={(e) => SetDescripcion(e.target.value)}
+                  required
+                ></textarea>
               </div>
               <div>
                 <label>Estado:</label>
-                <select value={Estado} onChange={(event) => setEstado(event.target.value)} required>
-                  <option value="">Select a status</option>
+                <select
+                  value={Estado}
+                  onChange={(event) => setEstado(event.target.value)}
+                  required
+                >
+                  <option value="">Seleccione un estado</option>
                   <option value="to-do">Por hacer</option>
                   <option value="in-progress">En progreso</option>
                   <option value="done">Hecho</option>
@@ -245,19 +266,30 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
               </div>
               <div>
                 <label>Usuario Asignado:</label>
-                <select value={UsuarioAsignado} onChange={(e) => setUsuarioAsignado(e.target.value)}>
-                  <option value="">Select a user</option>
-                  {userList.map(user => (
-                    <option key={user} value={user}>{user}</option>
+                <select
+                  value={UsuarioAsignado}
+                  onChange={(e) => setUsuarioAsignado(e.target.value)}
+                >
+                  <option value="">Seleccione un usuario</option>
+                  {userList.map((user) => (
+                    <option key={user} value={user}>
+                      {user}
+                    </option>
                   ))}
                 </select>
               </div>
               <div>
                 <label>Prioridad:</label>
-                <select value={Prioridad} onChange={(e) => setPrioridad(e.target.value)}>
+                <select
+                  value={Prioridad}
+                  onChange={(e) => setPrioridad(e.target.value)}
+                  required
+                >
                   <option value="">Select a priority</option>
-                  {priorityList.map(priority => (
-                    <option key={priority} value={priority}>{priority}</option>
+                  {priorityList.map((priority) => (
+                    <option key={priority} value={priority}>
+                      {priority}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -275,14 +307,25 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
               {tags.map((tag, index) => (
                 <div key={index} className="tag">
                   {tag}
-                  <button className="tag-remove" onClick={() => removeTag(index)}>×</button>
+                  <button
+                    className="tag-remove"
+                    onClick={() => removeTag(index)}
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
             <div className="form-group-2">
               <button type="submit">Guardar</button>
               {item && (
-                <button type="button" className="form-delete" onClick={handleDelete}>Eliminar</button>
+                <button
+                  type="button"
+                  className="form-delete"
+                  onClick={handleDelete}
+                >
+                  Eliminar
+                </button>
               )}
             </div>
           </form>
