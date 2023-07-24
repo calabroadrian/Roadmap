@@ -197,3 +197,7 @@ h2 {
     margin-bottom: 4px;
     white-space: nowrap;
   }
+
+  .input-disabled {
+    background-color: #f1f1f1 !important;
+  }

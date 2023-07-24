@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import './Form.css';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const SPREADSHEET_ID = '1FLc7zZF5jLw_yZv6QU-3T-2yxmFyfxgueqr6GMTJPuc';
 const CLIENT_EMAIL = 'prueba-sheet@test-agent-assist-351420.iam.gserviceaccount.com';
@@ -20,6 +22,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [priorityList, setPriorityList] = useState([]);
   const [isNewItem, setIsNewItem] = useState(true);
   const [showIdExistsError, setShowIdExistsError] = useState(false);
+  const [isIdEditable, setIsIdEditable] = useState(true);
 
 
   useEffect(() => {
@@ -65,6 +68,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setTags(item.Tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''));
       setPrioridad(item.Prioridad);
       setIsNewItem(false);
+      setIsIdEditable(false); // Deshabilitar el campo de ID
     } else {
       setId('');
       SetDescripcion('');
@@ -74,8 +78,10 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setTags([]);
       setPrioridad('');
       setIsNewItem(true);
+      setIsIdEditable(true); // Habilitar el campo de ID
     }
   }, [item]);
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -223,11 +229,13 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
               <div>
                 <label>Id:</label>
                 <input
-                  type="text"
-                  value={Id}
-                  onChange={(e) => setId(e.target.value)}
-                  required
-                />
+  type="text"
+  value={Id}
+  onChange={(e) => setId(e.target.value)}
+  required
+  disabled={!isIdEditable}
+  className={!isIdEditable ? 'input-disabled' : ''}
+/>
                 {showIdExistsError && (
                   <p className="form-error">
                     El ID ya existe en el sheet. Por favor, elige otro ID único.
@@ -244,13 +252,13 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                 />
               </div>
               <div>
-                <label>Descripción:</label>
-                <textarea
-                  value={Descripcion}
-                  onChange={(e) => SetDescripcion(e.target.value)}
-                  required
-                ></textarea>
-              </div>
+  <label>Descripción:</label>
+  <ReactQuill
+    value={Descripcion}
+    onChange={(value) => SetDescripcion(value)}
+    required
+  />
+</div>
               <div>
                 <label>Estado:</label>
                 <select
@@ -259,9 +267,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                   required
                 >
                   <option value="">Seleccione un estado</option>
-                  <option value="to-do">Por hacer</option>
-                  <option value="in-progress">En progreso</option>
-                  <option value="done">Hecho</option>
+                  <option value="Nuevo">Por hacer</option>
+                  <option value="En progreso">En progreso</option>
+                  <option value="Hecho">Hecho</option>
                 </select>
               </div>
               <div>
@@ -285,7 +293,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                   onChange={(e) => setPrioridad(e.target.value)}
                   required
                 >
-                  <option value="">Select a priority</option>
+                  <option value="">Seleccione una prioridad</option>
                   {priorityList.map((priority) => (
                     <option key={priority} value={priority}>
                       {priority}

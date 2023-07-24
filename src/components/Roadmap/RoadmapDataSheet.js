@@ -7,6 +7,8 @@ const CLIENT_ID = "113797463942398973735";
 const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, onDeselectItem }) => {
   const [items, setItems] = useState([]);
   const [statuses, setStatuses] = useState([]);
+  const [sprints, setSprints] = useState([]);
+  const [filterSprint, setFilterSprint] = useState('');
 
   useEffect(() => {
     // Fetch data from Google Sheets API
@@ -20,6 +22,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
         if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
           const headers = data.values[0];
           const tagsColumnIndex = headers.indexOf('Tags');
+          const sprintColumnIndex = headers.indexOf('Sprint');
           const parsedData = data.values.slice(1).map(row => {
             return headers.reduce((obj, key, index) => {
               obj[key] = row[index] || '';
@@ -33,6 +36,12 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
           });
 
           setItems(parsedData);
+
+          const distinctStatuses = [...new Set(parsedData.map(item => item.Estado))];
+          setStatuses(distinctStatuses);
+
+          const distinctSprints = [...new Set(parsedData.map(item => item[headers[sprintColumnIndex]]))];
+          setSprints(distinctSprints);
         } else {
           console.error('No se encontraron datos válidos en la respuesta API');
         }
@@ -44,17 +53,13 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
     fetchData();
   }, []);
 
-  useEffect(() => {
-    // Obtenemos los distintos estados presentes en los datos
-    const distinctStatuses = [...new Set(items.map(item => item.Estado))];
-    setStatuses(distinctStatuses);
-  }, [items]);
-
   const handleSelectItem = (item) => {
     if (selectedItem === item) {
       onDeselectItem();
     } else {
+      onDeselectItem();
       onSelectItem(item);
+      setFilterSprint(item.Sprint);
     }
   };
 
@@ -64,8 +69,8 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
         return '#F9D8C7';
       case 'En progreso':
         return '#FFF3C8';
-      case 'Validación de usuario':
-        return '#C9F7C5';
+      case 'Hecho':
+        return '#65f6b5';
       default:
         return 'white';
     }
@@ -73,38 +78,49 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
 
   return (
     <div className="roadmap-wrapper">
-      {statuses.map(Estado => (
-        <div className="roadmap-column" key={Estado}>
-          <div className="roadmap-column-header">
-            <h2>{Estado}</h2>
+      <div className="roadmap-filters">
+        <label htmlFor="sprint-filter">Filtrar por Sprint:</label>
+        <select id="sprint-filter" value={filterSprint} onChange={(e) => setFilterSprint(e.target.value)}>
+          <option value="">Todos los Sprints</option>
+          {sprints.map((sprint) => (
+            <option value={sprint} key={sprint}>{sprint}</option>
+          ))}
+        </select>
+      </div>
+      <div className="roadmap-columns">
+        {statuses.map((Estado) => (
+          <div className="roadmap-column" key={Estado}>
+            <div className="roadmap-column-header">
+              <h2>{Estado}</h2>
+            </div>
+            <ul>
+              {items
+                .filter((item) => item.Estado === Estado && (filterSprint === '' || item.Sprint === filterSprint))
+                .map((item) => (
+                  <li
+                    key={item.Id}
+                    className={`roadmap-item ${item.Estado} ${selectedItem === item ? 'selected' : ''}`}
+                    onClick={() => handleSelectItem(item)}
+                    onDoubleClick={() => onEditItem(item)}
+                    style={{ backgroundColor: getBackgroundColor(item.Estado) }}
+                  >
+                    <h3 className="item-title">{item.Titulo}</h3>
+                    <h3 className="item-description" dangerouslySetInnerHTML={{ __html: item.Descripcion }}></h3>
+                    <div className="item-details">
+                      <p className="item-assignee">{item.UsuarioAsignado}</p>
+                      <p className="item-priority">{item.Prioridad}</p>
+                    </div>
+                    <div className="item-tags">
+                      {item.tags.split(',').map(tag => (
+                        <span key={tag} className="item-tag">{tag.trim()}</span>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+            </ul>
           </div>
-          <ul>
-            {items
-              .filter((item) => item.Estado === Estado)
-              .map((item) => (
-                <li
-                  key={item.Id}
-                  className={`roadmap-item ${item.Estado} ${selectedItem === item ? 'selected' : ''}`}
-                  onClick={() => handleSelectItem(item)}
-                  onDoubleClick={() => onEditItem(item)}
-                  style={{ backgroundColor: getBackgroundColor(item.Estado) }}
-                >
-                  <h3 className="item-title">{item.Descripcion}</h3>
-                  <p className="item-description">{item.description}</p>
-                  <div className="item-details">
-                    <p className="item-assignee">Asignado: {item.UsuarioAsignado}</p>
-                    <p className="item-priority">Prioridad: {item.Prioridad}</p>
-                  </div>
-                  <div className="item-tags">
-                    {item.tags.split(',').map(tag => (
-                      <span key={tag} className="item-tag">{tag.trim()}</span>
-                    ))}
-                  </div>
-                </li>
-              ))}
-          </ul>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

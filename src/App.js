@@ -2,14 +2,15 @@ import { useState } from 'react';
 import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Form from './components/Form/Form';
 import Modal from './components/Modal/Modal';
+import SprintForm from './components/SprintForm/SprintForm';
 import './App.css';
-import AddButton from './components/AddButton/AddButton';
 
 function App() {
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
 
   const handleAddItem = () => {
     setIsAddingItem(true);
@@ -39,12 +40,19 @@ function App() {
     setItems(updatedItems);
   };
 
+  const handleOpenSprintForm = () => {
+    setIsSprintFormOpen(true);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">Backlog</h1>
         <button className="app-add-button" onClick={handleAddItem}>
           Agregar
+        </button>
+        <button className="app-add-button" onClick={handleOpenSprintForm}>
+          Sprint
         </button>
       </header>
       <RoadmapDataSheet
@@ -63,7 +71,13 @@ function App() {
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
         />
-      </Modal>
+      </Modal >
+      {isSprintFormOpen && (
+        <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
+          <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
+        </Modal>
+
+      )}
     </div>
   );
 }
