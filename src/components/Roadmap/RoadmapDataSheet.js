@@ -1,6 +1,6 @@
 import './Roadmap.css';
 import { useState, useEffect } from 'react';
-import { SPREADSHEET_ID, API_KEY, CLIENT_ID } from '../../../config';
+import { SPREADSHEET_ID, API_KEY, CLIENT_ID } from '../../config/config';
 
 const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, onDeselectItem }) => {
   const [items, setItems] = useState([]);
