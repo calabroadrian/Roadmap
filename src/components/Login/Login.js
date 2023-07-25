@@ -3,7 +3,7 @@ import { ReactComponent as FaceSvg } from './Login.svg'; // Use ReactComponent h
 import './Login.css'; // Importa el CSS que definimos anteriormente
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { sha256 } from 'js-sha256'; // Importa la librería para el hash SHA-256
-import { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } from '../../config/config';
+import { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } from '../../../config';
 const Login = ({ onLogin }) => {
     // Variables de estado para almacenar los datos del formulario
     const [resetPasswordError, setResetPasswordError] = React.useState('')
@@ -51,10 +51,10 @@ const Login = ({ onLogin }) => {
     const fetchLoginData = async () => {
       try {
         // Conectarse a la hoja de Google Sheets
-        const doc = new GoogleSpreadsheet(process.env.REACT_APP_SPREADSHEET_ID);
+        const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
         await doc.useServiceAccountAuth({
-          client_email: process.env.REACT_APP_CLIENT_EMAIL,
-          private_key: process.env.REACT_APP_PRIVATE_KEY,
+          client_email: CLIENT_EMAIL,
+          private_key: PRIVATE_KEY,
         });
         await doc.loadInfo();
   
@@ -100,7 +100,7 @@ const Login = ({ onLogin }) => {
       
         try {
           // Conectarse a la hoja de Google Sheets
-          const doc = new GoogleSpreadsheet(process.env.REACT_APP_SPREADSHEET_ID);
+          const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
           await doc.useServiceAccountAuth({
             client_email: CLIENT_EMAIL,
             private_key: PRIVATE_KEY,
