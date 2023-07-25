@@ -61,6 +61,19 @@ const Login = ({ onLogin }) => {
         // Obtener la hoja donde están almacenados los datos de inicio de sesión (suponemos que es la segunda hoja)
         const sheet = doc.sheetsByIndex[1];
         const rows = await sheet.getRows();
+
+        if (rows === null) {
+            console.error('No se pudo cargar ningún dato de la hoja de Google Sheets.');
+            return null;
+          }
+      
+          // Resto del código...
+      
+        } catch (error) {
+          console.error('Error al obtener los datos de inicio de sesión:', error);
+          return null;
+        }
+      };
   
         // Buscar el usuario ingresado en el formulario
         const userRow = rows.find(row => row.NombreUsuario === username);
