@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
+import { useAuth } from './components/AuthContext/AuthContext';
+import Login from './components/Login/Login';
 import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Form from './components/Form/Form';
 import Modal from './components/Modal/Modal';
@@ -6,6 +9,7 @@ import SprintForm from './components/SprintForm/SprintForm';
 import './App.css';
 
 function App() {
+  const { user, login, logout } = useAuth();
   const [items, setItems] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +48,11 @@ function App() {
     setIsSprintFormOpen(true);
   };
 
+  if (!user) {
+    return <Login onLogin={login} />;
+  }
+
+  // Si el usuario está autenticado, muestra el contenido de la aplicación
   return (
     <div className="app">
       <header className="app-header">
@@ -54,6 +63,16 @@ function App() {
         <button className="app-add-button" onClick={handleOpenSprintForm}>
           Sprint
         </button>
+        {/* Agregar la funcionalidad de inicio de sesión aquí */}
+        {user ? (
+          <button className="app-add-button" onClick={logout}>
+            Cerrar sesión
+          </button>
+        ) : (
+          <button className="app-add-button" onClick={() => login({ /* Datos de inicio de sesión */ })}>
+            Iniciar sesión
+          </button>
+        )}
       </header>
       <RoadmapDataSheet
         items={items}
@@ -76,10 +95,16 @@ function App() {
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
           <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
         </Modal>
-
       )}
     </div>
   );
 }
 
-export default App;
+// Envuelve el componente App con el AuthProvider
+const AppWithAuthProvider = () => (
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
+
+export default AppWithAuthProvider;
