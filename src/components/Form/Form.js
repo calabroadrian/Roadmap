@@ -8,6 +8,8 @@ import config from '../../config/config';
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const CLIENT_EMAIL = config.CLIENT_EMAIL;
 const PRIVATE_KEY = config.PRIVATE_KEY;
+const API_KEY = config.API_KEY;
+const CLIENT_ID = config.CLIENT_ID;
 
 function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal }) {
   const [Id, setId] = useState('');
