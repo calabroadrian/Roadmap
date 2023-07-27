@@ -7,7 +7,7 @@ body,
 }
 
 .roadmap-wrapper {
-  margin: 3% !important;
+  margin: 0% 2% 2% 2% !important;
 }
 
 .App-logo {
@@ -64,12 +64,18 @@ body,
   align-items: center;
   background-color: #ff5733; /* Color del botón personalizado */
   color: #fff;
-  padding: 10px 20px;
+  padding: 5px 20px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
+  margin: 1%;
 }
 
 .app-add-icon {
   margin-right: 5px;
+}
+
+.functions-container{
+  display: flex;
+  flex-basis: 33.33%;
+  /* flex-direction: column; */
 }

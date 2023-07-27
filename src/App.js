@@ -69,7 +69,7 @@ function App() {
         )}
       </header>
 
-      <div className="roadmap-wrapper">
+      <div className="functions-container">
       <button className="app-add-button" onClick={handleAddItem}>
           Agregar
         </button>
