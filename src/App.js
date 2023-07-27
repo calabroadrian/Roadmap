@@ -57,12 +57,6 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">Backlog</h1>
-        <button className="app-add-button" onClick={handleAddItem}>
-          Agregar
-        </button>
-        <button className="app-add-button" onClick={handleOpenSprintForm}>
-          Sprint
-        </button>
         {/* Agregar la funcionalidad de inicio de sesión aquí */}
         {user ? (
           <button className="app-add-button" onClick={logout}>
@@ -74,6 +68,16 @@ function App() {
           </button>
         )}
       </header>
+
+      <div className="roadmap-wrapper">
+      <button className="app-add-button" onClick={handleAddItem}>
+          Agregar
+        </button>
+        <button className="app-add-button" onClick={handleOpenSprintForm}>
+          Sprint
+        </button>
+          </div>
+
       <RoadmapDataSheet
         items={items}
         onSelectItem={handleSelectItem}
