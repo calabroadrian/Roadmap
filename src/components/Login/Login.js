@@ -8,6 +8,10 @@ import config from '../../config/config';
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const CLIENT_EMAIL = config.CLIENT_EMAIL;
 const PRIVATE_KEY = config.PRIVATE_KEY;
+const API_KEY = config.API_KEY;
+const CLIENT_ID = config.CLIENT_ID;
+
+console.log('SPREADSHEET_ID:', SPREADSHEET_ID);
 
 const Login = ({ onLogin }) => {
     // Variables de estado para almacenar los datos del formulario
@@ -56,7 +60,10 @@ const Login = ({ onLogin }) => {
     const fetchLoginData = async () => {
       try {
         // Conectarse a la hoja de Google Sheets
+        console.log('PRIVATE_KEY_ENV:', config.PRIVATE_KEY);
+        console.log('PRIVATE_KEY:', PRIVATE_KEY);
         const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+        console.log('doc:', doc);
         await doc.useServiceAccountAuth({
           client_email: CLIENT_EMAIL,
           private_key: PRIVATE_KEY,
@@ -66,6 +73,8 @@ const Login = ({ onLogin }) => {
         // Obtener la hoja donde están almacenados los datos de inicio de sesión (suponemos que es la segunda hoja)
         const sheet = doc.sheetsByIndex[1];
         const rows = await sheet.getRows();
+        console.log('Filas cargadas:', rows); // Agrega este console.log para ver las filas que se cargaron
+
   
         // Buscar el usuario ingresado en el formulario
         const userRow = rows.find(row => row.NombreUsuario === username);
@@ -142,7 +151,7 @@ const Login = ({ onLogin }) => {
           <div className="login-logo">
             {/* Usamos el SVG aquí */}
             <FaceSvg />
-            <h2>Roadmap DO</h2>
+            <h2>roadDOmap</h2>
           </div>
           <div className="login-form">
             <h2>Iniciar Sesión</h2>

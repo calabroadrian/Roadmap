@@ -13,6 +13,7 @@ module.exports = {
         "child_process": false,
         "https-proxy-agent": require.resolve("https-proxy-agent"),
         "querystring": require.resolve('querystring-es3'),
+        "dotenv": require.resolve('dotenv').config(),
       },
     },
   };
