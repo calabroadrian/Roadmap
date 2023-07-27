@@ -56,7 +56,7 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">Backlog</h1>
+        <h1 className="app-title">roadDOmap</h1>
         {/* Agregar la funcionalidad de inicio de sesión aquí */}
         {user ? (
           <button className="app-add-button" onClick={logout}>

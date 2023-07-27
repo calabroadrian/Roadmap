@@ -3,7 +3,11 @@ import './Form.css';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } from '../../config/config';
+import config from '../../config/config';
+
+const SPREADSHEET_ID = config.SPREADSHEET_ID;
+const CLIENT_EMAIL = config.CLIENT_EMAIL;
+const PRIVATE_KEY = config.PRIVATE_KEY;
 
 function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal }) {
   const [Id, setId] = useState('');

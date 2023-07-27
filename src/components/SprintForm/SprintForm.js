@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import './SprintForm.css';
-import { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } from '../../config/config';
+import config from '../../config/config';
+
+const SPREADSHEET_ID = config.SPREADSHEET_ID;
+const CLIENT_EMAIL = config.CLIENT_EMAIL;
+const PRIVATE_KEY = config.PRIVATE_KEY;
+
 function SprintForm({ onCloseModal }) {
   const [nombre, setNombre] = useState('');
   const [fechaInicio, setFechaInicio] = useState('');

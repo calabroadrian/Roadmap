@@ -3,7 +3,11 @@ import { ReactComponent as FaceSvg } from './Login.svg'; // Use ReactComponent h
 import './Login.css'; // Importa el CSS que definimos anteriormente
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { sha256 } from 'js-sha256'; // Importa la librería para el hash SHA-256
-import { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } from '../../config/config';
+import config from '../../config/config';
+
+const SPREADSHEET_ID = config.SPREADSHEET_ID;
+const CLIENT_EMAIL = config.CLIENT_EMAIL;
+const PRIVATE_KEY = config.PRIVATE_KEY;
 
 const Login = ({ onLogin }) => {
     // Variables de estado para almacenar los datos del formulario
