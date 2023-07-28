@@ -14,6 +14,7 @@ function SprintForm({ onCloseModal }) {
   const [sprints, setSprints] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editSprintId, setEditSprintId] = useState(null);
+  const [selectedSprintId, setSelectedSprintId] = useState(null);
 
   useEffect(() => {
     // Cargar los sprints existentes cuando se monta el componente
@@ -37,28 +38,14 @@ function SprintForm({ onCloseModal }) {
     }
   };
 
-  // Resto del código sin cambios ...
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleEditSprint = (sprintId) => {
-    // Cargar los datos del sprint seleccionado para editar
-    const sprintToEdit = sprints.find((sprint) => sprint.ID === sprintId);
-    if (sprintToEdit) {
-      setNombre(sprintToEdit.Nombre);
-      setFechaInicio(sprintToEdit.FechaDeInicio);
-      setFechaFin(sprintToEdit.FechaDeFin);
-      setIsEditMode(true);
-      setEditSprintId(sprintId);
-    } else {
-      // Si no se encuentra el sprint, limpiar los campos para agregar uno nuevo
-      setNombre('');
-      setFechaInicio('');
-      setFechaFin('');
-      setIsEditMode(false);
-      setEditSprintId(null);
+    if (!nombre || !fechaInicio || !fechaFin) {
+      console.error('Faltan campos obligatorios.');
+      return;
     }
-  };
-  
-  const handleDeleteSprint = async (sprintId) => {
+
     try {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({
@@ -66,16 +53,83 @@ function SprintForm({ onCloseModal }) {
         private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
       });
       await doc.loadInfo();
-  
+
       const sheet = doc.sheetsByTitle['Sprints'];
-  
-      const sprintToDelete = sprints.find((sprint) => sprint.ID === sprintId);
+
+      if (isEditMode && editSprintId !== null) {
+        // Modo edición: actualizar el sprint existente
+        const sprintToUpdate = sprints.find((sprint) => sprint.ID === editSprintId);
+        if (sprintToUpdate) {
+          sprintToUpdate.Nombre = nombre;
+          sprintToUpdate.FechaDeInicio = fechaInicio;
+          sprintToUpdate.FechaDeFin = fechaFin;
+          const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
+          sprintToUpdate.Dias = diffInDays;
+          await sprintToUpdate.save();
+          console.log(`Se actualizó el sprint con ID ${editSprintId}`);
+        }
+      } else {
+        // Modo nuevo sprint: agregar un nuevo sprint
+        const id = sheet.rowCount + 1;
+        const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
+
+        await sheet.addRow({
+          ID: id,
+          Nombre: nombre,
+          FechaDeInicio: fechaInicio,
+          FechaDeFin: fechaFin,
+          Dias: diffInDays,
+        });
+
+        console.log(`Se agregó un nuevo sprint con ID ${id}`);
+      }
+
+      setNombre('');
+      setFechaInicio('');
+      setFechaFin('');
+      setIsEditMode(false);
+      setEditSprintId(null);
+
+      // Recargar los sprints después de la actualización
+      await loadSprints();
+
+      onCloseModal();
+    } catch (error) {
+      console.error('Error al guardar el sprint:', error);
+    }
+  };
+
+  const handleEditSprint = () => {
+    // Cargar los datos del sprint seleccionado para editar
+    const sprintToEdit = sprints.find((sprint) => sprint.ID === selectedSprintId);
+    if (sprintToEdit) {
+      setNombre(sprintToEdit.Nombre);
+      setFechaInicio(sprintToEdit.FechaDeInicio);
+      setFechaFin(sprintToEdit.FechaDeFin);
+      setIsEditMode(true);
+      setEditSprintId(selectedSprintId);
+    }
+  };
+
+  const handleDeleteSprint = async () => {
+    try {
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+      await doc.useServiceAccountAuth({
+        client_email: CLIENT_EMAIL,
+        private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
+      });
+      await doc.loadInfo();
+
+      const sheet = doc.sheetsByTitle['Sprints'];
+
+      const sprintToDelete = sprints.find((sprint) => sprint.ID === selectedSprintId);
       if (sprintToDelete) {
         await sprintToDelete.delete();
-        console.log(`Se eliminó el sprint con ID ${sprintId}`);
-  
+        console.log(`Se eliminó el sprint con ID ${selectedSprintId}`);
+
         // Actualizar el estado después de eliminar el sprint
-        setSprints((prevSprints) => prevSprints.filter((sprint) => sprint.ID !== sprintId));
+        setSprints((prevSprints) => prevSprints.filter((sprint) => sprint.ID !== selectedSprintId));
+        setSelectedSprintId(null); // Reiniciar el sprint seleccionado
       }
     } catch (error) {
       console.error('Error al eliminar el sprint:', error);
@@ -111,38 +165,42 @@ function SprintForm({ onCloseModal }) {
           </div>
         </form>
         <div className="sprint-grid">
-  <h2>Lista de Sprints</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Inicio</th>
-        <th>Fin</th>
-        <th>Días</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {sprints.map((sprint) => (
-        <tr key={sprint.ID}>
-          <td>{sprint.Nombre}</td>
-          <td>{sprint.FechaDeInicio}</td>
-          <td>{sprint.FechaDeFin}</td>
-          <td>{sprint.Dias}</td>
-          <td>
-            <button onClick={() => handleEditSprint(sprint.ID)} className="edit-btn">
-              Editar
-            </button>
-            <button onClick={() => handleDeleteSprint(sprint.ID)} className="delete-btn">
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+          <h2>Lista de Sprints</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Días</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sprints.map((sprint) => (
+                <tr
+                  key={sprint.ID}
+                  className={selectedSprintId === sprint.ID ? 'selected' : ''}
+                  onClick={() => setSelectedSprintId(sprint.ID)}
+                >
+                  <td>{sprint.Nombre}</td>
+                  <td>{sprint.FechaDeInicio}</td>
+                  <td>{sprint.FechaDeFin}</td>
+                  <td>{sprint.Dias}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
+        {/* Botones para editar y eliminar el sprint seleccionado */}
+        <div className="action-buttons">
+          <button onClick={handleEditSprint} disabled={!selectedSprintId}>
+            Editar Sprint
+          </button>
+          <button onClick={handleDeleteSprint} disabled={!selectedSprintId}>
+            Eliminar Sprint
+          </button>
+        </div>
       </div>
     </div>
   );
