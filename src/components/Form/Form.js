@@ -17,6 +17,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [Estado, setEstado] = useState('');
   const [Titulo, setTitulo] = useState('');
   const [UsuarioAsignado, setUsuarioAsignado] = useState('');
+  const [Sprint, setSprint] = useState('');
   const [Prioridad, setPrioridad] = useState('');
   const [idExists, setIdExists] = useState(false);
   const [tags, setTags] = useState([]);
@@ -56,6 +57,19 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setPriorityList(priorities);
     };
 
+    const fetchSprintList = async () => {
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+      await doc.useServiceAccountAuth({
+        client_email: CLIENT_EMAIL,
+        private_key: PRIVATE_KEY,
+      });
+      await doc.loadInfo();
+      const sheet = doc.sheetsByIndex[2]; // Suponiendo que el listado de Sprint está en la segunda hoja
+      const rows = await sheet.getRows();
+      const sprints = rows.map(row => row.Nombre); //
+      setSprintList(sprints);
+    };
+
     fetchUserList();
     fetchPriorityList();
   }, []);
@@ -70,6 +84,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setUsuarioAsignado(item.UsuarioAsignado);
       setTags(item.Tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''));
       setPrioridad(item.Prioridad);
+      setSprint(item.Sprint);
       setIsNewItem(false);
       setIsIdEditable(false); // Deshabilitar el campo de ID
     } else {
@@ -79,7 +94,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setTitulo('');
       setUsuarioAsignado('');
       setTags([]);
-      setPrioridad('');
+      setSprint('');
       setIsNewItem(true);
       setIsIdEditable(true); // Habilitar el campo de ID
     }
@@ -121,6 +136,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Tags: tags.join(','),
         UsuarioAsignado,
         Prioridad,
+        Spinrt,
       });
 
       onAddItem({
@@ -132,6 +148,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Tags: tags.join(','),
         UsuarioAsignado,
         Prioridad,
+        Sprint,
       });
     } else {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
@@ -156,6 +173,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       rowToUpdate.Tags = tags.join(',');
       rowToUpdate.UsuarioAsignado = UsuarioAsignado;
       rowToUpdate.Prioridad = Prioridad;
+      rowToUpdate.Sprint = Sprint;
 
       await rowToUpdate.save();
 
@@ -168,6 +186,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Tags: tags.join(','),
         UsuarioAsignado,
         Prioridad,
+        Sprint,
       });
     }
 
@@ -297,6 +316,20 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                   required
                 >
                   <option value="">Seleccione una prioridad</option>
+                  {priorityList.map((priority) => (
+                    <option key={priority} value={priority}>
+                      {priority}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Sprint:</label>
+                <select
+                  value={Sprint}
+                  onChange={(e) => setSprint(e.target.value)}
+                >
+                  <option value="">Seleccione un Sprint</option>
                   {priorityList.map((priority) => (
                     <option key={priority} value={priority}>
                       {priority}
