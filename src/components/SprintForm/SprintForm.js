@@ -38,6 +38,18 @@ function SprintForm({ onCloseModal }) {
     }
   };
 
+  // Función para obtener el siguiente ID único
+  const getNextUniqueId = () => {
+    if (sprints.length === 0) {
+      // Si no hay sprints, el siguiente ID será 1
+      return 1;
+    }
+
+    // Obtener el valor máximo del ID y sumar 1 para el nuevo ID
+    const maxId = Math.max(...sprints.map((sprint) => parseInt(sprint.ID, 10)));
+    return maxId + 1;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -69,8 +81,8 @@ function SprintForm({ onCloseModal }) {
           console.log(`Se actualizó el sprint con ID ${editSprintId}`);
         }
       } else {
-        // Modo nuevo sprint: agregar un nuevo sprint
-        const id = sheet.rowCount + 1;
+        // Modo nuevo sprint: agregar un nuevo sprint con ID único
+        const id = getNextUniqueId(); // Obtener el siguiente ID único
         const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
 
         await sheet.addRow({
