@@ -72,6 +72,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
     fetchUserList();
     fetchPriorityList();
+    fetchSprintList();
   }, []);
 
   useEffect(() => {
