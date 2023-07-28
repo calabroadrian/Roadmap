@@ -125,10 +125,9 @@ function SprintForm({ onCloseModal }) {
       if (sprintToDelete) {
         await sprintToDelete.delete();
         console.log(`Se eliminó el sprint con ID ${sprintId}`);
+        // Actualizar el estado eliminando el sprint eliminado
+        setSprints((prevSprints) => prevSprints.filter((sprint) => sprint.ID !== sprintId));
       }
-
-      // Recargar los sprints después de la eliminación
-      await loadSprints();
     } catch (error) {
       console.error('Error al eliminar el sprint:', error);
     }
