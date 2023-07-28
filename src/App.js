@@ -92,7 +92,6 @@ function App() {
           onDeleteItem={handleDeleteItem}
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
-          onUpdateList={handleUpdateList}
         />
       </Modal >
       {isSprintFormOpen && (
