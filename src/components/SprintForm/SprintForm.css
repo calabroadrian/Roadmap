@@ -39,6 +39,7 @@ button[type='submit'] {
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
+  display: flex;
 }
 
 .sprint-item span {
@@ -58,4 +59,33 @@ button[type='submit'] {
 
 .sprint-item button.delete-btn {
   background-color: #dc3545;
+}
+
+.sprint-grid {
+  /* Resto de estilos */
+}
+
+/* Estilos para la tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+.sprint-grid {
+  /* Resto de estilos */
+
+  /* Agregar scroll */
+  max-height: 300px; /* Altura máxima del contenedor de la lista */
+  overflow-y: auto; /* Hacer que el contenido sea desplazable verticalmente */
 }

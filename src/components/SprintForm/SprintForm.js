@@ -152,22 +152,38 @@ function SprintForm({ onCloseModal }) {
           </div>
         </form>
         <div className="sprint-grid">
-          <h2>Lista de Sprints</h2>
-          {sprints.map((sprint) => (
-            <div key={sprint.ID} className="sprint-item">
-              <span>{sprint.Nombre}</span>
-              <span>Inicio: {sprint.FechaDeInicio}</span>
-              <span>Fin: {sprint.FechaDeFin}</span>
-              <span>Días: {sprint.Dias}</span>
-              <button onClick={() => handleEditSprint(sprint.ID)} className="edit-btn">
-                Editar
-              </button>
-              <button onClick={() => handleDeleteSprint(sprint.ID)} className="delete-btn">
-                Eliminar
-              </button>
-            </div>
-          ))}
-        </div>
+  <h2>Lista de Sprints</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Días</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {sprints.map((sprint) => (
+        <tr key={sprint.ID}>
+          <td>{sprint.Nombre}</td>
+          <td>{sprint.FechaDeInicio}</td>
+          <td>{sprint.FechaDeFin}</td>
+          <td>{sprint.Dias}</td>
+          <td>
+            <button onClick={() => handleEditSprint(sprint.ID)} className="edit-btn">
+              Editar
+            </button>
+            <button onClick={() => handleDeleteSprint(sprint.ID)} className="delete-btn">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
       </div>
     </div>
   );
