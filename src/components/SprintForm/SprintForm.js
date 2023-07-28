@@ -105,7 +105,7 @@ function SprintForm({ onCloseModal }) {
       // Recargar los sprints después de la actualización
       await loadSprints();
 
-      onCloseModal();
+
     } catch (error) {
       console.error('Error al guardar el sprint:', error);
     }
