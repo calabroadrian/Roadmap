@@ -66,6 +66,11 @@ function SprintForm({ onCloseModal }) {
           sprintToUpdate.Dias = diffInDays;
           await sprintToUpdate.save();
           console.log(`Se actualizó el sprint con ID ${editSprintId}`);
+
+          // Actualizar el estado después de editar el sprint
+          setSprints((prevSprints) =>
+            prevSprints.map((sprint) => (sprint.ID === editSprintId ? sprintToUpdate : sprint))
+          );
         }
       } else {
         // Modo nuevo sprint: agregar un nuevo sprint
@@ -81,6 +86,12 @@ function SprintForm({ onCloseModal }) {
         });
 
         console.log(`Se agregó un nuevo sprint con ID ${id}`);
+
+        // Actualizar el estado después de agregar el sprint
+        setSprints((prevSprints) => [
+          ...prevSprints,
+          { ID: id, Nombre: nombre, FechaDeInicio: fechaInicio, FechaDeFin: fechaFin, Dias: diffInDays },
+        ]);
       }
 
       setNombre('');
@@ -88,9 +99,6 @@ function SprintForm({ onCloseModal }) {
       setFechaFin('');
       setIsEditMode(false);
       setEditSprintId(null);
-
-      // Recargar los sprints después de la actualización
-      await loadSprints();
 
       onCloseModal();
     } catch (error) {
@@ -125,7 +133,8 @@ function SprintForm({ onCloseModal }) {
       if (sprintToDelete) {
         await sprintToDelete.delete();
         console.log(`Se eliminó el sprint con ID ${sprintId}`);
-        // Actualizar el estado eliminando el sprint eliminado
+
+        // Actualizar el estado después de eliminar el sprint
         setSprints((prevSprints) => prevSprints.filter((sprint) => sprint.ID !== sprintId));
       }
     } catch (error) {
