@@ -52,6 +52,14 @@ function App() {
     return <Login onLogin={login} />;
   }
 
+  const handleUpdateItem = (updatedItem) => {
+    const updatedItems = items.map((item) =>
+      item.id === updatedItem.id ? updatedItem : item
+    );
+    setItems(updatedItems);
+  };
+
+
   // Si el usuario está autenticado, muestra el contenido de la aplicación
   return (
     <div className="app">

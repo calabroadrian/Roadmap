@@ -11,7 +11,7 @@ const PRIVATE_KEY = config.PRIVATE_KEY;
 const API_KEY = config.API_KEY;
 const CLIENT_ID = config.CLIENT_ID;
 
-function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal }) {
+function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal,onUpdateList }) {
   const [Id, setId] = useState('');
   const [Descripcion, SetDescripcion] = useState('');
   const [Estado, setEstado] = useState('');
@@ -28,6 +28,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [isNewItem, setIsNewItem] = useState(true);
   const [showIdExistsError, setShowIdExistsError] = useState(false);
   const [isIdEditable, setIsIdEditable] = useState(true);
+  
 
 
   useEffect(() => {
@@ -194,7 +195,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
     onCloseModal();
     console.log('Formulario enviado');
-    window.location.reload();
     console.log(item);
   };
 
@@ -234,7 +234,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     const rowToDelete = rows.find(row => row._rawData[0] === item.Id);
     await rowToDelete.delete();
     onDeselectItem();
-    window.location.reload();
     onCloseModal();
   };
 
