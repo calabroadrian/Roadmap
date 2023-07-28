@@ -48,9 +48,16 @@ function SprintForm({ onCloseModal }) {
       setFechaFin(sprintToEdit.FechaDeFin);
       setIsEditMode(true);
       setEditSprintId(sprintId);
+    } else {
+      // Si no se encuentra el sprint, limpiar los campos para agregar uno nuevo
+      setNombre('');
+      setFechaInicio('');
+      setFechaFin('');
+      setIsEditMode(false);
+      setEditSprintId(null);
     }
   };
-
+  
   const handleDeleteSprint = async (sprintId) => {
     try {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
@@ -59,14 +66,14 @@ function SprintForm({ onCloseModal }) {
         private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
       });
       await doc.loadInfo();
-
+  
       const sheet = doc.sheetsByTitle['Sprints'];
-
+  
       const sprintToDelete = sprints.find((sprint) => sprint.ID === sprintId);
       if (sprintToDelete) {
         await sprintToDelete.delete();
         console.log(`Se eliminó el sprint con ID ${sprintId}`);
-
+  
         // Actualizar el estado después de eliminar el sprint
         setSprints((prevSprints) => prevSprints.filter((sprint) => sprint.ID !== sprintId));
       }
