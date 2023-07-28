@@ -24,6 +24,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [tagInput, setTagInput] = useState('');
   const [userList, setUserList] = useState([]);
   const [priorityList, setPriorityList] = useState([]);
+  const [sprintList, setSprintList] = useState([]);
   const [isNewItem, setIsNewItem] = useState(true);
   const [showIdExistsError, setShowIdExistsError] = useState(false);
   const [isIdEditable, setIsIdEditable] = useState(true);
@@ -137,7 +138,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Tags: tags.join(','),
         UsuarioAsignado,
         Prioridad,
-        Spinrt,
+        Sprint,
       });
 
       onAddItem({
@@ -331,9 +332,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                   onChange={(e) => setSprint(e.target.value)}
                 >
                   <option value="">Seleccione un Sprint</option>
-                  {priorityList.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priority}
+                  {sprintList.map((sprint) => (
+                    <option key={sprint} value={sprint}>
+                      {sprint}
                     </option>
                   ))}
                 </select>
