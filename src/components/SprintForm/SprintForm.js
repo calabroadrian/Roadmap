@@ -37,74 +37,7 @@ function SprintForm({ onCloseModal }) {
     }
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!nombre || !fechaInicio || !fechaFin) {
-      console.error('Faltan campos obligatorios.');
-      return;
-    }
-
-    try {
-      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
-      });
-      await doc.loadInfo();
-
-      const sheet = doc.sheetsByTitle['Sprints'];
-
-      if (isEditMode && editSprintId !== null) {
-        // Modo edición: actualizar el sprint existente
-        const sprintToUpdate = sprints.find((sprint) => sprint.ID === editSprintId);
-        if (sprintToUpdate) {
-          sprintToUpdate.Nombre = nombre;
-          sprintToUpdate.FechaDeInicio = fechaInicio;
-          sprintToUpdate.FechaDeFin = fechaFin;
-          const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
-          sprintToUpdate.Dias = diffInDays;
-          await sprintToUpdate.save();
-          console.log(`Se actualizó el sprint con ID ${editSprintId}`);
-
-          // Actualizar el estado después de editar el sprint
-          setSprints((prevSprints) =>
-            prevSprints.map((sprint) => (sprint.ID === editSprintId ? sprintToUpdate : sprint))
-          );
-        }
-      } else {
-        // Modo nuevo sprint: agregar un nuevo sprint
-        const id = sheet.rowCount + 1;
-        const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
-
-        await sheet.addRow({
-          ID: id,
-          Nombre: nombre,
-          FechaDeInicio: fechaInicio,
-          FechaDeFin: fechaFin,
-          Dias: diffInDays,
-        });
-
-        console.log(`Se agregó un nuevo sprint con ID ${id}`);
-
-        // Actualizar el estado después de agregar el sprint
-        setSprints((prevSprints) => [
-          ...prevSprints,
-          { ID: id, Nombre: nombre, FechaDeInicio: fechaInicio, FechaDeFin: fechaFin, Dias: diffInDays },
-        ]);
-      }
-
-      setNombre('');
-      setFechaInicio('');
-      setFechaFin('');
-      setIsEditMode(false);
-      setEditSprintId(null);
-
-      onCloseModal();
-    } catch (error) {
-      console.error('Error al guardar el sprint:', error);
-    }
-  };
+  // Resto del código sin cambios ...
 
   const handleEditSprint = (sprintId) => {
     // Cargar los datos del sprint seleccionado para editar
