@@ -128,7 +128,7 @@ function SprintForm({ onCloseModal }) {
       <div className="form-container">
         <div className="form-header">
           <h2>{isEditMode ? 'Editar Sprint' : 'Agregar Sprint'}</h2>
-          <button className="form-close" onClick={onCloseModal}>
+          <button className="form-close-btn" onClick={onCloseModal}>
             X
           </button>
         </div>
@@ -146,7 +146,9 @@ function SprintForm({ onCloseModal }) {
             <input type="date" id="fechaFin" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
           </div>
           <div className="form-group">
-            <button type="submit">{isEditMode ? 'Guardar Cambios' : 'Agregar Sprint'}</button>
+            <button type="submit" className="submit-btn">
+              {isEditMode ? 'Guardar Cambios' : 'Agregar Sprint'}
+            </button>
           </div>
         </form>
         <div className="sprint-grid">
@@ -157,8 +159,12 @@ function SprintForm({ onCloseModal }) {
               <span>Inicio: {sprint.FechaDeInicio}</span>
               <span>Fin: {sprint.FechaDeFin}</span>
               <span>Días: {sprint.Dias}</span>
-              <button onClick={() => handleEditSprint(sprint.ID)}>Editar</button>
-              <button onClick={() => handleDeleteSprint(sprint.ID)}>Eliminar</button>
+              <button onClick={() => handleEditSprint(sprint.ID)} className="edit-btn">
+                Editar
+              </button>
+              <button onClick={() => handleDeleteSprint(sprint.ID)} className="delete-btn">
+                Eliminar
+              </button>
             </div>
           ))}
         </div>

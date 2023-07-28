@@ -1,74 +1,61 @@
 .sprint-form-container {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-  
-  input[type='text'],
-  input[type='date'] {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  button[type='submit'] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+  max-width: 600px;
+  margin: 0 auto;
+}
 
-  .form-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  
-  .form-container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 101;
-    width: 80vw;
-    max-width: 600px;
-    background-color: #f0f0f0;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  .form-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .form-close-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-  
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+input[type='text'],
+input[type='date'] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button[type='submit'] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sprint-grid {
+  margin-top: 2rem;
+}
+
+.sprint-item {
+  background-color: #f0f0f0;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.sprint-item span {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sprint-item button {
+  margin-right: 0.5rem;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sprint-item button.delete-btn {
+  background-color: #dc3545;
+}
