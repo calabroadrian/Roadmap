@@ -59,6 +59,7 @@ function App() {
 
   useEffect(() => {
     fetchData();
+    console.log('fetchData al montar el componente');
   }, []); // Llamar fetchData al montar el componente
 
  
@@ -67,6 +68,7 @@ function App() {
     setSelectedItem(null);
     setIsModalOpen(true);
     fetchData(); // Llamar fetchData después de agregar el item
+    console.log('fetchData al agregar el componente');
   };
 
 
