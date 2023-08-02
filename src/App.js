@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
 import { useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
-import {RoadmapDataSheet, fetchData } from './components/Roadmap/RoadmapDataSheet';
+import {RoadmapDataSheet} from './components/Roadmap/RoadmapDataSheet';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
 import './App.css';
