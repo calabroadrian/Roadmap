@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
 import { useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
@@ -7,6 +7,11 @@ import Form from './components/Form/Form';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
 import './App.css';
+import config from './config/config';
+
+const SPREADSHEET_ID = config.SPREADSHEET_ID;
+const API_KEY = config.API_KEY;
+const CLIENT_ID = config.CLIENT_ID;
 
 function App() {
   const { user, login, logout } = useAuth();
@@ -15,6 +20,9 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
+  const [statuses, setStatuses] = useState([]); // Agrega la declaración de statuses
+  const [sprints, setSprints] = useState([]); // Agrega la declaración de sprints
+
 
   const handleAddItem = () => {
     setIsAddingItem(true);
@@ -54,12 +62,7 @@ function App() {
       item.id === updatedItem.id ? updatedItem : item
     );
     setItems(updatedItems);
-    fetchDataAndUpdate(); 
   };
-
-  if (!user) {
-    return <Login onLogin={login} />;
-  }
 
   return (
     <div className="app">
@@ -88,9 +91,13 @@ function App() {
 
       <RoadmapDataSheet
         items={items}
+        statuses={statuses} // Pasa las variables statuses como propiedad
+        sprints={sprints} // Pasa las variables sprints como propiedad
         onSelectItem={handleSelectItem}
         onDeselectItem={handleDeselectItem}
         onEditItem={handleSelectItem}
+        setStatuses={setStatuses}
+        setSprints={setSprints}
       />
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
