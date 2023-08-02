@@ -11,7 +11,7 @@ const PRIVATE_KEY = config.PRIVATE_KEY;
 const API_KEY = config.API_KEY;
 const CLIENT_ID = config.CLIENT_ID;
 
-function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal,onUpdateList }) {
+function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal, onUpdateList }) {
   const [Id, setId] = useState('');
   const [Descripcion, SetDescripcion] = useState('');
   const [Estado, setEstado] = useState('');
@@ -28,8 +28,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [isNewItem, setIsNewItem] = useState(true);
   const [showIdExistsError, setShowIdExistsError] = useState(false);
   const [isIdEditable, setIsIdEditable] = useState(true);
-  
-
 
   useEffect(() => {
     // Obtener el listado de usuarios de la hoja de Google Sheets
@@ -102,7 +100,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setIsIdEditable(true); // Habilitar el campo de ID
     }
   }, [item]);
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -142,7 +139,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         Sprint,
       });
 
-      onAddItem({
+      const newItem = {
         id: Date.now(),
         Id,
         Descripcion,
@@ -152,7 +149,10 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         UsuarioAsignado,
         Prioridad,
         Sprint,
-      });
+      };
+
+      onAddItem(newItem);
+      onUpdateList(newItem); // Llama a onUpdateList para agregar el nuevo elemento a la lista de tareas en RoadmapDataSheet.js
     } else {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({
@@ -180,7 +180,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
       await rowToUpdate.save();
 
-      onUpdateItem({
+      const updatedItem = {
         id: item.id,
         Id,
         Descripcion,
@@ -190,13 +190,14 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         UsuarioAsignado,
         Prioridad,
         Sprint,
-      });
+      };
+
+      onUpdateItem(updatedItem);
+      onUpdateList(updatedItem); // Llama a onUpdateList para actualizar el elemento en la lista de tareas en RoadmapDataSheet.js
     }
 
     onCloseModal();
     console.log('Formulario enviado');
-    window.location.reload();
-    console.log(item);
   };
 
   const addTag = (tag) => {
@@ -235,7 +236,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     const rowToDelete = rows.find(row => row._rawData[0] === item.Id);
     await rowToDelete.delete();
     onDeselectItem();
-    window.location.reload();
     onCloseModal();
   };
 

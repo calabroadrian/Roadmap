@@ -80,6 +80,18 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
     }
   };
 
+  const onUpdateList = (updatedTask) => {
+    // Encuentra el índice del elemento actualizado en la lista de tareas por su Id
+    const updatedTaskIndex = tasks.findIndex((task) => task.Id === updatedTask.Id);
+
+    // Si el elemento existe en la lista, actualiza sus datos
+    if (updatedTaskIndex !== -1) {
+      const updatedTasks = [...tasks];
+      updatedTasks[updatedTaskIndex] = updatedTask;
+      setTasks(updatedTasks);
+    }
+  };
+
   return (
     <div className="roadmap-wrapper">
       <div className="roadmap-filters">
