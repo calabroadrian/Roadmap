@@ -48,6 +48,13 @@ function App() {
     setIsSprintFormOpen(true);
   };
 
+  const handleUpdateList = (updatedItem) => {
+    const updatedItems = items.map((item) =>
+      item.id === updatedItem.id ? updatedItem : item
+    );
+    setItems(updatedItems);
+  };
+
   if (!user) {
     return <Login onLogin={login} />;
   }
@@ -92,7 +99,7 @@ function App() {
           onDeleteItem={handleDeleteItem}
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
-          onUpdateList={onUpdateList}
+          onUpdateList={handleUpdateList}
         />
       </Modal >
       {isSprintFormOpen && (
