@@ -24,18 +24,7 @@ function App() {
   const [sprints, setSprints] = useState([]); // Agrega la declaración de sprints
 
 
-  // Llama a fetchData para obtener los datos iniciales
-  useEffect(() => {
-    fetchData(setStatuses, setSprints, setItems);
-  }, []);
-
-    // Esta función se encargará de actualizar los datos al hacer una modificación
-  // o agregar un ítem desde el componente Form
-  const updateData = () => {
-    fetchData(setStatuses, setSprints, setItems);
-  };
- 
-  const handleAddItem = () => {
+   const handleAddItem = () => {
     setIsAddingItem(true);
     setSelectedItem(null);
     setIsModalOpen(true);
@@ -116,7 +105,6 @@ function App() {
         <Form
           items={items} // Pasa el estado de los elementos como una prop
           setItems={setItems} // Pasa la función para actualizar el estado de los elementos
-          fetchData={fetchData} // Pasa la función fetchData como una prop
           item={selectedItem}
           onAddItem={handleAddItem}
           onDeselectItem={handleDeselectItem}
@@ -125,9 +113,7 @@ function App() {
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
           onUpdateList={handleUpdateList}
-          updateData={updateData} 
         />
-        <Form updateData={updateData} />
       </Modal >
       {isSprintFormOpen && (
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
