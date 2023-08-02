@@ -23,10 +23,42 @@ function App() {
   const [statuses, setStatuses] = useState([]); // Agrega la declaración de statuses
   const [sprints, setSprints] = useState([]); // Agrega la declaración de sprints
 
-  useEffect(() => {
-    console.log('fetchData al montar el componente');
-  }, []); // Llamar fetchData al montar el componente
+  // Lógica para obtener los datos actualizados de la hoja de Google Sheets
+  const fetchData = async () => {
+    try {
+      const response = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
+      );
+      const data = await response.json();
 
+      if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
+        const headers = data.values[0];
+        const tagsColumnIndex = headers.indexOf('Tags');
+        const sprintColumnIndex = headers.indexOf('Sprint');
+        const parsedData = data.values.slice(1).map(row => {
+          return headers.reduce((obj, key, index) => {
+            obj[key] = row[index] || '';
+            return obj;
+          }, {});
+        });
+
+        // Agregar tags al objeto de cada elemento
+        parsedData.forEach(item => {
+          item.tags = item[headers[tagsColumnIndex]];
+        });
+
+        setItems(parsedData);
+      } else {
+        console.error('No se encontraron datos válidos en la respuesta API');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
  
   const handleAddItem = () => {
     setIsAddingItem(true);
@@ -107,6 +139,9 @@ function App() {
       />
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
+          items={items} // Pasa el estado de los elementos como una prop
+          setItems={setItems} // Pasa la función para actualizar el estado de los elementos
+          fetchData={fetchData} // Pasa la función fetchData como una prop
           item={selectedItem}
           onAddItem={handleAddItem}
           onDeselectItem={handleDeselectItem}
