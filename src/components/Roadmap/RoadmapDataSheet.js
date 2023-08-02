@@ -46,7 +46,6 @@
       console.error(error);
     }
   };
-  fetchData();
 
   const RoadmapDataSheet = ({
     selectedItem,
