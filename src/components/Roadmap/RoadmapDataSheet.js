@@ -8,6 +8,46 @@
   const API_KEY = config.API_KEY;
   const CLIENT_ID = config.CLIENT_ID;
 
+  const fetchData = async (setStatuses, setSprints, setItems) => {
+    console.log('fetchData called');
+    try {
+      const response = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
+      );
+      const data = await response.json();
+  
+      if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
+        const headers = data.values[0];
+        const tagsColumnIndex = headers.indexOf('Tags');
+        const sprintColumnIndex = headers.indexOf('Sprint');
+        const parsedData = data.values.slice(1).map(row => {
+          return headers.reduce((obj, key, index) => {
+            obj[key] = row[index] || '';
+            return obj;
+          }, {});
+        });
+  
+        // Agregar tags al objeto de cada elemento
+        parsedData.forEach(item => {
+          item.tags = item[headers[tagsColumnIndex]];
+        });
+  
+        setItems(parsedData);
+  
+        const distinctStatuses = [...new Set(parsedData.map(item => item.Estado))];
+        setStatuses(distinctStatuses);
+  
+        const distinctSprints = [...new Set(parsedData.map(item => item[headers[sprintColumnIndex]]))];
+        setSprints(distinctSprints);
+      } else {
+        console.error('No se encontraron datos válidos en la respuesta API');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  fetchData();
+
   const RoadmapDataSheet = ({
     selectedItem,
     onEditItem,
@@ -22,52 +62,6 @@
     console.log('RoadmapDataSheet rendered');
     const [items, setItems] = useState([]);
     const [filterSprint, setFilterSprint] = useState('');
-
-     
-
-    useEffect(() => {
-      // Fetch data from Google Sheets API
-      const fetchData = async () => {
-        console.log('fetchData called'); 
-        try {
-          const response = await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
-          );
-          const data = await response.json();
-  
-          if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
-            const headers = data.values[0];
-            const tagsColumnIndex = headers.indexOf('Tags');
-            const sprintColumnIndex = headers.indexOf('Sprint');
-            const parsedData = data.values.slice(1).map(row => {
-              return headers.reduce((obj, key, index) => {
-                obj[key] = row[index] || '';
-                return obj;
-              }, {});
-            });
-  
-            // Agregar tags al objeto de cada elemento
-            parsedData.forEach(item => {
-              item.tags = item[headers[tagsColumnIndex]];
-            });
-  
-            setItems(parsedData);
-  
-            const distinctStatuses = [...new Set(parsedData.map(item => item.Estado))];
-            setStatuses(distinctStatuses);
-  
-            const distinctSprints = [...new Set(parsedData.map(item => item[headers[sprintColumnIndex]]))];
-            setSprints(distinctSprints);
-          } else {
-            console.error('No se encontraron datos válidos en la respuesta API');
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      };
-  
-      fetchData();
-    }, []);
 
 
     const handleSelectItem = (item) => {
@@ -143,4 +137,4 @@
     );
   };
 
-  export default RoadmapDataSheet;
+  export { RoadmapDataSheet, fetchData };

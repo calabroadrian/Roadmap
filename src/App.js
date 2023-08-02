@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
 import { useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
-import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
-import Form from './components/Form/Form';
+import {RoadmapDataSheet, fetchData } from './components/Roadmap/RoadmapDataSheet';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
 import './App.css';
 import config from './config/config';
+import Form from './components/Form/Form';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
@@ -23,42 +23,17 @@ function App() {
   const [statuses, setStatuses] = useState([]); // Agrega la declaración de statuses
   const [sprints, setSprints] = useState([]); // Agrega la declaración de sprints
 
-  // Lógica para obtener los datos actualizados de la hoja de Google Sheets
-  const fetchData = async () => {
-    try {
-      const response = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
-      );
-      const data = await response.json();
 
-      if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
-        const headers = data.values[0];
-        const tagsColumnIndex = headers.indexOf('Tags');
-        const sprintColumnIndex = headers.indexOf('Sprint');
-        const parsedData = data.values.slice(1).map(row => {
-          return headers.reduce((obj, key, index) => {
-            obj[key] = row[index] || '';
-            return obj;
-          }, {});
-        });
-
-        // Agregar tags al objeto de cada elemento
-        parsedData.forEach(item => {
-          item.tags = item[headers[tagsColumnIndex]];
-        });
-
-        setItems(parsedData);
-      } else {
-        console.error('No se encontraron datos válidos en la respuesta API');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
+  // Llama a fetchData para obtener los datos iniciales
   useEffect(() => {
-    fetchData();
+    fetchData(setStatuses, setSprints, setItems);
   }, []);
+
+    // Esta función se encargará de actualizar los datos al hacer una modificación
+  // o agregar un ítem desde el componente Form
+  const updateData = () => {
+    fetchData(setStatuses, setSprints, setItems);
+  };
  
   const handleAddItem = () => {
     setIsAddingItem(true);
@@ -150,7 +125,9 @@ function App() {
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
           onUpdateList={handleUpdateList}
+          updateData={updateData} 
         />
+        <Form updateData={updateData} />
       </Modal >
       {isSprintFormOpen && (
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
