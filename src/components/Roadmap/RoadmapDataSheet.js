@@ -14,27 +14,23 @@
     onAddItem,
     onSelectItem,
     onDeselectItem,
-    setStatuses,
-    setSprints,
-    statuses, // Recibimos la variable statuses como propiedad
-    sprints, // Recibimos la variable sprints como propiedad
   }) => {
     console.log('RoadmapDataSheet rendered');
     const [items, setItems] = useState([]);
+    const [statuses, setStatuses] = useState([]);
+    const [sprints, setSprints] = useState([]);
     const [filterSprint, setFilterSprint] = useState('');
-
-     
+    
 
     useEffect(() => {
       // Fetch data from Google Sheets API
       const fetchData = async () => {
-        console.log('fetchData called'); 
         try {
           const response = await fetch(
             `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
           );
           const data = await response.json();
-  
+
           if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
             const headers = data.values[0];
             const tagsColumnIndex = headers.indexOf('Tags');
@@ -44,18 +40,20 @@
                 obj[key] = row[index] || '';
                 return obj;
               }, {});
+              setStatuses(distinctStatuses);
+              setSprints(distinctSprints);
             });
-  
+
             // Agregar tags al objeto de cada elemento
             parsedData.forEach(item => {
               item.tags = item[headers[tagsColumnIndex]];
             });
-  
+
             setItems(parsedData);
-  
+
             const distinctStatuses = [...new Set(parsedData.map(item => item.Estado))];
             setStatuses(distinctStatuses);
-  
+
             const distinctSprints = [...new Set(parsedData.map(item => item[headers[sprintColumnIndex]]))];
             setSprints(distinctSprints);
           } else {
@@ -65,7 +63,7 @@
           console.error(error);
         }
       };
-  
+
       fetchData();
     }, []);
 
