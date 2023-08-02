@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
 import { useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
@@ -15,6 +15,25 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
+
+   // Utilizamos useEffect para cargar los datos del usuario desde LocalStorage al iniciar la aplicación
+   useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      login(parsedUser); // Establecemos el usuario almacenado en el contexto de autenticación
+    }
+  }, [login]); // Ejecutamos este efecto solo cuando la función de login cambia
+
+  // Utilizamos useEffect para almacenar los datos del usuario en LocalStorage al cambiar el estado del usuario
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]); // Ejecutamos este efecto solo cuando el estado del usuario cambia
+
 
   const handleAddItem = () => {
     setIsAddingItem(true);
