@@ -195,6 +195,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
     onCloseModal();
     console.log('Formulario enviado');
+    window.location.reload();
     console.log(item);
   };
 
@@ -234,6 +235,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     const rowToDelete = rows.find(row => row._rawData[0] === item.Id);
     await rowToDelete.delete();
     onDeselectItem();
+    window.location.reload();
     onCloseModal();
   };
 
