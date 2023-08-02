@@ -54,6 +54,7 @@ function App() {
       item.id === updatedItem.id ? updatedItem : item
     );
     setItems(updatedItems);
+    fetchDataAndUpdate(); 
   };
 
   if (!user) {
