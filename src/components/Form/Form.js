@@ -102,6 +102,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   }, [item]);
 
   const handleSubmit = async (event) => {
+    console.log('handleSubmit called');
     event.preventDefault();
 
     if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) {

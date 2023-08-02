@@ -9,6 +9,7 @@ const API_KEY = config.API_KEY;
 const CLIENT_ID = config.CLIENT_ID;
 
 const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, onDeselectItem }) => {
+  console.log('RoadmapDataSheet rendered');
   const [items, setItems] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [sprints, setSprints] = useState([]);
@@ -58,6 +59,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
   }, []);
 
   const handleSelectItem = (item) => {
+    console.log('handleSelectItem called'); 
     if (selectedItem === item) {
       onDeselectItem();
     } else {
