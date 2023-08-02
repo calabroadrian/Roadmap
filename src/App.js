@@ -1,17 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
 import { useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
-import {RoadmapDataSheet} from './components/Roadmap/RoadmapDataSheet';
+import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
+import Form from './components/Form/Form';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
 import './App.css';
-import config from './config/config';
-import Form from './components/Form/Form';
-
-const SPREADSHEET_ID = config.SPREADSHEET_ID;
-const API_KEY = config.API_KEY;
-const CLIENT_ID = config.CLIENT_ID;
 
 function App() {
   const { user, login, logout } = useAuth();
@@ -20,17 +15,12 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
-  const [statuses, setStatuses] = useState([]); // Agrega la declaración de statuses
-  const [sprints, setSprints] = useState([]); // Agrega la declaración de sprints
 
-
-   const handleAddItem = () => {
+  const handleAddItem = () => {
     setIsAddingItem(true);
     setSelectedItem(null);
     setIsModalOpen(true);
-    console.log('fetchData al montar el componente');
   };
-
 
   const handleSelectItem = (item) => {
     setIsAddingItem(false);
@@ -58,13 +48,9 @@ function App() {
     setIsSprintFormOpen(true);
   };
 
-    const handleUpdateList = (updatedItem) => {
-      console.log('handleUpdateList called');
-    const updatedItems = items.map((item) =>
-      item.id === updatedItem.id ? updatedItem : item
-    );
-    setItems(updatedItems);
-  };
+  if (!user) {
+    return <Login onLogin={login} />;
+  }
 
   return (
     <div className="app">
@@ -93,18 +79,12 @@ function App() {
 
       <RoadmapDataSheet
         items={items}
-        statuses={statuses} // Pasa las variables statuses como propiedad
-        sprints={sprints} // Pasa las variables sprints como propiedad
         onSelectItem={handleSelectItem}
         onDeselectItem={handleDeselectItem}
         onEditItem={handleSelectItem}
-        setStatuses={setStatuses}
-        setSprints={setSprints}
       />
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
-          items={items} // Pasa el estado de los elementos como una prop
-          setItems={setItems} // Pasa la función para actualizar el estado de los elementos
           item={selectedItem}
           onAddItem={handleAddItem}
           onDeselectItem={handleDeselectItem}
@@ -112,7 +92,6 @@ function App() {
           onDeleteItem={handleDeleteItem}
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
-          onUpdateList={handleUpdateList}
         />
       </Modal >
       {isSprintFormOpen && (
