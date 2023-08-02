@@ -27,6 +27,7 @@
     useEffect(() => {
       // Fetch data from Google Sheets API
       const fetchData = async () => {
+        console.log('fetchData called'); 
         try {
           const response = await fetch(
             `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
