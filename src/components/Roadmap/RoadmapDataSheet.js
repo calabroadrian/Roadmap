@@ -18,6 +18,7 @@
     setSprints,
     statuses, // Recibimos la variable statuses como propiedad
     sprints, // Recibimos la variable sprints como propiedad
+    fetchData,
   }) => {
     console.log('RoadmapDataSheet rendered');
     const [items, setItems] = useState([]);

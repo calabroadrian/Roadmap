@@ -132,6 +132,7 @@ function App() {
           </div>
 
       <RoadmapDataSheet
+        fetchData={fetchData}
         items={items}
         statuses={statuses} // Pasa las variables statuses como propiedad
         sprints={sprints} // Pasa las variables sprints como propiedad
