@@ -22,13 +22,53 @@ function App() {
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
   const [statuses, setStatuses] = useState([]); // Agrega la declaración de statuses
   const [sprints, setSprints] = useState([]); // Agrega la declaración de sprints
+  const [data, setData] = useState([]);
+  
+  const fetchData = async () => {
+    console.log('fetchData called');
+    try {
+      const response = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
+      );
+      const data = await response.json();
 
+      if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
+        const headers = data.values[0];
+        const tagsColumnIndex = headers.indexOf('Tags');
+        const sprintColumnIndex = headers.indexOf('Sprint');
+        const parsedData = data.values.slice(1).map(row => {
+          return headers.reduce((obj, key, index) => {
+            obj[key] = row[index] || '';
+            return obj;
+          }, {});
+        });
 
+        // Agregar tags al objeto de cada elemento
+        parsedData.forEach(item => {
+          item.tags = item[headers[tagsColumnIndex]];
+        });
+
+        setData(parsedData);
+      } else {
+        console.error('No se encontraron datos válidos en la respuesta API');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []); // Llamar fetchData al montar el componente
+
+ 
   const handleAddItem = () => {
     setIsAddingItem(true);
     setSelectedItem(null);
     setIsModalOpen(true);
+    fetchData(); // Llamar fetchData después de agregar el item
   };
+
 
   const handleSelectItem = (item) => {
     setIsAddingItem(false);
