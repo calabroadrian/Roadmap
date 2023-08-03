@@ -77,9 +77,9 @@ function App() {
         <h1 className="app-title">roadDOmap</h1>
         {/* Agregar la funcionalidad de inicio de sesión aquí */}
         {user ? (
-          <button className="app-add-button" onClick={logout}>
-            Cerrar sesión
-          </button>
+       <button className="app-add-button" onClick={handleLogout}>
+       Cerrar sesión
+     </button>
         ) : (
           <button className="app-add-button" onClick={() => login({ /* Datos de inicio de sesión */ })}>
             Iniciar sesión
