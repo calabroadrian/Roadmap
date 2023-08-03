@@ -282,26 +282,43 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         <div className="form-scroll-container">
           {activeTab === TAB_GENERAL && (
             <form onSubmit={handleSubmit}>
-              {/* Campos para los detalles generales */}
-              <div className="form-group-1">
-                {/* ... (campos existentes para detalles generales) */}
-              </div>
-              <div className="tag-container">
-                {/* ... (campos existentes para tags) */}
-              </div>
-              <div className="form-group-2">
-                <button type="submit">Guardar</button>
-                {item && (
-                  <button
-                    type="button"
-                    className="form-delete"
-                    onClick={handleDelete}
-                  >
-                    Eliminar
-                  </button>
+            <div className="form-group-1">
+              <div>
+                <label>Id:</label>
+                <input
+                  type="text"
+                  value={Id}
+                  onChange={(e) => setId(e.target.value)}
+                  required
+                  disabled={!isIdEditable}
+                  className={!isIdEditable ? 'input-disabled' : ''}
+                />
+                {showIdExistsError && (
+                  <p className="form-error">
+                    El ID ya existe en el sheet. Por favor, elige otro ID único.
+                  </p>
                 )}
               </div>
-            </form>
+              {/* Resto de campos existentes en la pestaña General */}
+              {/* ... (otros campos existentes) */}
+            </div>
+            <div className="tag-container">
+              {/* Resto de campos de tags */}
+              {/* ... (campos de tags existentes) */}
+            </div>
+            <div className="form-group-2">
+              <button type="submit">Guardar</button>
+              {item && (
+                <button
+                  type="button"
+                  className="form-delete"
+                  onClick={handleDelete}
+                >
+                  Eliminar
+                </button>
+              )}
+            </div>
+          </form>
           )}
           {activeTab === TAB_TESTING && (
             <form onSubmit={handleSubmit}>
