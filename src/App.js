@@ -72,6 +72,8 @@ function App() {
     // Función para cerrar sesión
     const handleLogout = () => {
       logout(); // Llamamos a la función logout del contexto de autenticación
+      window.location.reload(); // Recargar la página para mostrar el formulario de inicio de sesión nuevamente
+
     };
   
 
