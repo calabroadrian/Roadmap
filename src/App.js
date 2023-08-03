@@ -69,11 +69,17 @@ function App() {
     return <Login onLogin={login} />;
   }
 
+    // Función para cerrar sesión
+    const handleLogout = () => {
+      logout(); // Llamamos a la función logout del contexto de autenticación
+    };
+  
+
   return (
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">roadDOmap</h1>
-        <button className="app-add-button" onClick={logout}>
+        <button className="app-add-button" onClick={handleLogout}>
           Cerrar sesión
         </button>
       </header>
