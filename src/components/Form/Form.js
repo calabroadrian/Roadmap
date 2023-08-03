@@ -284,27 +284,116 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
             <form onSubmit={handleSubmit}>
             <div className="form-group-1">
               <div>
-                <label>Id:</label>
+              <label>Id:</label>
                 <input
-                  type="text"
-                  value={Id}
-                  onChange={(e) => setId(e.target.value)}
-                  required
-                  disabled={!isIdEditable}
-                  className={!isIdEditable ? 'input-disabled' : ''}
-                />
+  type="text"
+  value={Id}
+  onChange={(e) => setId(e.target.value)}
+  required
+  disabled={!isIdEditable}
+  className={!isIdEditable ? 'input-disabled' : ''}
+/>
                 {showIdExistsError && (
                   <p className="form-error">
                     El ID ya existe en el sheet. Por favor, elige otro ID único.
                   </p>
                 )}
               </div>
-              {/* Resto de campos existentes en la pestaña General */}
-              {/* ... (otros campos existentes) */}
+              <div>
+                <label>Título:</label>
+                <input
+                  type="text"
+                  value={Titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+  <label>Descripción:</label>
+  <ReactQuill
+    value={Descripcion}
+    onChange={(value) => SetDescripcion(value)}
+    required
+  />
+</div>
+              <div>
+                <label>Estado:</label>
+                <select
+                  value={Estado}
+                  onChange={(event) => setEstado(event.target.value)}
+                  required
+                >
+                  <option value="">Seleccione un estado</option>
+                  <option value="Nuevo">Por hacer</option>
+                  <option value="En progreso">En progreso</option>
+                  <option value="Hecho">Hecho</option>
+                </select>
+              </div>
+              <div>
+                <label>Usuario Asignado:</label>
+                <select
+                  value={UsuarioAsignado}
+                  onChange={(e) => setUsuarioAsignado(e.target.value)}
+                >
+                  <option value="">Seleccione un usuario</option>
+                  {userList.map((user) => (
+                    <option key={user} value={user}>
+                      {user}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Prioridad:</label>
+                <select
+                  value={Prioridad}
+                  onChange={(e) => setPrioridad(e.target.value)}
+                  required
+                >
+                  <option value="">Seleccione una prioridad</option>
+                  {priorityList.map((priority) => (
+                    <option key={priority} value={priority}>
+                      {priority}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Sprint:</label>
+                <select
+                  value={Sprint}
+                  onChange={(e) => setSprint(e.target.value)}
+                >
+                  <option value="">Seleccione un Sprint</option>
+                  {sprintList.map((sprint) => (
+                    <option key={sprint} value={sprint}>
+                      {sprint}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="tag-general">
+                <label>Tags:</label>
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                />
+              </div>
             </div>
             <div className="tag-container">
-              {/* Resto de campos de tags */}
-              {/* ... (campos de tags existentes) */}
+              {tags.map((tag, index) => (
+                <div key={index} className="tag">
+                  {tag}
+                  <button
+                    className="tag-remove"
+                    onClick={() => removeTag(index)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
             <div className="form-group-2">
               <button type="submit">Guardar</button>
