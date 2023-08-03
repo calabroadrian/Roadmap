@@ -178,21 +178,21 @@ const Login = ({ onLogin }) => {
             ) : (
               // Mostrar formulario de inicio de sesión normal
               <form onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  placeholder="Nombre de usuario"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">Iniciar Sesión</button>
-                <button type="button" onClick={() => setResetPassword(true)}>Olvidé mi contraseña</button>
-              </form>
+  <input
+    type="text"
+    placeholder="Nombre de usuario"
+    value={username}
+    onChange={(e) => setUsername(e.target.value)}
+  />
+  <input
+    type="password"
+    placeholder="Contraseña"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+  />
+  <button type="submit">Iniciar Sesión</button>
+  <button type="button" onClick={() => setResetPassword(true)}>Olvidé mi contraseña</button>
+</form>
             )}
                     {/* Mostrar mensaje de error */}
         {loginError && <div className="error-message">{loginError}</div>}

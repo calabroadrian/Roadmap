@@ -17,7 +17,6 @@
         // Lógica para cerrar sesión (por ejemplo, eliminar datos de sesión del servidor)
         // Luego, establece el usuario como null
         setUser(null);
-        window.location.href = '/login'; // Redirigir al usuario a la pantalla de inicio de sesión
         console.log(setUser);
     };
 
