@@ -283,22 +283,22 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           {activeTab === TAB_GENERAL && (
              <form onSubmit={handleSubmit}>
              <div className="form-group-1">
-             <div>
-              <label>Id:</label>
-                <input
-  type="text"
-  value={Id}
-  onChange={(e) => setId(e.target.value)}
-  required
-  disabled={!isIdEditable}
-  className={!isIdEditable ? 'input-disabled' : ''}
-/>
-                {showIdExistsError && (
-                  <p className="form-error">
-                    El ID ya existe en el sheet. Por favor, elige otro ID único.
-                  </p>
-                )}
-              </div>
+               <div>
+                 <label>Id:</label>
+                 <input
+   type="text"
+   value={Id}
+   onChange={(e) => setId(e.target.value)}
+   required
+   disabled={!isIdEditable}
+   className={!isIdEditable ? 'input-disabled' : ''}
+ />
+                 {showIdExistsError && (
+                   <p className="form-error">
+                     El ID ya existe en el sheet. Por favor, elige otro ID único.
+                   </p>
+                 )}
+               </div>
                <div>
                  <label>Título:</label>
                  <input
@@ -309,13 +309,13 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                  />
                </div>
                <div>
-                 <label>Descripción:</label>
-                 <ReactQuill
-                   value={Descripcion}
-                   onChange={(value) => SetDescripcion(value)}
-                   required
-                 />
-               </div>
+   <label>Descripción:</label>
+   <ReactQuill
+     value={Descripcion}
+     onChange={(value) => SetDescripcion(value)}
+     required
+   />
+ </div>
                <div>
                  <label>Estado:</label>
                  <select
