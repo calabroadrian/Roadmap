@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AuthProvider } from './components/AuthContext/AuthContext'; // Importa el AuthProvider
-import { useAuth } from './components/AuthContext/AuthContext';
+import { AuthProvider, useAuth } from './components/AuthContext/AuthContext'; // Importa el AuthProvider y useAuth
 import Login from './components/Login/Login';
 import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Form from './components/Form/Form';
@@ -16,8 +15,8 @@ function App() {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
 
-   // Utilizamos useEffect para cargar los datos del usuario desde LocalStorage al iniciar la aplicación
-   useEffect(() => {
+  // Utilizamos useEffect para cargar los datos del usuario desde LocalStorage al iniciar la aplicación
+  useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
@@ -33,7 +32,6 @@ function App() {
       localStorage.removeItem('user');
     }
   }, [user]); // Ejecutamos este efecto solo cuando el estado del usuario cambia
-
 
   const handleAddItem = () => {
     setIsAddingItem(true);
@@ -75,26 +73,19 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">roadDOmap</h1>
-        {/* Agregar la funcionalidad de inicio de sesión aquí */}
-        {user ? (
-       <button className="app-add-button" onClick={handleLogout}>
-       Cerrar sesión
-     </button>
-        ) : (
-          <button className="app-add-button" onClick={() => login({ /* Datos de inicio de sesión */ })}>
-            Iniciar sesión
-          </button>
-        )}
+        <button className="app-add-button" onClick={logout}>
+          Cerrar sesión
+        </button>
       </header>
 
       <div className="functions-container">
-      <button className="app-add-button" onClick={handleAddItem}>
+        <button className="app-add-button" onClick={handleAddItem}>
           Agregar
         </button>
         <button className="app-add-button" onClick={handleOpenSprintForm}>
           Sprint
         </button>
-          </div>
+      </div>
 
       <RoadmapDataSheet
         items={items}
@@ -112,7 +103,7 @@ function App() {
           onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
         />
-      </Modal >
+      </Modal>
       {isSprintFormOpen && (
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
           <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
