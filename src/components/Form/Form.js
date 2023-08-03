@@ -11,6 +11,11 @@ const PRIVATE_KEY = config.PRIVATE_KEY;
 const API_KEY = config.API_KEY;
 const CLIENT_ID = config.CLIENT_ID;
 
+const TAB_GENERAL = "General";
+const TAB_TESTING = "Testing";
+const TAB_DESIGN = "Diseño";
+const TAB_DEVELOPER = "Desarrollador";
+
 function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal }) {
   const [Id, setId] = useState('');
   const [Descripcion, SetDescripcion] = useState('');
@@ -28,6 +33,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [isNewItem, setIsNewItem] = useState(true);
   const [showIdExistsError, setShowIdExistsError] = useState(false);
   const [isIdEditable, setIsIdEditable] = useState(true);
+  const [activeTab, setActiveTab] = useState(TAB_GENERAL);
 
 
   useEffect(() => {
@@ -237,6 +243,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     window.location.reload();
     onCloseModal();
   };
+  
 
   return (
     <div className="form-overlay">
@@ -279,22 +286,22 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
             <form onSubmit={handleSubmit}>
               <div className="form-group-1">
                 <div>
-                  <label>ID:</label>
-                  <input
-                    type="text"
-                    value={Id}
-                    onChange={handleIdChange}
-                    required
-                    disabled={!isIdEditable}
-                    className={!isIdEditable ? 'input-disabled' : ''}
-                  />
-                  {showIdExistsError && (
-                    <p className="form-error">
-                      El ID ya existe en la hoja. Por favor, elige otro ID único.
-                    </p>
-                  )}
-                </div>
-                <div>
+                <label>Id:</label>
+                <input
+  type="text"
+  value={Id}
+  onChange={(e) => setId(e.target.value)}
+  required
+  disabled={!isIdEditable}
+  className={!isIdEditable ? 'input-disabled' : ''}
+/>
+                {showIdExistsError && (
+                  <p className="form-error">
+                    El ID ya existe en el sheet. Por favor, elige otro ID único.
+                  </p>
+                )}
+              </div>
+              <div>
                   <label>Título:</label>
                   <input
                     type="text"
