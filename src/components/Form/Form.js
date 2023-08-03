@@ -283,22 +283,22 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           {activeTab === TAB_GENERAL && (
              <form onSubmit={handleSubmit}>
              <div className="form-group-1">
-               <div>
-                 <label>ID:</label>
-                 <input
-                   type="text"
-                   value={Id}
-                   onChange={handleIdChange}
-                   required
-                   disabled={!isIdEditable}
-                   className={!isIdEditable ? 'input-disabled' : ''}
-                 />
-                 {showIdExistsError && (
-                   <p className="form-error">
-                     El ID ya existe en la hoja. Por favor, elige otro ID único.
-                   </p>
-                 )}
-               </div>
+             <div>
+              <label>Id:</label>
+                <input
+  type="text"
+  value={Id}
+  onChange={(e) => setId(e.target.value)}
+  required
+  disabled={!isIdEditable}
+  className={!isIdEditable ? 'input-disabled' : ''}
+/>
+                {showIdExistsError && (
+                  <p className="form-error">
+                    El ID ya existe en el sheet. Por favor, elige otro ID único.
+                  </p>
+                )}
+              </div>
                <div>
                  <label>Título:</label>
                  <input
