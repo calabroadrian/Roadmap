@@ -4,12 +4,11 @@ import { GoogleSpreadsheet } from 'google-spreadsheet';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import config from '../../config/config';
+import DesignThinkingSidebar from '../DesignThinkingSidebar/DesignThinkingSidebar';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const CLIENT_EMAIL = config.CLIENT_EMAIL;
 const PRIVATE_KEY = config.PRIVATE_KEY;
-const API_KEY = config.API_KEY;
-const CLIENT_ID = config.CLIENT_ID;
 
 const TAB_GENERAL = "General";
 const TAB_TESTING = "Testing";
@@ -34,6 +33,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [showIdExistsError, setShowIdExistsError] = useState(false);
   const [isIdEditable, setIsIdEditable] = useState(true);
   const [activeTab, setActiveTab] = useState(TAB_GENERAL);
+  const [showDesignThinkingSidebar, setShowDesignThinkingSidebar] = useState(true);
 
 
   useEffect(() => {
@@ -242,6 +242,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     onDeselectItem();
     window.location.reload();
     onCloseModal();
+    setShowDesignThinkingSidebar(false);
   };
   
 
@@ -250,9 +251,12 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       <div className="form-container">
         <div className="form-header">
           <h2>Agregar nueva tarea</h2>
-          <button className="form-close" onClick={onCloseModal}>
-            X
-          </button>
+          <button className="form-close" onClick={() => {
+  setShowDesignThinkingSidebar(false);
+  onCloseModal();
+}}>
+  X
+</button>
         </div>
         <div className="form-tabs">
           {/* Agregar botones o enlaces para cada pestaña */}
@@ -283,7 +287,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
         </div>
         <div className="form-scroll-container">
           {activeTab === TAB_GENERAL && (
-            <form onSubmit={handleSubmit}>
+                      <form onSubmit={handleSubmit} className="form-grid">
               <div className="form-group-1">
                 <div>
                 <label>Id:</label>
@@ -310,14 +314,16 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                     required
                   />
                 </div>
-                <div>
+                <div className="form-description">
                   <label>Descripción:</label>
+                  <div className="react-quill">
                   <ReactQuill
                     value={Descripcion}
                     onChange={(value) => SetDescripcion(value)}
                     required
                   />
                 </div>
+              </div>
                 <div>
                   <label>Estado:</label>
                   <select
@@ -431,7 +437,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           )}
         </div>
       </div>
+      {showDesignThinkingSidebar && <DesignThinkingSidebar taskId={Id} />}
     </div>
+
   );
 }
 

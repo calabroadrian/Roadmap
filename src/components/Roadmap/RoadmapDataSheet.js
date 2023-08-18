@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import config from '../../config/config';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
-const CLIENT_EMAIL = config.CLIENT_EMAIL;
-const PRIVATE_KEY = config.PRIVATE_KEY;
 const API_KEY = config.API_KEY;
 const CLIENT_ID = config.CLIENT_ID;
 
@@ -80,7 +78,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
     }
   };
 
-  return (
+   return (
     <div className="roadmap-wrapper">
       <div className="roadmap-filters">
         <label htmlFor="sprint-filter">Filtrar por Sprint:</label>

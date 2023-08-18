@@ -5,7 +5,9 @@ import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Form from './components/Form/Form';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
+import DesignThinkingSidebar from './components/DesignThinkingSidebar/DesignThinkingSidebar';
 import './App.css';
+
 
 function App() {
   const { user, login, logout } = useAuth();
@@ -108,7 +110,7 @@ function App() {
           onDeselectItem={handleDeselectItem}
           onUpdateItem={handleUpdateItem}
           onDeleteItem={handleDeleteItem}
-          onCloseModal={() => setIsModalOpen(false)}
+          onCloseModal={() => setIsModalOpen(false)}          
           isAddingItem={isAddingItem}
         />
       </Modal>
