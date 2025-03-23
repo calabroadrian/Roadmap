@@ -1,0 +1,153 @@
+[
+        {
+          "title": "Bug #6644 (Nuevo): No quedan guardados los datos opcionales del ciudadano/No se puede cargar nuev...",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/6644",
+          "updated": "2022-11-23T13:39:30Z",
+          "author": {
+            "name": "Gala Vercenillo"
+          },
+          "content": "&lt;p&gt;No quedan guardados los datos:&lt;/p&gt;\n\n\n\t&lt;p&gt;Cada vez que se carga un contacto se debe editar los datos opcionales del ciudadano.&lt;br /&gt;Los datos ingresados/editados deben quedar guardados.&lt;/p&gt;\n\n\n\t&lt;p&gt;Reproducción:&lt;br /&gt;Ingresar a GC&lt;br /&gt;Seleccionar prestación&lt;br /&gt;Seleccionar ciudadano&lt;br /&gt;Editar ciudadano&lt;br /&gt;Guardar y Seleccionar&lt;br /&gt;Seleccionar ubicación&lt;br /&gt;Confirmar&lt;br /&gt;Cargar un nuevo contacto&lt;br /&gt;Seleccionar prestación&lt;br /&gt;Seleccionar ciudadano editado anteriormente&lt;br /&gt;Resultado obtenido: los datos del ciudadano no se guardaron y se debe editar nuevamente.&lt;/p&gt;\n\n\n\t&lt;p&gt;Resultado esperado: debe quedar los datos del ciudadano guardados.&lt;br /&gt;Nota: Adjunto video de evidencia.&lt;/p&gt;\n\n\n\t&lt;p&gt;No se puede cargar nuevo ciudadano:&lt;br /&gt;Buscar un ciudadano que no exista, y luego crear un nuevo ciudadano. Validar que se genera correctamente.&lt;/p&gt;\n\n\n\t&lt;p&gt;1- Ingresar a GC&lt;br /&gt;2- Loguearse con AD&lt;br /&gt;3- Ir al módulo Ciudadano&lt;br /&gt;4- Buscar por tipo de documento, numero de documento y sexo&lt;br /&gt;5- Buscar&lt;br /&gt;6- El sistema muestra \"No se encontraron resultados para los criterios ingresados\". Presionar botón \"NUEVO\" &lt;br /&gt;7- Agregar información solicitada.&lt;br /&gt;8- Presionar GUARDAR&lt;br /&gt;9- Ingresar nuevamente al modulo ciudadanos &lt;br /&gt;10- buscar el ciudadano ya creado por sus datos &lt;br /&gt;11- clic en buscar&lt;/p&gt;\n\n\n\t&lt;p&gt;Resultado esperado: el sistema crea un nuevo ciudadano.&lt;br /&gt;Resultado Obtenido: El botón “Nuevo” aparece cuando no se encuentran resultados, pero luego de cargar la información del nuevo ciudadano y realizar una búsqueda nueva, vuelve a dar el mensaje “No se encontraron resultados para los criterios ingresados\", por lo que la creación del nuevo ciudadano no sucedió. DEV&lt;/p&gt;\n\n\n\t&lt;p&gt;Se adjunta video.&lt;/p&gt;"
+        },
+    
+        {
+          "title": "Requerimiento #6398 (En análisis): Creación de Documentación",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/6398",
+          "updated": "2022-05-20T15:35:12Z",
+          "author": {
+            "name": "Nehuen  Navarro"
+          },
+          "content": "&lt;p&gt;Descripción&lt;/p&gt;\n\n\n\t&lt;p&gt;Se solicita, que se creen la documentación pertinente para cada requerimiento solicitado.&lt;br /&gt;Donde la prioridad para la creación de esto tiene que ser de requerimiento mas reciente a mas viejo.&lt;br /&gt;Una vez finalizado esto, adjuntarlo a cada uno de los RM al que pertenece.&lt;/p&gt;"
+        },
+        {
+          "title": "Requerimiento #5332 (Pendiente aprobación): Ciudad OnDemand - Integración GC y Redes Sociales + IA",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/5332",
+          "updated": "2020-08-14T19:04:14Z",
+          "author": {
+            "name": "Elias Actis Grosso"
+          },
+          "content": "&lt;p&gt;Se requiere de un proceso que lea y levante los comentarios de distintas redes sociales y Google, los clasifique mediante Inteligencia Artificial, y los cargue automáticamente como un nuevo tipo de contacto (Aporte) a gestión colaborativa.&lt;/p&gt;\n\n\n\t&lt;p&gt;Los sitios a considerar son:&lt;br /&gt;- Google (Comentarios abiertos / valoraciones)&lt;br /&gt;- Twitter&lt;br /&gt;- Instagram&lt;br /&gt;- TripAdvisor&lt;br /&gt;- Facebook&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #5286 (Pendiente aprobación): Quitar el check \"Finalizar el cuestionario con esta respuesta\"",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/5286",
+          "updated": "2020-07-20T16:55:12Z",
+          "author": {
+            "name": "Paula Villanueva"
+          },
+          "content": "&lt;p&gt;Actualmente en los cuestionarios tenemos un check \"Finalizar el cuestionario con esta respuesta\" para que se termine el cuestionario y así como también el botón se muestre como \"Finalizar\" en ves de \"Siguiente\".&lt;/p&gt;\n\n\n\t&lt;p&gt;Lo que solicitamos es &lt;strong&gt;quitar ese check&lt;/strong&gt; y que valide automáticamente en la configuración del cuestionario con cuales respuestas finaliza.&lt;br /&gt;De esta manera, evitamos la configuración extra de seleccionar con que respuestas termina el cuestionario.&lt;/p&gt;"
+        },
+        {
+          "title": "Requerimiento #5270 (Pendiente aprobación): Cuestionarios - Posibilidad de configurar orden de re...",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/5270",
+          "updated": "2020-07-14T21:32:18Z",
+          "author": {
+            "name": "Elias Actis Grosso"
+          },
+          "content": "&lt;p&gt;Se requiere poder configurar, dentro de los Cuestionarios, el Orden en el que deben figurar las respuestas a preguntas de Selección Múltiple y Excluyente.&lt;/p&gt;\n\n\n\t&lt;p&gt;En caso de tener un cuestionario con una pregunta con Lista de Valores y obtenga más de una respuesta, &lt;strong&gt;&lt;ins&gt;debe cumplir con las siguientes condiciones:&lt;/ins&gt;&lt;/strong&gt;&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;1.&lt;/strong&gt; Al agregar cada respuesta debe haber un desplegable que contenga el Título: \" &lt;strong&gt;Orden&lt;/strong&gt; \" al igual que las Preguntas (como esta actualmente).&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;2.&lt;/strong&gt; Los números de ordenes que deben visualizarse según la cantidad de respuestas que hay configuradas.&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;3.&lt;/strong&gt; No deben repetirse los números de ordenes.&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;4.&lt;/strong&gt; Debe poder modificarse \"N\" cantidad de veces.&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;5.&lt;/strong&gt; Si se elimina una respuesta con un orden ya definido, debe volver a ordenarse de forma automática el resto de las respuestas. Por ejemplo si \"Jose\" (Orden1), \"Juan\" (Orden2), \"Pedro\" (Orden3) se elimina la respuesta \"Juan\"(Orden2) el resto de las respuestas deben quedar de la siguiente manera: \"Jose\"(Orden1) y \"Pedro\"(Orden2).&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;6.&lt;/strong&gt; Si tenemos un cuestionario previamente configurado y agregamos nuevas respuestas deben quedar con el orden que se van cargando.&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;strong&gt;7.&lt;/strong&gt; Si se realiza un cambio en alguna respuesta (Numero de orden o eliminación) y luego no se guarda el cuestionario, no deben aplicarse los cambios.&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;ins&gt;&lt;strong&gt;Comentarios:&lt;/strong&gt;&lt;/ins&gt;&lt;/p&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Los cuestionarios que ya se encuentran configurados debe agregarse este cambio en todos, con los números de ordenes de como se visualizan hoy.&lt;/li&gt;\n\t\t&lt;li&gt;Este requerimiento debe ser para cualquiera fuera el tipo de respuesta \"Múltiple\" y/o \"Excluyente\"&lt;/li&gt;\n\t&lt;/ul&gt;"
+        },
+        {
+          "title": "Mejora #5269 (Pendiente aprobación): Subpregunta en cuestionario con respuestas múltiples",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/5269",
+          "updated": "2020-07-14T16:31:30Z",
+          "author": {
+            "name": "Elias Actis Grosso"
+          },
+          "content": "&lt;p&gt;Actualmente, en un cuestionario con respuestas múltiples, si se selecciona una opción que contiene una subpregunta y además otra opción, no se muestra la subpregunta. Solo muestra la subpregunta cuando se selecciona &lt;strong&gt;SOLO&lt;/strong&gt; la opción asociada.&lt;/p&gt;\n\n\n\t&lt;p&gt;&lt;ins&gt;&lt;strong&gt;Se requiere que se cumpla con las siguientes condiciones:&lt;/strong&gt;&lt;/ins&gt;&lt;/p&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;En caso de tener una Pregunta con respuestas MÚLTIPLES, solo debe permitir configurar &lt;ins&gt;UNA ÚNICA&lt;/ins&gt; subpregunta asociada a una de las opciones de respuestas.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si se seleccionan todas las respuestas (incluso con la que contiene una subpregunta) debe continuar con la subpregunta asociada y luego con el orden 2 del cuestionario.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si no se responde la subpregunta asociada, no debe permitir continuar con la carga del contacto. El botón Siguiente debe estar grisado.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si seleccionamos todas las respuestas MENOS la que tiene la pregunta asociada, tiene que continuar con el flujo del cuestionario sin mostrar la subpregunta.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;En caso de marcar todas las opciones (incluso la que contiene una subpregunta), respondemos la subpregunta y luego seleccionamos el botón \"Atrás\" y desmarcamos la respuesta que contenía la pregunta asociada debe continuar con el flujo normal del cuestionario al orden 2.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si la subpregunta tiene tipo de respuesta \"Lista de Valores\" y sus opciones también son múltiples debe cumplir con la misma lógica del primer item, SOLO UNA subpregunta asociada a una de las opciones.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si la subpregunta tiene tipo de respuesta \"Lista de Valores\" y sus opciones son de tipo excluyente si debe poder configurarse \"N\" cantidad de subpreguntas asociadas.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;p&gt;&lt;ins&gt;&lt;strong&gt;Validaciones al configurar cuestionario con respuesta múltiple&lt;/strong&gt;&lt;/ins&gt;&lt;/p&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si agregamos una subpregunta y luego nos posicionamos en otra respuesta para agregar una nueva, el botón \"Agregar Pregunta\" no debe visualizarse o debe estar bloqueado en caso de tener previamente una subpregunta configurada.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Si eliminamos la subpregunta asociada, debe habilitarse el botón \"Agregar Pregunta\" para el resto de las opciones.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;p&gt;&lt;ins&gt;&lt;strong&gt;Comentarios:&lt;/strong&gt;&lt;/ins&gt;&lt;/p&gt;\n\n\n\t&lt;ul&gt;\n\t&lt;li&gt;Se adjunta un cuestionario de ejemplo.&lt;/li&gt;\n\t&lt;/ul&gt;"
+        },
+        {
+          "title": "Requerimiento #4507 (En análisis): Integración con SAP - Enviar campo \"Canal\" de la solicitud",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/4507",
+          "updated": "2020-02-19T17:20:05Z",
+          "author": {
+            "name": "Elias Actis Grosso"
+          },
+          "content": "&lt;p&gt;Se solicita enviar el campo \"canal\" para todos los contactos que viajan a SAP.&lt;br /&gt;El valor a enviar es la descripción del canal.&lt;/p&gt;\n\n\n\t&lt;p&gt;Ejemplo:&lt;br /&gt;\"Call Center\" &lt;br /&gt;\"Cercania\" &lt;br /&gt;\"App BA 147\"&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #1861 (Nuevo): Sección Ciudadano - Cambiar de lugar el botón \"Seleccionar\"",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1861",
+          "updated": "2018-12-18T18:15:28Z",
+          "author": {
+            "name": "Paula Villanueva"
+          },
+          "content": "&lt;p&gt;Al seleccionar una prestación y luego al hacer una búsqueda de ciudadano los botones deben estar por debajo de la grilla y no por debajo del buscador.&lt;/p&gt;\n\n\n\t&lt;p&gt;Adjunto imagen.&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #1860 (Nuevo): Cambiar de lugar el botón \"Seleccionar\"",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1860",
+          "updated": "2018-12-18T18:11:28Z",
+          "author": {
+            "name": "Paula Villanueva"
+          },
+          "content": "&lt;p&gt;El botón \"Seleccionar\" sirve para seleccionar la prestación una vez que se realizó la búsqueda. Debería estar debajo de la grilla y no debajo del buscador.&lt;/p&gt;\n\n\n\t&lt;p&gt;Adjunto imagen.&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #1854 (Nuevo): Imprimir TODO el detalle y acciones de un contacto",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1854",
+          "updated": "2018-12-17T21:23:29Z",
+          "author": {
+            "name": "Paula Villanueva"
+          },
+          "content": "&lt;p&gt;Al imprimir el detalle de un contacto debe visualizarse también el detalle de todas las interacciones y el detalle de todos los cambios de estado. Ahora solo se ven las acciones pero no los detalles de cada uno.&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #1750 (Nuevo): Reenvió de notificación HPA de tipo informativa",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1750",
+          "updated": "2018-12-03T14:34:39Z",
+          "author": {
+            "name": "Federico Marsiglia"
+          },
+          "content": "&lt;p&gt;Se solicita que se vuelva a enviar la notificación del tipo informativa de HPA según los siguientes casos:&lt;/p&gt;\n\n\n\t&lt;p&gt;-SAP notifica cambio de fecha o reprogramación.&lt;/p&gt;\n\n\n\t&lt;p&gt;-SAP notifica cambio de estado.&lt;/p&gt;\n\n\n\t&lt;p&gt;-En caso de que SAP notifique dos veces el mismo cambio de estado, validar si ya envió la notificación y en caso de que si, no volver a enviarla para dicha transicion.&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #1564 (Nuevo): Agregar Spinner",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1564",
+          "updated": "2018-10-30T21:26:18Z",
+          "author": {
+            "name": "Paula Villanueva"
+          },
+          "content": "&lt;p&gt;Se necesita agregar el spinner al ejecutar cualquier consulta o exportación a Excel.&lt;/p&gt;"
+        },
+        {
+          "title": "Mejora #1545 (Nuevo): Datos opcionales de SAP que son variables en GC",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1545",
+          "updated": "2018-10-26T16:55:24Z",
+          "author": {
+            "name": "Anónimo"
+          },
+          "content": "Actualmente el caso en el que SAP no envía valores para los datos de “Descripción equipo” y “Tipo objeto” no está controlado en la app. \n\t&lt;ul&gt;\n\t&lt;li&gt;SAP en lugar de enviar NULL, envíe un espacio en blanco de modo que al acceder a la notificación dicha variable se muestre en blanco.&lt;/li&gt;\n\t&lt;/ul&gt;\n\n\n\t&lt;p&gt;Por lo cual se requiere, una mejora para que se le configure un valor default a las variables.&lt;/p&gt;"
+        },
+        {
+          "title": "Requerimiento #1447 (Nuevo): Unificar gestión de preguntas para Obras y Espacios públicos",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/1447",
+          "updated": "2018-10-09T14:49:08Z",
+          "author": {
+            "name": "Elias Actis Grosso"
+          },
+          "content": "&lt;p&gt;Se solicita unificar el gestor de preguntas de Obras y Espacios públicos.&lt;br /&gt;Eliminar la sección \"Gestión de preguntas\" interna de Obras, y permitir utilizar las mismas preguntas que se generan en el Gestor de preguntas general.&lt;/p&gt;"
+        },
+        {
+          "title": "Requerimiento #849 (Nuevo): Agregar tipo de respuesta: Texto Libre",
+          "link": "",
+          "id": "http://redmineac.buenosaires.gob.ar/issues/849",
+          "updated": "2018-07-17T21:52:52Z",
+          "author": {
+            "name": "Paula Villanueva"
+          },
+          "content": "&lt;p&gt;Se debe agregar una opción de tipo de respuesta al gestor de preguntas que sea: Texto libre.&lt;/p&gt;\n\n\n\t&lt;p&gt;- El tipo de respuesta que puede satisfacer la pregunta, por defecto debe mostrar el texto \"-- Seleccione un tipo de respuesta --\" y al activar el combo uno de los valores que debe mostrar es &lt;strong&gt;\"Texto Libre\"&lt;/strong&gt;.&lt;/p&gt;\n\n\n\t&lt;p&gt;- Al seleccionar \"Tipo de respuesta = &lt;strong&gt;Texto libre&lt;/strong&gt;\", debajo de \"Tipo de respuesta\" se deben mostrar los campos:&lt;br /&gt;URL imagen (opcional)&lt;br /&gt;Vista previa de la imagen&lt;/p&gt;"
+        }
+      ]

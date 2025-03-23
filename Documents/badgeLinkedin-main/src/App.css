@@ -1,0 +1,503 @@
+.app-content{
+  margin-bottom: 0% !important;
+  margin: 3%;
+
+}
+/* Estilos para el logo de la aplicación */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+/* Estilos para el encabezado de la aplicación */
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+/* Estilos para los enlaces en la aplicación */
+.App-link {
+  color: #61dafb;
+}
+
+/* Estilos para el cuerpo de las tarjetas */
+.card-body {
+  flex: 1 1 auto;
+  padding: 1rem 1rem;
+}
+
+/* Estilos para el contenedor de los badges */
+.badge-container {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+/* Estilos para los badges */
+.badge {
+  position: absolute;
+  z-index: 1;
+}
+
+/* Estilos para la clase .main_circle_text */
+.main_circle_text {
+
+}
+
+/* Estilos para el texto del badge */
+.textPath {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: #FFFFFF;
+  transform: scale(-1, 1);
+}
+
+/* Estilos para las imágenes en el contenedor de los badges */
+.badge-container img {
+  border-radius: 50%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Estilos para la imagen de perfil */
+.profile-image {
+  border-radius: 55px;
+  display: block;
+  position: relative;
+}
+
+/* Estilos para el contenedor principal de la aplicación */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Estilos para las tarjetas en la aplicación */
+.card-form {
+  width: 330px;
+  height: 35%;
+  margin-bottom: 20px;
+  border: none;
+  box-shadow: 0px 18px 80px rgba(0, 0, 0, 0.22);
+}
+
+.card {
+  margin-bottom: 20px;
+  border: none;
+  box-shadow: 0px 18px 80px rgba(0, 0, 0, 0.22);
+}
+
+/* Estilos para el logo */
+.logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Estilos para el ícono en el logo */
+.logo i {
+  color: var(--bs-blue);
+  font-size: 52px;
+}
+
+/* Estilos para el título */
+.title {
+  font-size: 20.4px;
+  text-align: center;
+}
+
+/* Estilos para el formulario de búsqueda y el formulario de badges */
+.search-form, .badge-form {
+  margin-bottom: 20px;
+}
+
+/* Estilos para los campos de formulario */
+.form-control {
+  margin-bottom: 10px;
+}
+
+/* Estilos para el resultado de la aplicación */
+.output {
+  padding: 12px;
+  display: inline;
+}
+
+/* Estilos para el formulario de búsqueda y el formulario de badges */
+.search-form, .badge-form {
+  margin-bottom: 20px;
+}
+
+/* Estilos para los campos de formulario */
+.form-control {
+  width: 100%;
+  font-size: 1rem;
+  line-height: 2;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  padding-inline: initial;
+}
+
+/* Estilos para los grupos de formulario */
+.form-group {
+  margin-top: 20px;
+}
+
+/* Estilos para los botones del formulario */
+.btn-primary {
+  display: inline-block;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  background-color: #007bff;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: color .15s background-color .15s border-color .15s;
+  cursor: pointer;
+  background-color: #0073b1;
+	border: none;
+	color: #fff;
+}
+
+.btn-primary-large {
+  display: inline-block;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  background-color: #007bff;
+  border: 1px solid #007bff;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: color .15s background-color .15s border-color .15s;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-primary-large:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Estilos para el input de color */
+.input-group .form-control.color-input {
+  padding-right: 0;
+}
+
+/* Estilos para el input de color y el botón de color */
+.input-group-append .btn-color-picker {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: .25rem;
+  border-bottom-right-radius: .25rem;
+}
+
+/* Estilos para el botón de color */
+.btn-color-picker {
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0 .25rem .25rem 0;
+  cursor: pointer;
+}
+
+/* Estilos para el contenedor del botón de color */
+.input-group-append .color-picker-container {
+  position: relative;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+}
+
+/* Estilos para el contenedor del botón de color y el contenedor de entrada de color */
+.input-group-append .color-picker-container .color-input-container {
+  flex-grow: 1;
+  min-width: 0;
+  padding-right: 0;
+}
+
+/* Estilos para el contenedor del botón de color y el contenedor de entrada de color */
+.input-group-append .color-picker-container .color-input-container .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.info-container {
+  padding: 20px;
+  background-color: #f8f8f8;
+  margin-left: 20px; /* Ajusta el espacio entre el formulario y la información adicional */
+}
+
+.app-content {
+  display: flex;
+  align-items: flex-start; /* Alinea los elementos arriba */
+}
+
+/* ... Tus estilos actuales ... */
+
+/* Estilos para el formulario de búsqueda y el formulario de badges */
+.search-form, .badge-form {
+  margin-bottom: 20px;
+  width: 100%; /* Asegura que ocupen todo el ancho del contenedor */
+}
+
+/* Estilos para los campos de formulario */
+.form-control {
+	font-family: inherit;
+	font-weight: 600;
+	font-size: 1rem;
+}
+
+/* Estilos para los grupos de formulario */
+.form-group {
+  margin-bottom: 20px;
+}
+
+/* Estilos para los botones del formulario */
+.btn-secondary {
+	background-color: #fff;
+	border: 1px solid #0073b1;
+	color: #0073b1;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+input#badgeColor {
+  height: 40px;
+}
+
+input#textColor {
+  height: 40px; 
+}
+
+.col2 {
+  display: flex;
+  justify-content: space-between;
+}
+
+.usos {
+  width: 25%;
+}
+
+.usos h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.usos ul {
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.usos li {
+  font-size: 16px;
+  color: #666;
+  margin: 0 10px 15px;
+  padding: 10px 20px;
+  background-color: #f4f4f4;
+  border-radius: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  list-style-type: none; /* Eliminar el punto del li */
+}
+
+.usos li:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.usos li:before {
+  content: '#';
+  color: #007bff;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.beneficios{
+  display: flex;
+  align-content: stretch;
+  align-items: center;
+  margin-left: 3%;
+}
+
+.beneficios li {
+  font-size: 16px;
+  color: #666;
+  margin: 0 10px 15px;
+  padding: 10px 20px;
+  background-color: #f4f4f4;
+  border-radius: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  list-style-type: none; /* Eliminar el punto del li */
+}
+
+.beneficios li:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.beneficios li:before {
+  content: '#';
+  color: #007bff;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.app-header {
+  background-color: #007bff;
+  color: #fff;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-logo {
+  width: 50px; /* ajusta el ancho según sea necesario */
+  height: auto;
+  margin-right: 20px;
+}
+
+.app-title {
+  font-size: 24px;
+  margin: 0;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.beneficios h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.card-form:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card-form:before {
+  color: #007bff;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.card-form {
+  font-size: 16px;
+  color: #666;
+  padding: 10px 20px;
+  background-color: #f4f4f4;
+  border-radius: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  list-style-type: none; /* Eliminar el punto del li */
+}
+.badge-base {
+  width: 25%;
+}
+
+
+.beneficios1 {
+  width: 75%;
+}
+
+.badge-base.LI-profile-badge {
+  display: flex;
+  width: 100%;
+}
+
+.controls-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.move-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.move-button {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  margin: 0 4px;
+  border: none;
+  background-color: #007BFF;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.move-button:hover {
+  background-color: #0056b3;
+}
+
+.scale-controls {
+  display: flex;
+  align-items: center;
+}
+
+.scale-label {
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+.scale-input {
+  width: 120px;
+  margin-right: 8px;
+}
+
+.scale-button {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  border: none;
+  background-color: #007BFF;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.scale-button:hover {
+  background-color: #0056b3;
+}
+
+img {
+  border-radius: 100%;
+  width: 25%;
+}
