@@ -1,5 +1,5 @@
 import './DesignThinkingSidebar.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import config from '../../config/config';
 import ReactQuill from 'react-quill';
@@ -8,7 +8,6 @@ import 'react-quill/dist/quill.snow.css';
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const CLIENT_EMAIL = config.CLIENT_EMAIL;
 const PRIVATE_KEY = config.PRIVATE_KEY;
-
 
 const DesignThinkingSidebar = ({ taskId }) => {
   const [sections, setSections] = useState([
@@ -20,7 +19,7 @@ const DesignThinkingSidebar = ({ taskId }) => {
     { title: 'Implementación', expanded: false, text: '', currentState: '' }
   ]);
 
-  const fetchDesignThinkingData = async () => {
+  const fetchDesignThinkingData = useCallback(async () => {
     try {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({
@@ -42,26 +41,26 @@ const DesignThinkingSidebar = ({ taskId }) => {
         dataBySection[sectionTitle].push({ taskId: currentTaskId, text, sectionTitle, currentState });
       });
 
-      const updatedSections = sections.map((section) => {
-        const sectionData = dataBySection[section.title];
-        if (sectionData && sectionData.length > 0) {
-          const matchingRow = sectionData.find((data) => data.taskId === taskId);
-          if (matchingRow) {
-            return { ...section, text: matchingRow.text, currentState: matchingRow.currentState };
+      setSections(prevSections =>
+        prevSections.map((section) => {
+          const sectionData = dataBySection[section.title];
+          if (sectionData && sectionData.length > 0) {
+            const matchingRow = sectionData.find((data) => data.taskId === taskId);
+            if (matchingRow) {
+              return { ...section, text: matchingRow.text, currentState: matchingRow.currentState };
+            }
           }
-        }
-        return section;
-      });
-
-      setSections(updatedSections);
+          return section;
+        })
+      );
     } catch (error) {
       console.error('Error al obtener los datos de Design Thinking:', error);
     }
-  };
+  }, [taskId]);
 
   useEffect(() => {
     fetchDesignThinkingData();
-  }, [taskId]);
+  }, [fetchDesignThinkingData]);
 
   const saveDesignThinkingData = async () => {
     try {
@@ -114,23 +113,30 @@ const DesignThinkingSidebar = ({ taskId }) => {
   return (
     <div className="design-thinking-sidebar">
       <h2 className="sidebar-title">Proceso de Design Thinking</h2>
-      
       <div className="design-thinking-flow">
         {sections.map((section, index) => (
           <div className={`flow-step ${section.currentState}`} key={index}>
             <div className="step-state-circle">
-            <div className={`step-state ${section.currentState === 'Hecho' ? 'step-state-green' : (section.currentState === 'En Progreso' ? 'step-state-yellow' : 'step-state-red')}`}></div>
+              <div className={`step-state ${
+                section.currentState === 'Hecho'
+                  ? 'step-state-green'
+                  : section.currentState === 'En Progreso'
+                    ? 'step-state-yellow'
+                    : 'step-state-red'
+              }`}></div>
             </div>
             <div className="step-content">
-              <p className="step-title" onClick={() => toggleSection(index)}>{section.title}</p>
+              <p className="step-title" onClick={() => toggleSection(index)}>
+                {section.title}
+              </p>
               {section.expanded && (
                 <div className="step-details">
-<ReactQuill
-  className="step-input"
-  value={section.text}
-  onChange={(value) => handleInputChange(index, value)}
-  placeholder="Añadir notas..."
-/>
+                  <ReactQuill
+                    className="step-input"
+                    value={section.text}
+                    onChange={(value) => handleInputChange(index, value)}
+                    placeholder="Añadir notas..."
+                  />
                   <select
                     className="step-select"
                     value={section.currentState}
@@ -146,7 +152,9 @@ const DesignThinkingSidebar = ({ taskId }) => {
             </div>
           </div>
         ))}
-              <button className="step-button" onClick={saveDesignThinkingData}>Guardar</button>
+        <button className="step-button" onClick={saveDesignThinkingData}>
+          Guardar
+        </button>
       </div>
     </div>
   );
