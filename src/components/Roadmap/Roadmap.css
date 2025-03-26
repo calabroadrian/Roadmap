@@ -1,0 +1,166 @@
+.to-do {
+  background-color: #F6E3CE !important;
+}
+
+.in-progress {
+  background-color: #C9E4CA !important;
+}
+
+.done {
+  background-color: #65f6b5 !important;
+}
+
+.roadmap-column-header h2 {
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.roadmap-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.roadmap-filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.roadmap-filters label {
+  margin-right: 10px;
+}
+
+.roadmap-filters select {
+  width: 200px;
+}
+
+.roadmap-columns {
+  display: flex;
+  overflow-x: auto;
+}
+
+.roadmap-column {
+  flex-grow: 1;
+  padding: 10px;
+}
+
+.roadmap-column-header {
+  background-color: #f2f2f2;
+  padding: 5px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.item-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 1% 1% 1% 3%;
+}
+
+.item-description {
+  padding: 1% 1% 1% 3%;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.item-details {
+  padding-left: 3%;
+}
+
+.item-assignee {
+  font-size: 14px;
+  color: #555;
+}
+
+.item-priority {
+  font-size: 14px;
+  color: #555;
+  font-weight: bold;
+}
+
+.item-tag {
+  display: inline-block;
+  margin-right: 1%;
+  margin-bottom: 1%;
+  padding: 4px 8px;
+  background-color: #e0d268;
+  color: #333;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.item-tag:empty {
+  padding: 0;
+}
+
+.item-tags {
+  margin-left: 3%;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.filter-section label {
+  margin-right: 10px;
+}
+
+.roadmap-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 33.33%;
+}
+
+.roadmap-filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.roadmap-filters label {
+  margin-right: 10px;
+}
+
+.roadmap-filters select {
+  width: 200px;
+}
+
+.roadmap-columns {
+  display: flex;
+  overflow-x: auto;
+}
+
+.roadmap-column {
+  flex-grow: 1;
+  padding: 10px;
+}
+
+.roadmap-column-header {
+  background-color: #f2f2f2;
+  padding: 5px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.roadmap-column ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.roadmap-item {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.roadmap-item.selected {
+  background-color: #c7e2f7;
+}
