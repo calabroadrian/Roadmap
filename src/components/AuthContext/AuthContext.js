@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithLinkedIn = () => {
     // Obtener las variables de entorno del archivo .env
     const clientId = '780h542vy6ljrw';
-    const redirectUri = 'https://roadmap-theta.vercel.app/linkedin/callback';
+    const redirectUri = 'http://localhost:3000/linkedin/callback';
     const state = 'foobar';
     const scope = 'openid profile w_member_social email';
 

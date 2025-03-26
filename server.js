@@ -26,7 +26,7 @@ app.get('/linkedin/callback', async (req, res) => {
       params: {
         grant_type: 'authorization_code',
         code: authorizationCode,
-        redirect_uri: 'https://roadmap-theta.vercel.app/linkedin/callback', // Cambia esto por tu URI
+        redirect_uri: 'http://localhost:3000/linkedin/callback', // Cambia esto por tu URI
         client_id: '780h542vy6ljrw', // Tu Client ID
         client_secret: 'acXNvf8Kjak9ya3L', // Tu Client Secret
       },
