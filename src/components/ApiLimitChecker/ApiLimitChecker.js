@@ -6,7 +6,8 @@ const API_LIMIT_PER_MINUTE = 100;
 
 const ApiLimitChecker = ({ children }) => {
   const [apiLimit, setApiLimit] = useState(API_LIMIT_PER_MINUTE);
-  const [lastUpdateMinute, setLastUpdateMinute] = useState(null);
+  const [, setLastUpdateMinute] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {

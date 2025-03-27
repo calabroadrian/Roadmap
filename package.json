@@ -43,7 +43,8 @@
   "server": "nodemon server.js",
   "build": "react-app-rewired build",
   "test": "react-app-rewired test",
-  "eject": "react-app-rewired eject"
+  "eject": "react-app-rewired eject",
+  "lint": "eslint src --ext .js,.jsx"
 }
 ,
   "eslintConfig": {

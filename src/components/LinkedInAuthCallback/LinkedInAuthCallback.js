@@ -1,25 +1,14 @@
-import React, { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Importamos useNavigate
+import React, { useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const LinkedInAuthCallback = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
-
-    if (code && state === 'foobar') {
-      // Realiza la solicitud para obtener el token de acceso desde tu servidor
-      fetchAccessToken(code, state);
-    }
-  }, [location]);
-
-  const fetchAccessToken = async (code, state) => {
+  const fetchAccessToken = useCallback(async (code, state) => {
     try {
       const response = await fetch(`http://localhost:3001/linkedin/callback?code=${code}&state=${state}`, {
-        method: 'GET',  // Cambia esto a 'GET'
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -31,16 +20,22 @@ const LinkedInAuthCallback = () => {
 
       const data = await response.json();
       console.log('Access token:', data.accessToken);
-      // Aquí puedes almacenar el token y realizar más acciones
       localStorage.setItem('user', data.accessToken);
-      // Redirige al usuario a la pantalla principal o dashboard
       navigate('/');
     } catch (error) {
       console.error('Error fetching access token:', error);
     }
-  };
+  }, [navigate]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
 
+    if (code && state === 'foobar') {
+      fetchAccessToken(code, state);
+    }
+  }, [location, fetchAccessToken]);
 
   return (
     <div>

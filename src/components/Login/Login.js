@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Container, Typography, Box } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
 import { useAuth } from '../AuthContext/AuthContext';
 import LinkedInLoginButton from '../LinkedInLoginButton/LinkedInLoginButton'; // Botón personalizado de LinkedIn
 

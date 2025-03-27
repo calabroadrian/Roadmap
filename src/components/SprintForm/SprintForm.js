@@ -119,8 +119,6 @@ function SprintForm({ onCloseModal }) {
       });
       await doc.loadInfo();
 
-      const sheet = doc.sheetsByTitle['Sprints'];
-
       const sprintToDelete = sprints.find((sprint) => sprint.ID === selectedSprintId);
       if (sprintToDelete) {
         await sprintToDelete.delete();
