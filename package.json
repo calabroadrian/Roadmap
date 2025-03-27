@@ -36,7 +36,6 @@
     "styled-components": "^5.3.9",
     "util": "^0.12.5",
     "web-vitals": "^2.1.4",
-    "react-app-rewired": "^2.2.1",
     "yarn": "^1.22.19"
   },
   "scripts": {
