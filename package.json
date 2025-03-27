@@ -42,7 +42,7 @@
   "scripts": {
     "start": "serve -s build",
     "server": "node server.js",
-    "build": "react-app-rewired build",
+    "build": "npx react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "lint": "eslint src --ext .js,.jsx"
