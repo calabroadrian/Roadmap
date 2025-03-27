@@ -85,29 +85,27 @@ const DesignThinkingSidebar = ({ taskId }) => {
   };
 
   const toggleSection = (index) => {
-    const updatedSections = sections.map((section, i) => {
-      if (i === index) {
-        return { ...section, expanded: !section.expanded };
-      }
-      return section;
-    });
-    setSections(updatedSections);
+    setSections(prevSections =>
+      prevSections.map((section, i) =>
+        i === index ? { ...section, expanded: !section.expanded } : section
+      )
+    );
   };
 
   const handleInputChange = (index, value) => {
-    const updatedSections = [...sections];
-    updatedSections[index].text = value;
-    setSections(updatedSections);
+    setSections(prevSections => {
+      const updatedSections = [...prevSections];
+      updatedSections[index].text = value;
+      return updatedSections;
+    });
   };
 
   const handleStateChange = (index, newState) => {
-    const updatedSections = sections.map((section, i) => {
-      if (i === index) {
-        return { ...section, currentState: newState };
-      }
-      return section;
-    });
-    setSections(updatedSections);
+    setSections(prevSections =>
+      prevSections.map((section, i) =>
+        i === index ? { ...section, currentState: newState } : section
+      )
+    );
   };
 
   return (
