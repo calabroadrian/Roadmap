@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
-const cors = require('cors'); // Importa el paquete cors
+const cors = require('cors');
+const path = require('path'); // Importa path para servir archivos estáticos
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -11,11 +12,13 @@ app.use(express.json());
 // Configuración de CORS
 const corsOptions = {
   origin: 'https://roadmap-uo7v.onrender.com', // Permitir solicitudes desde este origen
-  methods: ['GET', 'POST'], // Métodos permitidos
-  credentials: true, // Si estás utilizando cookies o credenciales
+  methods: ['GET', 'POST'],
+  credentials: true,
 };
+app.use(cors(corsOptions));
 
-app.use(cors(corsOptions)); // Usa la configuración de CORS
+// 🔹 Sirve los archivos estáticos del frontend desde la carpeta "build"
+app.use(express.static(path.join(__dirname, 'build')));
 
 // Ruta para manejar la callback de LinkedIn
 app.get('/linkedin/callback', async (req, res) => {
@@ -26,21 +29,25 @@ app.get('/linkedin/callback', async (req, res) => {
       params: {
         grant_type: 'authorization_code',
         code: authorizationCode,
-        redirect_uri: process.env.REACT_APP_LINKEDIN_REDIRECT_URI, // Cambia esto por tu URI
-        client_id: '780h542vy6ljrw', // Tu Client ID
-        client_secret: 'acXNvf8Kjak9ya3L', // Tu Client Secret
+        redirect_uri: process.env.REACT_APP_LINKEDIN_REDIRECT_URI,
+        client_id: '780h542vy6ljrw',
+        client_secret: 'acXNvf8Kjak9ya3L',
       },
     });
 
     const accessToken = response.data.access_token;
-    // Aquí puedes hacer lo que necesites con el accessToken
     res.json({ accessToken });
   } catch (error) {
     res.status(500).json({ error: 'Error exchanging authorization code for access token' });
   }
 });
 
+// 🔹 Para cualquier otra ruta, devolver "index.html" (para React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
 // Inicia el servidor
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
