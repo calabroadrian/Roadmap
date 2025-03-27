@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithLinkedIn = () => {
     // Obtener las variables de entorno del archivo .env
     const clientId = '780h542vy6ljrw';
-    const redirectUri = 'http://localhost:3000/linkedin/callback';
+    const redirectUri = process.env.REACT_APP_LINKEDIN_REDIRECT_URI;
     const state = 'foobar';
     const scope = 'openid profile w_member_social email';
 

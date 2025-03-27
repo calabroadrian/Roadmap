@@ -10,9 +10,11 @@ app.use(express.json());
 
 // Configuración de CORS
 const corsOptions = {
-  origin: 'http://localhost:3000', // Permitir solicitudes desde este origen
-  methods: ['GET', 'POST'], // Métodos permitidos
-  credentials: true, // Si estás utilizando cookies o credenciales
+  origin: process.env.NODE_ENV === 'production'
+    ? 'https://roadflow.netlify.app/'
+    : 'http://localhost:3000',
+  methods: ['GET', 'POST'],
+  credentials: true,
 };
 
 app.use(cors(corsOptions)); // Usa la configuración de CORS
@@ -26,7 +28,7 @@ app.get('/linkedin/callback', async (req, res) => {
       params: {
         grant_type: 'authorization_code',
         code: authorizationCode,
-        redirect_uri: 'http://localhost:3000/linkedin/callback', // Cambia esto por tu URI
+        redirect_uri: process.env.REACT_APP_LINKEDIN_REDIRECT_URI, // Cambia esto por tu URI
         client_id: '780h542vy6ljrw', // Tu Client ID
         client_secret: 'acXNvf8Kjak9ya3L', // Tu Client Secret
       },
