@@ -17,6 +17,7 @@ module.exports = function override(config, env) {
       stream: require.resolve('stream-browserify'),
       zlib: require.resolve('browserify-zlib'),
       'https-proxy-agent': require.resolve('https-proxy-agent'),
+      vm: require.resolve('vm-browserify'), // Agregar polyfill para 'vm'
     },
   };
 
