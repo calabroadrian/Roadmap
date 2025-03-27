@@ -10,11 +10,9 @@ app.use(express.json());
 
 // Configuración de CORS
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? 'https://roadmap-uo7v.onrender.com/'
-    : 'http://localhost:3000',
-  methods: ['GET', 'POST'],
-  credentials: true,
+  origin: 'https://roadmap-uo7v.onrender.com', // Permitir solicitudes desde este origen
+  methods: ['GET', 'POST'], // Métodos permitidos
+  credentials: true, // Si estás utilizando cookies o credenciales
 };
 
 app.use(cors(corsOptions)); // Usa la configuración de CORS
