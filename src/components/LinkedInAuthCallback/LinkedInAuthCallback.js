@@ -7,7 +7,7 @@ const LinkedInAuthCallback = () => {
 
   const fetchAccessToken = useCallback(async (code, state) => {
     try {
-      const response = await fetch(`http://roadflow.netlify.app:3001/linkedin/callback?code=${code}&state=${state}`, {
+      const response = await fetch(`https://roadflow.netlify.app:3001/linkedin/callback?code=${code}&state=${state}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
