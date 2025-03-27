@@ -11,7 +11,7 @@ app.use(express.json());
 // Configuración de CORS
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://roadflow.netlify.app'
+    ? 'https://roadmap-uo7v.onrender.com/'
     : 'http://localhost:3000',
   methods: ['GET', 'POST'],
   credentials: true,
