@@ -40,8 +40,8 @@
   },
   "scripts": {
     "start": "concurrently \"react-app-rewired start\" \"nodemon server.js\"",
-    "server": "nodemon server.js",
-    "build": "react-app-rewired build",
+    "server": "node server.js",
+    "build": "react-scripts build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "lint": "eslint src --ext .js,.jsx"
