@@ -33,15 +33,16 @@
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
+    "serve": "^14.2.4",
     "styled-components": "^5.3.9",
     "util": "^0.12.5",
     "web-vitals": "^2.1.4",
     "yarn": "^1.22.19"
   },
   "scripts": {
-    "start": "concurrently \"react-app-rewired start\" \"nodemon server.js\"",
+    "start": "serve -s build",
     "server": "node server.js",
-    "build": "react-scripts build",
+    "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
     "lint": "eslint src --ext .js,.jsx"
