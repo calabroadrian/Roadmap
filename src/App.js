@@ -8,6 +8,7 @@ import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Modal from './components/Modal/Modal';
 import Form from './components/Form/Form';
 import SprintForm from './components/SprintForm/SprintForm';
+import RoadmapContainer from './components/Roadmap/RoadmapContainer';
 import './App.css';
 
 function App() {
@@ -96,12 +97,9 @@ function App() {
         </button>
       </div>
 
-      <RoadmapDataSheet
-        items={items}
-        onSelectItem={handleSelectItem}
-        onDeselectItem={handleDeselectItem}
-        onEditItem={handleSelectItem}
-      />
+      {/* RoadmapContainer maneja el Form y RoadmapDataSheet juntos */}
+      <RoadmapContainer />
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
           item={selectedItem}
