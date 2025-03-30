@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Re
 import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
-import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Modal from './components/Modal/Modal';
 import Form from './components/Form/Form';
 import SprintForm from './components/SprintForm/SprintForm';
