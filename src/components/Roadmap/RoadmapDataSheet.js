@@ -31,7 +31,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
             }, {});
           });
           parsedData.forEach(item => {
-            item.tags = item[headers[tagsColumnIndex]]; // O también puedes hacer: item.tags = (item[headers[tagsColumnIndex]] || "").split(',');
+            item.tags = item[headers[tagsColumnIndex]] || '';
           });
           setItems(parsedData);
           const distinctStatuses = [...new Set(parsedData.map(item => item.Estado))];
@@ -47,7 +47,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
     };
 
     fetchData();
-  }, [refreshTrigger]); // Se vuelve a ejecutar cuando cambia refreshTrigger
+  }, [refreshTrigger]); // Se vuelve a ejecutar cuando refreshTrigger cambia
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -88,19 +88,14 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
         {statuses.map((Estado) => (
           <Grid item xs={12} md={4} key={Estado}>
             <Paper elevation={0} sx={{ padding: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                   {Estado}
                 </Typography>
-                <Badge
-                  badgeContent={getTaskCountByStatus(Estado)}
-                  color="primary"
-                  sx={{ marginLeft: 1 }}
-                >
+                <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
                   <AssignmentIcon />
                 </Badge>
               </Box>
-
               {items.filter(item =>
                 item.Estado === Estado &&
                 (tabValue === 0 || item.Sprint === sprints[tabValue - 1])

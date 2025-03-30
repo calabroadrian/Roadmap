@@ -1,6 +1,6 @@
 // src/App.js
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Reemplaza Switch por Routes
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
@@ -17,33 +17,28 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  // Estado para refrescar el roadmap
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    const token = localStorage.getItem('user'); // Busca el token en localStorage
+    const token = localStorage.getItem('user');
     if (token) {
-      // Aquí podrías realizar alguna validación adicional o simplemente loguear
-      login(token); // Inicia sesión con el token
+      login(token);
     }
   }, [login]);
-  
 
   useEffect(() => {
     if (user && user.accessToken) {
-      localStorage.setItem('accessToken', user.accessToken); // Guarda el accessToken
+      localStorage.setItem('accessToken', user.accessToken);
     } else {
-      localStorage.removeItem('user'); // Elimina el accessToken si no hay usuario
+      localStorage.removeItem('user');
     }
   }, [user]);
-  
 
   const handleLogout = () => {
     logout();
     window.location.reload();
   };
-
-  if (!user) {
-    return <Login onLogin={loginWithLinkedIn} />;
-  }
 
   const handleAddItem = () => {
     setIsAddingItem(true);
@@ -77,6 +72,14 @@ function App() {
     setIsSprintFormOpen(true);
   };
 
+  // Función para refrescar el roadmap (se incrementa refreshTrigger)
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  if (!user) {
+    return <Login onLogin={loginWithLinkedIn} />;
+  }
 
   return (
     <div className="app">
@@ -96,12 +99,15 @@ function App() {
         </button>
       </div>
 
+      {/* Se pasa refreshTrigger para que RoadmapDataSheet refresque la data al cambiar */}
       <RoadmapDataSheet
         items={items}
         onSelectItem={handleSelectItem}
         onDeselectItem={handleDeselectItem}
         onEditItem={handleSelectItem}
+        refreshTrigger={refreshTrigger}
       />
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
           item={selectedItem}
@@ -109,10 +115,12 @@ function App() {
           onDeselectItem={handleDeselectItem}
           onUpdateItem={handleUpdateItem}
           onDeleteItem={handleDeleteItem}
-          onCloseModal={() => setIsModalOpen(false)}          
+          onCloseModal={() => setIsModalOpen(false)}
           isAddingItem={isAddingItem}
+          onRefresh={handleRefresh}  {/* Llama a la función para refrescar el roadmap */}
         />
       </Modal>
+
       {isSprintFormOpen && (
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
           <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
@@ -122,13 +130,12 @@ function App() {
   );
 }
 
-// Cambia Switch por Routes y ajusta las rutas
 const AppWithAuthProvider = () => (
   <AuthProvider>
     <Router>
       <Routes>
         <Route path="/linkedin/callback" element={<LinkedInAuthCallback />} />
-        <Route path="/" element={<App />} />
+        <Route path="/*" element={<App />} />
       </Routes>
     </Router>
   </AuthProvider>
