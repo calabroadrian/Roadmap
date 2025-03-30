@@ -1,7 +1,6 @@
     import { useState } from 'react';
     import RoadmapDataSheet from '../Roadmap/RoadmapDataSheet';
-    import Modal from '../Modal/Modal';
-    import Form from '../Form/Form';
+    import Form from '../components/Form/Form';
 
     function RoadmapContainer() {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -44,10 +43,7 @@
     return (
         <div>
         <RoadmapDataSheet 
-        items={items}
-            onSelectItem={handleSelectItem}
-            onDeselectItem={handleDeselectItem}
-            onEditItem={handleSelectItem}
+            /* otros props */
             refreshTrigger={refreshTrigger}
         />
 
