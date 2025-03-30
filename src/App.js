@@ -6,7 +6,7 @@ import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
-import RoadmapContainer from './components/Roadmap/RoadmapContainer';
+import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
 import './App.css';
 
 function App() {
