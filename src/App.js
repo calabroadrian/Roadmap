@@ -94,13 +94,6 @@ function App() {
           Sprint
         </button>
       </div>
-
-      <RoadmapContainer
-        items={items}
-        onSelectItem={handleSelectItem}
-        onDeselectItem={handleDeselectItem}
-        onEditItem={handleSelectItem}
-      />
       {/* RoadmapContainer maneja el Form y RoadmapDataSheet juntos */}
       <RoadmapContainer />
 

@@ -44,7 +44,10 @@
     return (
         <div>
         <RoadmapDataSheet 
-            /* otros props */
+        items={items}
+            onSelectItem={handleSelectItem}
+            onDeselectItem={handleDeselectItem}
+            onEditItem={handleSelectItem}
             refreshTrigger={refreshTrigger}
         />
 
