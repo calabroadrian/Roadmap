@@ -5,9 +5,8 @@ import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
 import Modal from './components/Modal/Modal';
-import Form from './components/Form/Form';
 import SprintForm from './components/SprintForm/SprintForm';
-import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
+import RoadmapContainer from './components/Roadmap/RoadmapContainer';
 import './App.css';
 
 function App() {
@@ -17,7 +16,6 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
   const [isAddingItem, setIsAddingItem] = useState(false);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem('user'); // Busca el token en localStorage
@@ -41,11 +39,6 @@ function App() {
     logout();
     window.location.reload();
   };
-
-    // Función para refrescar el roadmap (se incrementa refreshTrigger)
-    const handleRefresh = () => {
-      setRefreshTrigger(prev => prev + 1);
-    };
 
   if (!user) {
     return <Login onLogin={loginWithLinkedIn} />;
@@ -107,20 +100,10 @@ function App() {
         onSelectItem={handleSelectItem}
         onDeselectItem={handleDeselectItem}
         onEditItem={handleSelectItem}
-        refreshTrigger={refreshTrigger}
       />
+      {/* RoadmapContainer maneja el Form y RoadmapDataSheet juntos */}
+      <RoadmapContainer />
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Form
-          item={selectedItem}
-          onAddItem={handleAddItem}
-          onDeselectItem={handleDeselectItem}
-          onUpdateItem={handleUpdateItem}
-          onDeleteItem={handleDeleteItem}
-          onCloseModal={() => setIsModalOpen(false)}          
-          isAddingItem={isAddingItem}
-        />
-      </Modal>
       {isSprintFormOpen && (
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
           <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
