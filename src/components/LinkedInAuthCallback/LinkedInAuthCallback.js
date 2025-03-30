@@ -4,10 +4,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const LinkedInAuthCallback = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:3001";
 
   const fetchAccessToken = useCallback(async (code, state) => {
     try {
-      const response = await fetch(`https://roadmap-uo7v.onrender.com/linkedin/callback?code=${code}&state=${state}`, {
+      const response = await fetch(`${API_BASE_URL}/api/linkedin/callback?code=${code}&state=${state}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +26,7 @@ const LinkedInAuthCallback = () => {
     } catch (error) {
       console.error('Error fetching access token:', error);
     }
-  }, [navigate]);
+  }, [API_BASE_URL, navigate]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
