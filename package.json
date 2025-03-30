@@ -19,7 +19,6 @@
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "fs": "^0.0.1-security",
     "google-auth-library": "^8.7.0",
     "google-spreadsheet": "^3.3.0",
     "googleapis": "^114.0.0",
@@ -47,7 +46,6 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "concurrently \"react-app-rewired start\" \"nodemon server.js\"",
     "build": "npx react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-app-rewired eject",
