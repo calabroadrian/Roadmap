@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
 import Modal from './components/Modal/Modal';
+import Form from './components/Form/Form';
 import SprintForm from './components/SprintForm/SprintForm';
 import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
 import './App.css';
@@ -97,6 +98,17 @@ function App() {
       {/* RoadmapContainer maneja el Form y RoadmapDataSheet juntos */}
       <RoadmapContainer />
 
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Form
+          item={selectedItem}
+          onAddItem={handleAddItem}
+          onDeselectItem={handleDeselectItem}
+          onUpdateItem={handleUpdateItem}
+          onDeleteItem={handleDeleteItem}
+          onCloseModal={() => setIsModalOpen(false)}          
+          isAddingItem={isAddingItem}
+        />
+      </Modal>
       {isSprintFormOpen && (
         <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
           <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
