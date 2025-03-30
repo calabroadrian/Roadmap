@@ -11,24 +11,24 @@ app.use(express.json());
 
 // Configuración de CORS
 const corsOptions = {
-  origin: 'https://roadmap-uo7v.onrender.com', // Asegúrate de que coincida con el origen de tu cliente
+  origin: 'https://roadmap-uo7v.onrender.com',
   methods: ['GET', 'POST'],
   credentials: true,
 };
 app.use(cors(corsOptions));
 
-// Sirve los archivos estáticos del frontend (la carpeta "build")
+// Sirve los archivos estáticos del frontend (carpeta build)
 app.use(express.static(path.join(__dirname, 'build')));
 
-// Endpoint para manejar la callback de LinkedIn
-app.get('/linkedin/callback', async (req, res) => {
+// Endpoint API para la callback de LinkedIn
+app.get('/api/linkedin/callback', async (req, res) => {
   const authorizationCode = req.query.code;
   try {
     const response = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', null, {
       params: {
         grant_type: 'authorization_code',
         code: authorizationCode,
-        redirect_uri: process.env.REACT_APP_LINKEDIN_REDIRECT_URI, // Debe estar configurado en tus variables de entorno
+        redirect_uri: process.env.REACT_APP_LINKEDIN_REDIRECT_URI,
         client_id: '780h542vy6ljrw',
         client_secret: 'acXNvf8Kjak9ya3L',
       },
