@@ -29,7 +29,7 @@ const TAB_TESTING = "Testing";
 const TAB_DESIGN = "Diseño";
 const TAB_DEVELOPER = "Desarrollador";
 
-function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal }) {
+function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal, onRefresh }) {
   const [Id, setId] = useState('');
   const [Descripcion, setDescripcion] = useState('');
   const [Estado, setEstado] = useState('');
@@ -48,15 +48,12 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [activeTab, setActiveTab] = useState(TAB_GENERAL);
 
   useEffect(() => {
-    // Obtener el listado de usuarios de la hoja de Google Sheets
+    // Obtener el listado de usuarios
     const fetchUserList = async () => {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY,
-      });
+      await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
       await doc.loadInfo();
-      const sheet = doc.sheetsByIndex[1]; // Suponiendo que el listado de usuarios está en la segunda hoja
+      const sheet = doc.sheetsByIndex[1]; // Supone que los usuarios están en la segunda hoja
       const rows = await sheet.getRows();
       const users = rows.map(row => row.NombreUsuario);
       setUserList(users);
@@ -64,12 +61,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
     const fetchPriorityList = async () => {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY,
-      });
+      await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
       await doc.loadInfo();
-      const sheet = doc.sheetsByIndex[1]; // Suponiendo que el listado de prioridades está en la segunda hoja
+      const sheet = doc.sheetsByIndex[1]; // Supone que las prioridades están en la segunda hoja
       const rows = await sheet.getRows();
       const priorities = rows.map(row => row.Prioridad);
       setPriorityList(priorities);
@@ -77,12 +71,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
     const fetchSprintList = async () => {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY,
-      });
+      await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
       await doc.loadInfo();
-      const sheet = doc.sheetsByIndex[2]; // Suponiendo que el listado de Sprint está en la tercera hoja
+      const sheet = doc.sheetsByIndex[2]; // Supone que los sprints están en la tercera hoja
       const rows = await sheet.getRows();
       const sprints = rows.map(row => row.Nombre);
       setSprintList(sprints);
@@ -104,7 +95,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setPrioridad(item.Prioridad);
       setSprint(item.Sprint);
       setIsNewItem(false);
-      setIsIdEditable(false); // Deshabilitar el campo de ID
+      setIsIdEditable(false);
     } else {
       setId('');
       setDescripcion('');
@@ -114,30 +105,25 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setTags([]);
       setSprint('');
       setIsNewItem(true);
-      setIsIdEditable(true); // Habilitar el campo de ID
+      setIsIdEditable(true);
     }
   }, [item]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) {
       console.error('Faltan campos obligatorios.');
       return;
     }
 
     const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-    await doc.useServiceAccountAuth({
-      client_email: CLIENT_EMAIL,
-      private_key: PRIVATE_KEY,
-    });
+    await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
 
     if (isNewItem) {
       const rows = await sheet.getRows();
       const exists = rows.some(row => row.Id === Id);
-
       if (exists) {
         console.error('El ID ya existe en el sheet. Por favor, elige otro ID único.');
         setShowIdExistsError(true);
@@ -171,7 +157,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
     } else {
       const rows = await sheet.getRows();
       const rowToUpdate = rows.find(row => row.Id === item.Id);
-
       if (!rowToUpdate) {
         console.error('No se encontró el elemento a actualizar en el sheet.');
         return;
@@ -185,7 +170,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       rowToUpdate.UsuarioAsignado = UsuarioAsignado;
       rowToUpdate.Prioridad = Prioridad;
       rowToUpdate.Sprint = Sprint;
-
       await rowToUpdate.save();
 
       onUpdateItem({
@@ -201,9 +185,9 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       });
     }
 
-    onCloseModal();
+    onCloseModal();          // Cierra el modal
+    onRefresh();             // Llama al callback para refrescar la data en el roadmap
     console.log('Formulario enviado');
-    window.location.reload();
   };
 
   const addTag = (tag) => {
@@ -232,18 +216,15 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const handleDelete = async () => {
     onDeleteItem(item);
     const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-    await doc.useServiceAccountAuth({
-      client_email: CLIENT_EMAIL,
-      private_key: PRIVATE_KEY,
-    });
+    await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
     const rows = await sheet.getRows();
     const rowToDelete = rows.find(row => row._rawData[0] === item.Id);
     await rowToDelete.delete();
     onDeselectItem();
-    window.location.reload();
     onCloseModal();
+    onRefresh();
   };
 
   return (
@@ -412,7 +393,6 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           {activeTab === TAB_DESIGN && (
             <Grid item xs={12}>
               <Typography variant="h6">Contenido para Diseño</Typography>
-              {/* Se muestra el componente DesignThinkingSidebar en la pestaña de Diseño */}
               <DesignThinkingSidebar taskId={Id || (item ? item.Id : '')} />
             </Grid>
           )}
