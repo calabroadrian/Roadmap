@@ -8,7 +8,7 @@ import RoadmapDataSheet from './components/Roadmap/RoadmapDataSheet';
 import Modal from './components/Modal/Modal';
 import Form from './components/Form/Form';
 import SprintForm from './components/SprintForm/SprintForm';
-import RoadmapContainer from './components/Roadmap/RoadmapContainer';
+import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
 import './App.css';
 
 function App() {
