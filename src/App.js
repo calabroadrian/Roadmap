@@ -97,14 +97,12 @@ function App() {
         </button>
       </div>
 
-      <RoadmapDataSheet
+      <RoadmapContainer
         items={items}
         onSelectItem={handleSelectItem}
         onDeselectItem={handleDeselectItem}
         onEditItem={handleSelectItem}
       />
-      {/* RoadmapContainer maneja el Form y RoadmapDataSheet juntos */}
-      <RoadmapContainer />
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
