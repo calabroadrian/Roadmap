@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import config from '../../config/config';
+import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
