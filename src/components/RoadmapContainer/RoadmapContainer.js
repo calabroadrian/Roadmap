@@ -15,18 +15,6 @@
             /* otros props */
             refreshTrigger={refreshTrigger}
         />
-
-<   Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <Form
-          item={selectedItem}
-          onAddItem={handleAddItem}
-          onDeselectItem={handleDeselectItem}
-          onUpdateItem={handleUpdateItem}
-          onDeleteItem={handleDeleteItem}
-          onCloseModal={() => setIsModalOpen(false)}          
-          isAddingItem={isAddingItem}
-        />
-      </Modal>
         </div>
     );
     }
