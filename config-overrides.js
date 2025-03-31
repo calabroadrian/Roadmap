@@ -18,6 +18,7 @@ module.exports = function override(config, env) {
       zlib: require.resolve('browserify-zlib'),
       'https-proxy-agent': require.resolve('https-proxy-agent'),
       vm: require.resolve('vm-browserify'), // Agregar polyfill para 'vm'
+      "process": require.resolve("process/browser.js"),  // Agregamos la extensión .js
     },
   };
 
