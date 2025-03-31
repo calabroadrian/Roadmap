@@ -1,30 +1,25 @@
 const webpack = require('webpack');
-const path = require('path');
 
 module.exports = function override(config, env) {
-  config.resolve = {
-    ...config.resolve,
-    fallback: {
-      path: require.resolve('path-browserify'),
-      fs: false,
-      net: false,
-      tls: false,
-      child_process: false,
-      querystring: require.resolve('querystring-es3'),
-      http: require.resolve('stream-http'),
-      https: require.resolve('https-browserify'),
-      crypto: require.resolve('crypto-browserify'),
-      stream: require.resolve('stream-browserify'),
-      zlib: require.resolve('browserify-zlib'),
-      'https-proxy-agent': require.resolve('https-proxy-agent'),
-      vm: require.resolve('vm-browserify'), // Agregar polyfill para 'vm'
-      "process": require.resolve("process/browser.js"),  // Agregamos la extensión .js
-    },
+  config.resolve.fallback = {
+    "https": require.resolve("https-browserify"),
+    "http": require.resolve("stream-http"),
+    "buffer": require.resolve("buffer/"),
+    "crypto": require.resolve("crypto-browserify"),
+    "util": require.resolve("util/"),
+    "path": require.resolve("path-browserify"),
+    "os": require.resolve("os-browserify/browser"),
+    "stream": require.resolve("stream-browserify"),
+    "zlib": require.resolve("browserify-zlib"),
+    "child_process": false,
+    "https-proxy-agent": require.resolve("https-proxy-agent"),
+    "querystring": require.resolve("querystring-es3"),
+    "process": require.resolve("process/browser.js")  // Agregamos la extensión .js
   };
 
   config.plugins.push(
     new webpack.ProvidePlugin({
-      process: 'process/browser',
+      process: 'process/browser.js',  // Usamos la ruta con extensión
       Buffer: ['buffer', 'Buffer'],
     })
   );
