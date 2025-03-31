@@ -4,7 +4,7 @@ import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip,
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import config from '../../config/config';
 import DesignThinkingSidebar from '../DesignThinkingSidebar/DesignThinkingSidebar';
-import GSTCTimeline from './GSTCTimeline';
+import GSTCTimeline from '../GSTCTimeline/GSTCTimeline';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
