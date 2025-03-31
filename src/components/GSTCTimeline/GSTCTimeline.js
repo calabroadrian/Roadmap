@@ -3,20 +3,29 @@ import React, { useMemo } from 'react';
 import GSTC from 'gantt-schedule-timeline-calendar';
 import 'gantt-schedule-timeline-calendar/dist/style.css';
 
+/**
+ * Se espera que tasks sea un arreglo de objetos con:
+ * {
+ *   id: string | number,
+ *   title: string,
+ *   startDate: string (ISO),
+ *   endDate: string (ISO),
+ *   progress: number (opcional)
+ * }
+ */
 const GSTCTimeline = ({ tasks }) => {
-  // Transforma las tareas al formato que GSTC espera:
+  // Transformamos las tareas en items para GSTC
   const items = useMemo(() => {
     return tasks.reduce((acc, task) => {
       acc[task.id] = {
         id: task.id,
         label: task.title,
-        // Puedes agregar otras propiedades si es necesario para personalizar el render
       };
       return acc;
     }, {});
   }, [tasks]);
 
-  // Calcula el rango de tiempo usando las fechas de inicio y fin de las tareas:
+  // Calculamos el rango de tiempo
   const timeRange = useMemo(() => {
     if (tasks.length === 0) {
       const now = Date.now();
@@ -32,14 +41,12 @@ const GSTCTimeline = ({ tasks }) => {
 
   // Configuración básica de GSTC
   const config = useMemo(() => ({
-    list: {
-      items,
-    },
+    list: { items },
     chart: {
       items: Object.keys(items),
       time: timeRange,
     },
-    plugins: {} // Agregamos plugins como objeto vacío para evitar errores de suscripción
+    plugins: {} // Para evitar errores de suscripción
   }), [items, timeRange]);
 
   return (
