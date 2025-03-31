@@ -19,6 +19,7 @@
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "gantt-schedule-timeline-calendar": "^3.40.5",
     "google-auth-library": "^8.7.0",
     "google-spreadsheet": "^3.3.0",
     "googleapis": "^114.0.0",

@@ -1,10 +1,12 @@
-// src/components/RoadmapDataSheet.js
 import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge, Button } from '@mui/material';
+import { 
+  Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, 
+  Tooltip, Tabs, Tab, Badge, Button 
+} from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import config from '../../config/config';
 import DesignThinkingSidebar from '../DesignThinkingSidebar/DesignThinkingSidebar';
-import GSTCTimeline from '../GSTCTimeline/GSTCTimeline';
+import GSTCTimeline from '../GSTCTimeline/GSTCTimeline'; // Importa el componente horizontal
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
@@ -15,7 +17,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, o
   const [statuses, setStatuses] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tabValue, setTabValue] = useState(0);
-  const [viewType, setViewType] = useState('vertical'); // 'vertical' o 'horizontal'
+  const [viewType, setViewType] = useState('vertical'); // Puede ser 'vertical' o 'horizontal'
 
   useEffect(() => {
     const fetchData = async () => {

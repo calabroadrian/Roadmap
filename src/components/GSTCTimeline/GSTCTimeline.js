@@ -1,46 +1,56 @@
 // src/components/GSTCTimeline.js
 import React, { useMemo } from 'react';
-import GSTC from 'gstc-react';
-import 'gstc/dist/style.css';
+import GSTC from 'gantt-schedule-timeline-calendar'; // Importa el componente principal del paquete
+import 'gantt-schedule-timeline-calendar/dist/style.css'; // Asegúrate de usar la ruta correcta según el paquete
 
+/**
+ * Se espera que tasks sea un arreglo de objetos con las siguientes propiedades:
+ * {
+ *   id: string | number,
+ *   title: string,
+ *   startDate: string (fecha en formato ISO),
+ *   endDate: string (fecha en formato ISO),
+ *   progress: number (opcional)
+ * }
+ */
 const GSTCTimeline = ({ tasks }) => {
-  // Transformamos las tareas a un formato simple para GSTC
-  // Se espera que cada tarea tenga: id, Titulo, startDate, endDate, progress (opcional)
-  const items = useMemo(() => {
-    return tasks.reduce((acc, task) => {
-      acc[task.Id] = {
-        id: task.Id,
-        label: task.Titulo,
-        // Puedes agregar propiedades adicionales para personalizar el render
+  // Transformamos las tareas al formato que GSTC espera.
+  // La configuración depende de cómo desees mostrar la información; aquí usamos una configuración básica.
+  const config = useMemo(() => {
+    // Creamos la lista de items (tareas)
+    const items = tasks.reduce((acc, task) => {
+      acc[task.id] = {
+        id: task.id,
+        label: task.title,
       };
       return acc;
     }, {});
-  }, [tasks]);
 
-  // Determinar el rango de tiempo usando las fechas de inicio y fin de las tareas
-  const timeRange = useMemo(() => {
-    if (tasks.length === 0) {
+    // Determinar el rango de tiempo usando las fechas de inicio y fin de las tareas.
+    let startTimes = tasks.map(task => new Date(task.startDate).getTime());
+    let endTimes = tasks.map(task => new Date(task.endDate).getTime());
+    if (startTimes.length === 0 || endTimes.length === 0) {
       const now = Date.now();
-      return { start: now, end: now + 30 * 24 * 60 * 60 * 1000 }; // 30 días desde ahora
+      startTimes = [now];
+      endTimes = [now + 30 * 24 * 60 * 60 * 1000];
     }
-    const startDates = tasks.map(task => new Date(task.startDate).getTime());
-    const endDates = tasks.map(task => new Date(task.endDate).getTime());
+    const timeRange = {
+      start: Math.min(...startTimes),
+      end: Math.max(...endTimes),
+    };
+
     return {
-      start: Math.min(...startDates),
-      end: Math.max(...endDates),
+      // Configuración de la lista de items (tareas)
+      list: {
+        items,
+      },
+      // Configuración del chart (timeline)
+      chart: {
+        items: Object.keys(items),
+        time: timeRange,
+      },
     };
   }, [tasks]);
-
-  // Configuración básica de GSTC
-  const config = useMemo(() => ({
-    list: {
-      items,
-    },
-    chart: {
-      items: Object.keys(items),
-      time: timeRange,
-    },
-  }), [items, timeRange]);
 
   return (
     <div style={{ height: '500px' }}>
