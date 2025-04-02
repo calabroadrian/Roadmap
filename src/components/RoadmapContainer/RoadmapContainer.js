@@ -1,8 +1,8 @@
 // src/components/RoadmapContainer.js
-import { useState } from 'react';
-import RoadmapDataSheet from '../Roadmap/RoadmapDataSheet';
-import Modal from '../Modal/Modal';
-import Form from '../Form/Form';
+import { useState } from "react";
+import RoadmapDataSheet from "../Roadmap/RoadmapDataSheet";
+import Modal from "../Modal/Modal";
+import Form from "../Form/Form";
 
 function RoadmapContainer() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -12,7 +12,7 @@ function RoadmapContainer() {
   const [items, setItems] = useState([]);
 
   const refreshRoadmap = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleAddItem = () => {

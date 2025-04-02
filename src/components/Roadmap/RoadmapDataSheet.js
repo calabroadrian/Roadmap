@@ -1,9 +1,9 @@
 // src/components/RoadmapDataSheet.js
-import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge, Button } from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import config from '../../config/config';
-import GSTCTimeline from '../GSTCTimeline/GSTCTimeline';
+import { useState, useEffect } from "react";
+import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge } from "@mui/material";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import config from "../../config/config";
+import GSTCTimeline from "../GSTCTimeline/GSTCTimeline";
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
@@ -24,28 +24,27 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         const data = await response.json();
         if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
           const headers = data.values[0];
-          const tagsColumnIndex = headers.indexOf('Tags');
-          const sprintColumnIndex = headers.indexOf('Sprint');
+          const tagsColumnIndex = headers.indexOf("Tags");
+          const sprintColumnIndex = headers.indexOf("Sprint");
           const parsedData = data.values.slice(1).map(row => {
             return headers.reduce((obj, key, index) => {
-              obj[key] = row[index] || '';
+              obj[key] = row[index] || "";
               return obj;
             }, {});
           });
           parsedData.forEach(item => {
-            item.tags = item[headers[tagsColumnIndex]] || '';
+            item.tags = item[headers[tagsColumnIndex]] || "";
           });
           setItems(parsedData);
           setStatuses([...new Set(parsedData.map(item => item.Estado))]);
           setSprints([...new Set(parsedData.map(item => item[headers[sprintColumnIndex]]))]);
         } else {
-          console.error('No se encontraron datos válidos en la respuesta API');
+          console.error("No se encontraron datos válidos en la respuesta API");
         }
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchData();
   }, [refreshTrigger]);
 
@@ -55,24 +54,31 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 
   const getBackgroundColor = (Estado) => {
     switch (Estado) {
-      case 'Nuevo': return '#F9D8C7';
-      case 'En progreso': return '#FFF3C8';
-      case 'Hecho': return '#65f6b5';
-      default: return 'white';
+      case "Nuevo":
+        return "#F9D8C7";
+      case "En progreso":
+        return "#FFF3C8";
+      case "Hecho":
+        return "#65f6b5";
+      default:
+        return "white";
     }
   };
 
   const getTaskCountByStatus = (Estado) => {
-    return items.filter((item) =>
-      item.Estado === Estado &&
-      (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
+    return items.filter(
+      (item) =>
+        item.Estado === Estado &&
+        (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
     ).length;
   };
 
   return (
     <Box sx={{ padding: 2 }}>
       {/* Vista Vertical */}
-      <Typography variant="h5" gutterBottom>Vista Vertical</Typography>
+      <Typography variant="h5" gutterBottom>
+        Vista Vertical
+      </Typography>
       <Tabs
         value={tabValue}
         onChange={handleTabChange}
@@ -89,39 +95,57 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         {statuses.map((Estado) => (
           <Grid item xs={12} md={4} key={Estado}>
             <Paper elevation={0} sx={{ padding: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>{Estado}</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between"
+                }}
+              >
+                <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                  {Estado}
+                </Typography>
                 <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
                   <AssignmentIcon />
                 </Badge>
               </Box>
-              {items.filter(item =>
-                item.Estado === Estado &&
-                (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
-              ).map(item => (
-                <Card
-                  key={item.Id}
-                  sx={{ backgroundColor: getBackgroundColor(item.Estado), marginBottom: 2, cursor: 'pointer', '&:hover': { backgroundColor: '#f0f0f0' } }}
-                  onClick={() => onSelectItem(item)}
-                  onDoubleClick={() => onEditItem(item)}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 1 }}>
-                      <Typography variant="subtitle1" fontWeight="bold">{item.Titulo}</Typography>
-                      <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
-                        <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
-                      </Tooltip>
-                    </Box>
-                    <Typography variant="body2" dangerouslySetInnerHTML={{ __html: item.Descripcion }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
-                      {item.tags.split(',').map(tag => (
-                        <Chip key={tag} label={tag.trim()} sx={{ marginRight: 1, marginBottom: 0 }} />
-                      ))}
-                      <Typography variant="body2">{item.Prioridad}</Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
+              {items
+                .filter(
+                  (item) =>
+                    item.Estado === Estado &&
+                    (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
+                )
+                .map(item => (
+                  <Card
+                    key={item.Id}
+                    sx={{
+                      backgroundColor: getBackgroundColor(item.Estado),
+                      marginBottom: 2,
+                      cursor: "pointer",
+                      "&:hover": { backgroundColor: "#f0f0f0" }
+                    }}
+                    onClick={() => onSelectItem(item)}
+                    onDoubleClick={() => onEditItem(item)}
+                  >
+                    <CardContent>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
+                        <Typography variant="subtitle1" fontWeight="bold">
+                          {item.Titulo}
+                        </Typography>
+                        <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
+                          <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
+                        </Tooltip>
+                      </Box>
+                      <Typography variant="body2" dangerouslySetInnerHTML={{ __html: item.Descripcion }} />
+                      <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
+                        {item.tags.split(",").map(tag => (
+                          <Chip key={tag} label={tag.trim()} sx={{ marginRight: 1, marginBottom: 0 }} />
+                        ))}
+                        <Typography variant="body2">{item.Prioridad}</Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
             </Paper>
           </Grid>
         ))}
@@ -129,15 +153,17 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 
       {/* Vista Horizontal usando GSTC */}
       <Box sx={{ marginTop: 4 }}>
-        <Typography variant="h5" gutterBottom>Vista Horizontal (GSTC)</Typography>
+        <Typography variant="h5" gutterBottom>
+          Vista Horizontal (GSTC)
+        </Typography>
         <GSTCTimeline
           tasks={items.map(item => ({
             id: item.Id,
             title: item.Titulo,
-            startDate: item['Fecha Inicio'] || item.startDate,
-            endDate: item['Fecha Fin'] || item.endDate,
-            progress: item.progress ? parseInt(item.progress, 10) : 0,
-          }))} 
+            startDate: item["Fecha Inicio"] || item.startDate,
+            endDate: item["Fecha Fin"] || item.endDate,
+            progress: item.progress ? parseInt(item.progress, 10) : 0
+          }))}
         />
       </Box>
     </Box>
