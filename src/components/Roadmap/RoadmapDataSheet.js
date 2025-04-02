@@ -1,19 +1,21 @@
 // src/components/RoadmapDataSheet.js
 import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge } from '@mui/material';
+import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge, Button } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import config from '../../config/config';
+import DesignThinkingSidebar from '../DesignThinkingSidebar/DesignThinkingSidebar';
 import GSTCTimeline from '../GSTCTimeline/GSTCTimeline';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
 const CLIENT_ID = config.CLIENT_ID;
 
-const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectItem, refreshTrigger }) => {
+const RoadmapDataSheet = ({ selectedItem, onEditItem, onAddItem, onSelectItem, onDeselectItem, refreshTrigger }) => {
   const [items, setItems] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tabValue, setTabValue] = useState(0);
+  const [viewType, setViewType] = useState('vertical'); // 'vertical' o 'horizontal'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +49,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         console.error(error);
       }
     };
+
     fetchData();
   }, [refreshTrigger]);
 
@@ -72,76 +75,93 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 
   return (
     <Box sx={{ padding: 2 }}>
-      {/* Vista Vertical */}
-      <Typography variant="h5" gutterBottom>Vista Vertical</Typography>
-      <Tabs
-        value={tabValue}
-        onChange={handleTabChange}
-        variant="scrollable"
-        scrollButtons="auto"
-        allowScrollButtonsMobile
-      >
-        <Tab label="Todos los Sprints" value={0} />
-        {sprints.map((sprint, index) => (
-          <Tab label={sprint} key={sprint} value={index + 1} />
-        ))}
-      </Tabs>
-      <Grid container spacing={2} sx={{ marginTop: 2 }}>
-        {statuses.map((Estado) => (
-          <Grid item xs={12} md={4} key={Estado}>
-            <Paper elevation={0} sx={{ padding: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>{Estado}</Typography>
-                <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
-                  <AssignmentIcon />
-                </Badge>
-              </Box>
-              {items.filter(item =>
-                item.Estado === Estado &&
-                (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
-              ).map(item => (
-                <Card
-                  key={item.Id}
-                  sx={{ backgroundColor: getBackgroundColor(item.Estado), marginBottom: 2, cursor: 'pointer', '&:hover': { backgroundColor: '#f0f0f0' } }}
-                  onClick={() => onSelectItem(item)}
-                  onDoubleClick={() => onEditItem(item)}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 1 }}>
-                      <Typography variant="subtitle1" fontWeight="bold">{item.Titulo}</Typography>
-                      <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
-                        <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
-                      </Tooltip>
-                    </Box>
-                    <Typography variant="body2" dangerouslySetInnerHTML={{ __html: item.Descripcion }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
-                      {item.tags.split(',').map(tag => (
-                        <Chip key={tag} label={tag.trim()} sx={{ marginRight: 1, marginBottom: 0 }} />
-                      ))}
-                      <Typography variant="body2">{item.Prioridad}</Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Botones para cambiar la vista */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+        <Button variant={viewType === 'vertical' ? 'contained' : 'outlined'} onClick={() => setViewType('vertical')}>
+          Vista Vertical
+        </Button>
+        <Button variant={viewType === 'horizontal' ? 'contained' : 'outlined'} onClick={() => setViewType('horizontal')}>
+          Vista Horizontal (GSTC)
+        </Button>
+      </Box>
 
-      <Box sx={{ marginTop: 4 }}>
-  <Typography variant="h5" gutterBottom>
-    Vista Horizontal (GSTC)
-  </Typography>
-  <GSTCTimeline
-    tasks={items.map(item => ({
-      id: item.Id,
-      title: item.Titulo,
-      startDate: item['Fecha Inicio'] || item.startDate,
-      endDate: item['Fecha Fin'] || item.endDate,
-      progress: item.progress ? parseInt(item.progress, 10) : 0,
-    }))}
-  />
-</Box>
+      {viewType === 'vertical' ? (
+        <>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            <Tab label="Todos los Sprints" value={0} />
+            {sprints.map((sprint, index) => (
+              <Tab label={sprint} key={sprint} value={index + 1} />
+            ))}
+          </Tabs>
+          <Grid container spacing={2} sx={{ marginTop: 2 }}>
+            {statuses.map((Estado) => (
+              <Grid item xs={12} md={4} key={Estado}>
+                <Paper elevation={0} sx={{ padding: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                      {Estado}
+                    </Typography>
+                    <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
+                      <AssignmentIcon />
+                    </Badge>
+                  </Box>
+                  {items.filter(item =>
+                    item.Estado === Estado &&
+                    (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
+                  ).map(item => (
+                    <Card
+                      key={item.Id}
+                      sx={{
+                        backgroundColor: getBackgroundColor(item.Estado),
+                        marginBottom: 2,
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                      onClick={() => onSelectItem(item)}
+                      onDoubleClick={() => onEditItem(item)}
+                    >
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 1 }}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {item.Titulo}
+                          </Typography>
+                          <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
+                            <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
+                          </Tooltip>
+                        </Box>
+                        <Typography variant="body2" dangerouslySetInnerHTML={{ __html: item.Descripcion }} />
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+                          {item.tags.split(',').map(tag => (
+                            <Chip key={tag} label={tag.trim()} sx={{ marginRight: 1, marginBottom: 0 }} />
+                          ))}
+                          <Typography variant="body2">{item.Prioridad}</Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      ) : (
+        // Vista Horizontal usando GSTC
+        <GSTCTimeline
+          tasks={items.map(item => ({
+            id: item.Id,
+            title: item.Titulo,
+            startDate: item['Fecha Inicio'] || item.startDate,
+            endDate: item['Fecha Fin'] || item.endDate,
+            progress: item.progress ? parseInt(item.progress, 10) : 0,
+          }))}
+        />
+      )}
     </Box>
   );
 };

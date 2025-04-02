@@ -58,7 +58,6 @@
                      onDeselectItem={handleDeselectItem}
                      onEditItem={handleSelectItem}
         />
-              <RoadmapContainer/>
               <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
           item={selectedItem}
