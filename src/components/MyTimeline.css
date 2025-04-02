@@ -3,7 +3,8 @@
 }
 
 .react-calendar-timeline .rct-outer {
-    display: block;
+    display: grid;
+    grid-template-columns: min-content 1fr; /* Barra lateral y área principal */
     overflow: hidden;
     white-space: nowrap;
     background: #f9f9f9;
@@ -17,9 +18,11 @@
     white-space: normal;
     vertical-align: top;
     overflow-x: auto;
-    overflow-y: auto; /* Corrección: Habilitar el scroll vertical */
+    overflow-y: auto; /* Habilitar el scroll vertical */
     -ms-touch-action: none;
     touch-action: none;
+    grid-column: 2;
+    grid-row: 2;
 }
 
 .react-calendar-timeline .rct-item {
@@ -67,6 +70,8 @@
     border-right: 1px solid #eee;
     background: #37474f;
     color: #e0e0e0;
+    grid-column: 1;
+    grid-row: 1 / span 2; /* Cubre ambas filas */
 }
 
 .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
@@ -108,6 +113,8 @@
     border-bottom: 2px solid #1976d2;
     color: white;
     font-weight: 600;
+    grid-column: 2;
+    grid-row: 1;
 }
 
 .react-calendar-timeline .rct-dateHeader {

@@ -102,7 +102,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
       {view === "vertical" ? (
         <>
           <Typography variant="h5" gutterBottom>
-            Vista Vertical
+            Tablero
           </Typography>
           <Tabs
             value={tabValue}
@@ -164,7 +164,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
       ) : (
         <>
           <Typography variant="h5" gutterBottom>
-            Vista Horizontal (Timeline)
+            Roadmap Timeline
           </Typography>
           <MyTimeline
             tasks={items.map((item) => ({
