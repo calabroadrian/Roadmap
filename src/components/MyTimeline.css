@@ -2,111 +2,120 @@
     box-sizing: border-box;
   }
   
-  /* Fondo principal con un toque más moderno */
+  /* Contenedor principal */
   .react-calendar-timeline .rct-outer {
     display: block;
     overflow: hidden;
-    background: #f4f7fc;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding-bottom: 8px;
+    white-space: nowrap;
+    background: #ffffff; /* Fondo limpio */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
   
-  /* Scroll optimizado */
+  /* Área de scroll */
   .react-calendar-timeline .rct-scroll {
     display: inline-block;
     white-space: normal;
     vertical-align: top;
     overflow-x: auto;
     overflow-y: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: #007bff #f4f7fc;
+    -ms-touch-action: none;
+    touch-action: none;
   }
   
-  /* Personalización de tareas */
+  /* Estilos para cada tarea */
   .react-calendar-timeline .rct-item {
-    border-radius: 10px;
+    border-radius: 8px;
     transition: transform 0.2s ease, box-shadow 0.3s ease;
-    background: linear-gradient(135deg, #0056b3, #6610f2);
+    background: linear-gradient(135deg, #007bff, #6610f2);
     color: white;
     font-weight: bold;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
-  /* Efecto hover más elegante */
+  /* Efecto hover en las tareas */
   .react-calendar-timeline .rct-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    z-index: 100;
   }
   
-  /* Contenido de las tareas */
+  /* Contenido dentro de cada tarea */
   .react-calendar-timeline .rct-item .rct-item-content {
-    position: relative;
-    left: 0;
-    overflow: hidden;
-    display: inline-block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 6px 12px;
     text-align: center;
     font-size: 14px;
+    white-space: nowrap;
   }
   
-  /* Barra lateral (grupos) */
+  /* Barra lateral */
   .react-calendar-timeline .rct-sidebar {
-    background: #212529;
-    color: white;
-    border-right: 2px solid #444;
-    font-size: 14px;
-    font-weight: 600;
-  }
-  
-  .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
-    padding: 12px;
-    text-overflow: ellipsis;
-    border-bottom: 1px solid #555;
-    transition: background 0.3s ease;
-  }
-  
-  .react-calendar-timeline .rct-sidebar .rct-sidebar-row:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Diferentes tonos en la barra lateral */
-  .react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-odd {
+    overflow: hidden;
+    white-space: normal;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    box-sizing: border-box;
+    border-right: 1px solid #ccc;
     background: #343a40;
+    color: white;
+  }
+  
+  /* Filas de la barra lateral */
+  .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
+    padding: 10px 6px;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    border-bottom: 1px solid #444;
+  }
+  
+  /* Alternancia de colores en la barra lateral */
+  .react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-odd {
+    background: #495057;
   }
   
   .react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-even {
-    background: #212529;
+    background: #343a40;
   }
   
   /* Líneas de la grilla */
   .react-calendar-timeline .rct-horizontal-lines .rct-hl-even,
   .react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid #ddd;
   }
   
   .react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(0, 0, 0, 0.03);
   }
   
   /* Línea de la fecha actual */
   .react-calendar-timeline .rct-cursor-line {
+    position: absolute;
     width: 2px;
-    background: #dc3545;
+    background: #e63946;
     z-index: 51;
   }
   
   /* Encabezado */
   .react-calendar-timeline .rct-header-root {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    border-bottom: 3px solid #003d80;
+    background: #007bff;
+    border-bottom: 2px solid #0056b3;
     color: white;
     font-weight: bold;
-    padding: 10px 0;
   }
   
-  /* Estilos de los días en la grilla */
+  /* Estilos de las fechas en el encabezado */
   .react-calendar-timeline .rct-dateHeader {
     display: flex;
     align-items: center;
@@ -118,26 +127,27 @@
     font-weight: bold;
   }
   
-  /* Colores para los fines de semana */
+  /* Resaltar fines de semana */
   .react-calendar-timeline .rct-vertical-lines .rct-vl.rct-day-6,
   .react-calendar-timeline .rct-vertical-lines .rct-vl.rct-day-0 {
-    background: rgba(255, 193, 7, 0.15);
+    background: rgba(255, 193, 7, 0.2);
   }
   
-  /* Animación de carga */
-  .react-calendar-timeline .rct-loading {
-    animation: fadeIn 0.6s ease-in-out;
+  /* Scrollbar personalizada */
+  .react-calendar-timeline .rct-scroll::-webkit-scrollbar {
+    height: 8px;
   }
   
-  /* Animación de aparición */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .react-calendar-timeline .rct-scroll::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+  
+  .react-calendar-timeline .rct-scroll::-webkit-scrollbar-thumb {
+    background: #007bff;
+    border-radius: 4px;
+  }
+  
+  .react-calendar-timeline .rct-scroll::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
   }
   
