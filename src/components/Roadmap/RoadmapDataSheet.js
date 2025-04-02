@@ -92,10 +92,10 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
     <Box sx={{ padding: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
         <Button variant={view === "vertical" ? "contained" : "outlined"} onClick={() => setView("vertical")}>
-          Vista Vertical
+          Tablero 
         </Button>
         <Button variant={view === "horizontal" ? "contained" : "outlined"} onClick={() => setView("horizontal")}>
-          Vista Horizontal (Timeline)
+          Roadmap Timeline
         </Button>
       </Box>
 
