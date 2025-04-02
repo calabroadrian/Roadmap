@@ -128,12 +128,20 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         ))}
       </Grid>
 
-      {/* Vista Horizontal usando GSTC */}
       <Box sx={{ marginTop: 4 }}>
-        <Typography variant="h5" gutterBottom>Vista Horizontal (GSTC)</Typography>
-        <GSTCTimeline
-          tasks={items.map(item => ({\n            id: item.Id,\n            title: item.Titulo,\n            startDate: item['Fecha Inicio'] || item.startDate,\n            endDate: item['Fecha Fin'] || item.endDate,\n            progress: item.progress ? parseInt(item.progress, 10) : 0,\n          }))}\n        />
-      </Box>
+  <Typography variant="h5" gutterBottom>
+    Vista Horizontal (GSTC)
+  </Typography>
+  <GSTCTimeline
+    tasks={items.map(item => ({
+      id: item.Id,
+      title: item.Titulo,
+      startDate: item['Fecha Inicio'] || item.startDate,
+      endDate: item['Fecha Fin'] || item.endDate,
+      progress: item.progress ? parseInt(item.progress, 10) : 0,
+    }))}
+  />
+</Box>
     </Box>
   );
 };
