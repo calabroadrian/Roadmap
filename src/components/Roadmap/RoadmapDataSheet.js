@@ -1,6 +1,6 @@
 // src/components/RoadmapDataSheet.js
 import { useState, useEffect } from "react";
-import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge } from "@mui/material";
+import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge, Button } from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import config from "../../config/config";
 import GSTCTimeline from "../GSTCTimeline/GSTCTimeline";
@@ -95,16 +95,8 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         {statuses.map((Estado) => (
           <Grid item xs={12} md={4} key={Estado}>
             <Paper elevation={0} sx={{ padding: 2 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between"
-                }}
-              >
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                  {Estado}
-                </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Typography variant="h6" sx={{ flexGrow: 1 }}>{Estado}</Typography>
                 <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
                   <AssignmentIcon />
                 </Badge>
@@ -129,9 +121,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
                   >
                     <CardContent>
                       <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                          {item.Titulo}
-                        </Typography>
+                        <Typography variant="subtitle1" fontWeight="bold">{item.Titulo}</Typography>
                         <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
                           <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
                         </Tooltip>
@@ -150,7 +140,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           </Grid>
         ))}
       </Grid>
-
+      
       {/* Vista Horizontal usando GSTC */}
       <Box sx={{ marginTop: 4 }}>
         <Typography variant="h5" gutterBottom>
@@ -163,7 +153,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             startDate: item["Fecha Inicio"] || item.startDate,
             endDate: item["Fecha Fin"] || item.endDate,
             progress: item.progress ? parseInt(item.progress, 10) : 0
-          }))}
+          }))} 
         />
       </Box>
     </Box>

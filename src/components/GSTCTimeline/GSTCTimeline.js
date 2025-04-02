@@ -1,29 +1,26 @@
 // src/components/GSTCTimeline.js
 import React, { useMemo, useEffect, useRef } from "react";
-import { GSTC } from "gantt-schedule-timeline-calendar";
+import createGSTC from "gantt-schedule-timeline-calendar";
 import "gantt-schedule-timeline-calendar/dist/style.css";
 
 const GSTCTimeline = ({ tasks }) => {
   const containerRef = useRef(null);
-
-  // Aseguramos que tasks sea un arreglo (incluso vacío)
   const safeTasks = tasks || [];
 
-  // Calculamos la configuración para GSTC utilizando useMemo
+  // Calculamos la configuración de GSTC basándonos en las tareas
   const config = useMemo(() => {
-    // Crear la lista de items a partir de las tareas
+    // Creamos la lista de items
     const items = safeTasks.reduce((acc, task) => {
       acc[task.id] = {
         id: task.id,
-        label: task.title,
-        // Puedes extender propiedades aquí si necesitas render personalizado
+        label: task.title
       };
       return acc;
     }, {});
 
-    // Determinar el rango de tiempo basado en startDate y endDate
+    // Calculamos el rango de tiempo
     let start = Date.now();
-    let end = start + 30 * 24 * 60 * 60 * 1000; // 30 días por defecto
+    let end = start + 30 * 24 * 60 * 60 * 1000; // Valor por defecto: 30 días
     if (safeTasks.length > 0) {
       const startTimes = safeTasks.map(task => new Date(task.startDate).getTime());
       const endTimes = safeTasks.map(task => new Date(task.endDate).getTime());
@@ -33,20 +30,20 @@ const GSTCTimeline = ({ tasks }) => {
 
     return {
       list: {
-        items,
+        items
       },
       chart: {
         items: Object.keys(items),
-        time: { start, end },
+        time: { start, end }
       }
       // No agregamos plugins para evitar errores de suscripción
     };
   }, [safeTasks]);
 
-  // Instanciar GSTC cuando cambie la configuración
   useEffect(() => {
     if (!containerRef.current) return;
-    const instance = GSTC({ element: containerRef.current, state: GSTC.api.state(config) });
+    // Instanciamos GSTC usando la función default importada (createGSTC)
+    const instance = createGSTC({ element: containerRef.current, state: createGSTC.api.state(config) });
     return () => {
       instance.destroy();
     };

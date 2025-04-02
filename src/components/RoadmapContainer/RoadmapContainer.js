@@ -12,7 +12,7 @@ function RoadmapContainer() {
   const [items, setItems] = useState([]);
 
   const refreshRoadmap = () => {
-    setRefreshTrigger((prev) => prev + 1);
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleAddItem = () => {
@@ -32,14 +32,14 @@ function RoadmapContainer() {
   };
 
   const handleUpdateItem = (updatedItem) => {
-    const updatedItems = items.map((item) =>
+    const updatedItems = items.map(item =>
       item.id === updatedItem.id ? updatedItem : item
     );
     setItems(updatedItems);
   };
 
   const handleDeleteItem = (itemToDelete) => {
-    const updatedItems = items.filter((item) => item.id !== itemToDelete.id);
+    const updatedItems = items.filter(item => item.id !== itemToDelete.id);
     setItems(updatedItems);
   };
 
