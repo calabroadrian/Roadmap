@@ -89,33 +89,21 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 
   return (
     <Box sx={{ padding: 2 }}>
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-        <Button
-          variant={viewType === "vertical" ? "contained" : "outlined"}
-          onClick={() => setViewType("vertical")}
-        >
+      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, marginBottom: 2 }}>
+        <Button variant={view === "vertical" ? "contained" : "outlined"} onClick={() => setView("vertical")}>
           Vista Vertical
         </Button>
-        <Button
-          variant={viewType === "horizontal" ? "contained" : "outlined"}
-          onClick={() => setViewType("horizontal")}
-        >
-          Vista Horizontal (Timeline)
+        <Button variant={view === "horizontal" ? "contained" : "outlined"} onClick={() => setView("horizontal")}>
+          Vista Horizontal
         </Button>
       </Box>
 
-      {viewType === "vertical" ? (
+      {view === "vertical" ? (
         <>
           <Typography variant="h5" gutterBottom>
             Vista Vertical
           </Typography>
-          <Tabs
-            value={tabValue}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-          >
+          <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
             <Tab label="Todos los Sprints" value={0} />
             {sprints.map((sprint, index) => (
               <Tab label={sprint} key={sprint} value={index + 1} />
@@ -125,73 +113,21 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             {statuses.map((Estado) => (
               <Grid item xs={12} md={4} key={Estado}>
                 <Paper elevation={0} sx={{ padding: 2 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                      {Estado}
-                    </Typography>
-                    <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>{Estado}</Typography>
+                    <Badge badgeContent={items.filter((item) => item.Estado === Estado).length} color="primary">
                       <AssignmentIcon />
                     </Badge>
                   </Box>
                   {items
-                    .filter(
-                      (item) =>
-                        item.Estado === Estado &&
-                        (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
-                    )
+                    .filter((item) => item.Estado === Estado)
                     .map((item) => (
-                      <Card
-                        key={item.Id}
-                        sx={{
-                          backgroundColor: getBackgroundColor(item.Estado),
-                          marginBottom: 2,
-                          cursor: "pointer",
-                          "&:hover": { backgroundColor: "#f0f0f0" },
-                        }}
-                        onClick={() => onSelectItem(item)}
-                        onDoubleClick={() => onEditItem(item)}
-                      >
+                      <Card key={item.Id} sx={{ marginBottom: 2, cursor: "pointer" }} onClick={() => onSelectItem(item)}>
                         <CardContent>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginTop: 1,
-                            }}
-                          >
-                            <Typography variant="subtitle1" fontWeight="bold">
-                              {item.Titulo}
-                            </Typography>
-                            <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
-                              <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
-                            </Tooltip>
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            dangerouslySetInnerHTML={{ __html: item.Descripcion }}
-                          />
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginTop: 5,
-                            }}
-                          >
-                            {item.tags.split(",").map((tag) => (
-                              <Chip
-                                key={tag}
-                                label={tag.trim()}
-                                sx={{ marginRight: 1, marginBottom: 0 }}
-                              />
-                            ))}
-                            <Typography variant="body2">{item.Prioridad}</Typography>
-                          </Box>
+                          <Typography variant="subtitle1" fontWeight="bold">{item.Titulo}</Typography>
+                          <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
+                            <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
+                          </Tooltip>
                         </CardContent>
                       </Card>
                     ))}
@@ -201,7 +137,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           </Grid>
         </>
       ) : (
-        <>
+        <Box sx={{ marginTop: 4 }}>
           <Typography variant="h5" gutterBottom>
             Vista Horizontal (Timeline)
           </Typography>
@@ -213,10 +149,8 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
               endDate: item["Fecha Fin"] || item.endDate,
             }))}
           />
-        </>
+        </Box>
       )}
     </Box>
   );
 };
-
-export default RoadmapDataSheet;
