@@ -1,9 +1,23 @@
 // src/components/RoadmapDataSheet.js
 import { useState, useEffect } from "react";
-import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Chip, Tooltip, Tabs, Tab, Badge, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Chip,
+  Tooltip,
+  Tabs,
+  Tab,
+  Badge,
+  Button,
+} from "@mui/material";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import config from "../../config/config";
-import GSTCTimeline from "../GSTCTimeline/GSTCTimeline";
+import MyTimeline from "../MyTimeline";
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const API_KEY = config.API_KEY;
@@ -26,18 +40,18 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           const headers = data.values[0];
           const tagsColumnIndex = headers.indexOf("Tags");
           const sprintColumnIndex = headers.indexOf("Sprint");
-          const parsedData = data.values.slice(1).map(row => {
+          const parsedData = data.values.slice(1).map((row) => {
             return headers.reduce((obj, key, index) => {
               obj[key] = row[index] || "";
               return obj;
             }, {});
           });
-          parsedData.forEach(item => {
+          parsedData.forEach((item) => {
             item.tags = item[headers[tagsColumnIndex]] || "";
           });
           setItems(parsedData);
-          setStatuses([...new Set(parsedData.map(item => item.Estado))]);
-          setSprints([...new Set(parsedData.map(item => item[headers[sprintColumnIndex]]))]);
+          setStatuses([...new Set(parsedData.map((item) => item.Estado))]);
+          setSprints([...new Set(parsedData.map((item) => item[headers[sprintColumnIndex]]))]);
         } else {
           console.error("No se encontraron datos válidos en la respuesta API");
         }
@@ -107,15 +121,10 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
                     item.Estado === Estado &&
                     (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
                 )
-                .map(item => (
+                .map((item) => (
                   <Card
                     key={item.Id}
-                    sx={{
-                      backgroundColor: getBackgroundColor(item.Estado),
-                      marginBottom: 2,
-                      cursor: "pointer",
-                      "&:hover": { backgroundColor: "#f0f0f0" }
-                    }}
+                    sx={{ backgroundColor: getBackgroundColor(item.Estado), marginBottom: 2, cursor: "pointer", "&:hover": { backgroundColor: "#f0f0f0" } }}
                     onClick={() => onSelectItem(item)}
                     onDoubleClick={() => onEditItem(item)}
                   >
@@ -128,7 +137,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
                       </Box>
                       <Typography variant="body2" dangerouslySetInnerHTML={{ __html: item.Descripcion }} />
                       <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
-                        {item.tags.split(",").map(tag => (
+                        {item.tags.split(",").map((tag) => (
                           <Chip key={tag} label={tag.trim()} sx={{ marginRight: 1, marginBottom: 0 }} />
                         ))}
                         <Typography variant="body2">{item.Prioridad}</Typography>
@@ -140,21 +149,14 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           </Grid>
         ))}
       </Grid>
-      
-      {/* Vista Horizontal usando GSTC */}
+
+      {/* Vista Horizontal usando MyTimeline */}
       <Box sx={{ marginTop: 4 }}>
         <Typography variant="h5" gutterBottom>
-          Vista Horizontal (GSTC)
+          Vista Horizontal (Timeline)
         </Typography>
-        <GSTCTimeline
-          tasks={items.map(item => ({
-            id: item.Id,
-            title: item.Titulo,
-            startDate: item["Fecha Inicio"] || item.startDate,
-            endDate: item["Fecha Fin"] || item.endDate,
-            progress: item.progress ? parseInt(item.progress, 10) : 0
-          }))} 
-        />
+        <MyTimeline
+          tasks={items.map((item) => ({\n            id: item.Id,\n            title: item.Titulo,\n            startDate: item["Fecha Inicio"] || item.startDate,\n            endDate: item["Fecha Fin"] || item.endDate,\n          }))}\n        />
       </Box>
     </Box>
   );
