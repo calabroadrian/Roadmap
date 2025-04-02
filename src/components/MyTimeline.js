@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+// src/components/MyTimeline.js
+import React from "react";
 import Timeline from "react-calendar-timeline";
+import "./MyTimeline.css"
 import moment from "moment";
-import "react-calendar-timeline/lib/Timeline.css";
 
 const MyTimeline = ({ tasks }) => {
   if (!tasks || tasks.length === 0) return <p>No hay tareas disponibles</p>;
