@@ -28,7 +28,6 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
   const [statuses, setStatuses] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tabValue, setTabValue] = useState(0);
-  const [viewType, setViewType] = useState("vertical"); // 'vertical' o 'horizontal'
 
   useEffect(() => {
     const fetchData = async () => {
