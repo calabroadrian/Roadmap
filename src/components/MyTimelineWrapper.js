@@ -1,24 +1,26 @@
 // src/components/MyTimelineWrapper.js
 import React from "react";
 import Timeline from "react-calendar-timeline";
-import "react-calendar-timeline/lib/Timeline.css";
+import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 
 const MyTimelineWrapper = ({ tasks }) => {
-  // Creamos un grupo único para todas las tareas.
-  const groups = [{ id: 1, title: "Tareas" }];
-
-  // Mapeamos las tareas al formato que requiere la librería:
-  // id, group, title, start_time, end_time
-  const items = tasks.map((task) => ({
-    id: task.Id,
-    group: 1,
-    title: task.Titulo,
-    start_time: moment(task["Fecha Inicio"] || task.startDate),
-    end_time: moment(task["Fecha Fin"] || task.endDate),
+  // Creamos un grupo para cada tarea
+  const groups = tasks.map(task => ({
+    id: task.id,
+    title: task.title,
   }));
 
-  // Definimos un rango de tiempo por defecto: desde ayer hasta dentro de 7 días
+  // Cada tarea se mapea a un ítem, asignando el grupo correspondiente
+  const items = tasks.map(task => ({
+    id: task.id,
+    group: task.id,
+    title: task.title,
+    start_time: moment(task.startDate),
+    end_time: moment(task.endDate),
+  }));
+
+  // Definimos un rango de tiempo por defecto
   const defaultTimeStart = moment().startOf("day").subtract(1, "day");
   const defaultTimeEnd = moment().startOf("day").add(7, "days");
 
