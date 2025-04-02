@@ -5,8 +5,11 @@ import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 
 const MyTimeline = ({ tasks }) => {
-  // Creamos un grupo único para todas las tareas
-  const groups = [{ id: 1, title: "Tareas" }];
+    // Creamos un grupo para cada tarea
+    const groups = tasks.map(task => ({
+      id: task.id,
+      title: task.title,
+    }));
 
   // Mapeamos las tareas al formato requerido: id, group, title, start_time, end_time
   const items = tasks.map((task) => ({
