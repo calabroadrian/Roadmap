@@ -152,12 +152,18 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 
       {/* Vista Horizontal usando MyTimeline */}
       <Box sx={{ marginTop: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Vista Horizontal (Timeline)
-        </Typography>
-        <MyTimeline
-          tasks={items.map((item) => ({\n            id: item.Id,\n            title: item.Titulo,\n            startDate: item["Fecha Inicio"] || item.startDate,\n            endDate: item["Fecha Fin"] || item.endDate,\n          }))}\n        />
-      </Box>
+  <Typography variant="h5" gutterBottom>
+    Vista Horizontal (Timeline)
+  </Typography>
+  <MyTimeline
+    tasks={items.map((item) => ({
+      id: item.Id,
+      title: item.Titulo,
+      startDate: item["Fecha Inicio"] || item.startDate,
+      endDate: item["Fecha Fin"] || item.endDate,
+    }))}
+  />
+</Box>
     </Box>
   );
 };
