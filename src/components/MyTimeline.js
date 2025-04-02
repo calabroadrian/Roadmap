@@ -5,19 +5,21 @@ import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 
 const MyTimeline = ({ tasks }) => {
-    // Creamos un grupo para cada tarea
-    const groups = tasks.map(task => ({
-      id: task.id,
-      title: task.title,
-    }));
+  if (!tasks || tasks.length === 0) return <p>No hay tareas disponibles</p>;
 
-  // Mapeamos las tareas al formato requerido: id, group, title, start_time, end_time
+  // Creamos un grupo para cada tarea (una fila por tarea)
+  const groups = tasks.map((task) => ({
+    id: task.id, // Cada tarea tendrá su propio grupo
+    title: task.title,
+  }));
+
+  // Asignamos cada tarea a su propio grupo
   const items = tasks.map((task) => ({
     id: task.id,
-    group: 1,
+    group: task.id, // Se usa el mismo ID del grupo para separarlas
     title: task.title,
     start_time: moment(task.startDate),
-    end_time: moment(task.endDate)
+    end_time: moment(task.endDate),
   }));
 
   // Definimos un rango de tiempo por defecto: desde ayer hasta dentro de 7 días
@@ -32,6 +34,8 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeStart={defaultTimeStart}
         defaultTimeEnd={defaultTimeEnd}
         itemHeightRatio={0.75}
+        canMove={false} // Desactiva la edición manual
+        canResize={false}
       />
     </div>
   );
