@@ -4,24 +4,25 @@ import GSTC from 'gantt-schedule-timeline-calendar';
 import 'gantt-schedule-timeline-calendar/dist/style.css';
 
 const GSTCTimeline = ({ tasks }) => {
-  // Transforma las tareas al formato que GSTC espera:
+  // Si no hay tareas, muestra un mensaje informativo.
+  if (!tasks || tasks.length === 0) {
+    return <div>No hay tareas para mostrar en el timeline.</div>;
+  }
+
+  // Transformamos las tareas en items para GSTC.
   const items = useMemo(() => {
     return tasks.reduce((acc, task) => {
       acc[task.id] = {
         id: task.id,
         label: task.title,
-        // Puedes agregar otras propiedades si es necesario para personalizar el render
+        // Puedes agregar más propiedades aquí para personalizar cada item.
       };
       return acc;
     }, {});
   }, [tasks]);
 
-  // Calcula el rango de tiempo usando las fechas de inicio y fin de las tareas:
+  // Calculamos el rango de tiempo usando las fechas de inicio y fin de las tareas.
   const timeRange = useMemo(() => {
-    if (tasks.length === 0) {
-      const now = Date.now();
-      return { start: now, end: now + 30 * 24 * 60 * 60 * 1000 }; // 30 días desde ahora
-    }
     const startTimes = tasks.map(task => new Date(task.startDate).getTime());
     const endTimes = tasks.map(task => new Date(task.endDate).getTime());
     return {
@@ -30,7 +31,7 @@ const GSTCTimeline = ({ tasks }) => {
     };
   }, [tasks]);
 
-  // Configuración básica de GSTC
+  // Configuración básica de GSTC.
   const config = useMemo(() => ({
     list: {
       items,
@@ -38,8 +39,8 @@ const GSTCTimeline = ({ tasks }) => {
     chart: {
       items: Object.keys(items),
       time: timeRange,
-    },
-    plugins: {} // Agregamos plugins como objeto vacío para evitar errores de suscripción
+    }
+    // No se agregan plugins para evitar errores relacionados con 'subscribe'
   }), [items, timeRange]);
 
   return (
