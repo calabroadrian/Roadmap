@@ -17,7 +17,7 @@
     white-space: normal;
     vertical-align: top;
     overflow-x: auto;
-    overflow-y: hidden;
+    overflow-y: auto; /* Corrección: Habilitar el scroll vertical */
     -ms-touch-action: none;
     touch-action: none;
 }
@@ -33,8 +33,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Aumenta la altura de las tareas */
-    min-height: 40px; /* Ajusta este valor según necesites */
+    min-height: 40px;
 }
 
 .react-calendar-timeline .rct-item:hover {
@@ -75,9 +74,8 @@
     text-overflow: ellipsis;
     box-sizing: border-box;
     border-bottom: 1px solid #455a64;
-    /* Aumenta la altura de las filas de la barra lateral */
-    min-height: 50px; /* Ajusta este valor según necesites */
-    display: flex; /* Asegura que el contenido se centre verticalmente */
+    min-height: 50px;
+    display: flex;
     align-items: center;
 }
 
