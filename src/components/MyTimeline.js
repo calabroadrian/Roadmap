@@ -1,7 +1,7 @@
 // src/components/MyTimeline.js
 import React from "react";
 import Timeline from "react-calendar-timeline";
-import "react-calendar-timeline/lib/Timeline.css";
+import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 
 const MyTimeline = ({ tasks }) => {
