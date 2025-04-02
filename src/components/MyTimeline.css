@@ -1,0 +1,119 @@
+.react-calendar-timeline * {
+    box-sizing: border-box;
+  }
+  
+  .react-calendar-timeline .rct-outer {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    background: #f8f9fa; /* Fondo más limpio */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .react-calendar-timeline .rct-scroll {
+    display: inline-block;
+    white-space: normal;
+    vertical-align: top;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -ms-touch-action: none;
+    touch-action: none;
+  }
+  
+  /* Estilos para las tareas */
+  .react-calendar-timeline .rct-item {
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, #007bff, #6610f2); /* Degradado moderno */
+    color: white;
+    font-weight: bold;
+  }
+  
+  .react-calendar-timeline .rct-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+  }
+  
+  /* Contenido de cada tarea */
+  .react-calendar-timeline .rct-item .rct-item-content {
+    position: sticky;
+    left: 0;
+    overflow: hidden;
+    display: inline-block;
+    padding: 5px 10px;
+    text-align: center;
+  }
+  
+  /* Barra lateral */
+  .react-calendar-timeline .rct-sidebar {
+    overflow: hidden;
+    white-space: normal;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    box-sizing: border-box;
+    border-right: 1px solid #ccc;
+    background: #343a40;
+    color: white;
+  }
+  
+  .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
+    padding: 10px 6px;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    border-bottom: 1px solid #444;
+  }
+  
+  .react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-odd {
+    background: #495057;
+  }
+  
+  .react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-even {
+    background: #343a40;
+  }
+  
+  /* Líneas de la grilla */
+  .react-calendar-timeline .rct-horizontal-lines .rct-hl-even,
+  .react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
+    background: rgba(0, 0, 0, 0.03);
+  }
+  
+  /* Línea de la fecha actual */
+  .react-calendar-timeline .rct-cursor-line {
+    position: absolute;
+    width: 2px;
+    background: #e63946; /* Rojo vibrante para destacar */
+    z-index: 51;
+  }
+  
+  /* Encabezado */
+  .react-calendar-timeline .rct-header-root {
+    background: #007bff;
+    border-bottom: 2px solid #0056b3;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .react-calendar-timeline .rct-dateHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 14px;
+    background-color: #e9ecef;
+    border-left: 1px solid #ccc;
+    font-weight: bold;
+  }
+  
+  /* Estilos de los fines de semana */
+  .react-calendar-timeline .rct-vertical-lines .rct-vl.rct-day-6,
+  .react-calendar-timeline .rct-vertical-lines .rct-vl.rct-day-0 {
+    background: rgba(255, 193, 7, 0.2); /* Amarillo suave */
+  }
+  
