@@ -232,7 +232,3 @@
     align-items: center;
     justify-content: center;
 }
-
-.react-calendar-timeline .rct-scroll .rct-items .rct-item {
-    top: 0px !important;
-}
