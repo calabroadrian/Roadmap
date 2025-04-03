@@ -13,6 +13,7 @@
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #eee;
+    height: 300px;
 }
 
 .react-calendar-timeline .rct-scroll {
@@ -75,6 +76,7 @@
     grid-row: 1 / span 2;
     min-width: 300px;
     max-width: 300px;
+    height: 300px;
 }
 
 .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
