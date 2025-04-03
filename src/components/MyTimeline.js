@@ -102,6 +102,14 @@ const MyTimeline = ({ tasks }) => {
 
     const groupHeights = groups.map(() => 40); // Define la altura de las filas a 40px
 
+    const sidebarContentRenderer = ({ group }) => {
+        return (
+            <div className="mi-rct-sidebar-row">
+                {group.title}
+            </div>
+        );
+    };
+
     return (
         <div>
             <Timeline
@@ -131,6 +139,7 @@ const MyTimeline = ({ tasks }) => {
                 sidebarWidth={300}
                 className="mi-rct-sidebar"
                 groupHeights={groupHeights} // Aplica la altura de las filas
+                sidebarContentRenderer={sidebarContentRenderer}
             />
         </div>
     );
