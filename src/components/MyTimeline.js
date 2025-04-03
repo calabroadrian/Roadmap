@@ -129,6 +129,8 @@ const MyTimeline = ({ tasks }) => {
                 headerLabelHeight={50}
                 minZoom={1000 * 60 * 60 * 24 * 30}
                 maxZoom={1000 * 60 * 60 * 24 * 365}
+                sidebarWidth={300} // mantiene el ancho del sidebar
+                className={'mi-rct-sidebar'} // Aplica la clase personalizada
             />
         </div>
     );
