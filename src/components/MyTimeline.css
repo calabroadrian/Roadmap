@@ -220,10 +220,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    top: 0px;
 }
 
 .react-calendar-timeline .rct-item {
     min-height: 40px;
+    top: 0px;
     line-height: normal;
     padding: 8px 0;
     display: flex;
