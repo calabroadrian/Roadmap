@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Timeline from "react-calendar-timeline";
-import "react-calendar-timeline/dist/style.css";
 import "./MyTimeline.css";
 import moment from "moment";
 
