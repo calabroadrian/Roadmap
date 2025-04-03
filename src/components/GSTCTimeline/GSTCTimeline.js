@@ -54,7 +54,7 @@ const GSTCTimeline = ({ tasks }) => {
     };
   }, [safeState]);
 
-  return <div ref={containerRef} style={{ width: "100%", height: "500px" }} />;
+  return <div ref={containerRef} style={{ width: "100%", height: "1000px" }} />;
 };
 
 export default GSTCTimeline;
