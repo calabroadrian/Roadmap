@@ -23,6 +23,7 @@ const MyTimeline = ({ tasks }) => {
     }));
 
     const items = safeTasks.map((task) => {
+        let backgroundColor = "linear-gradient(120deg, #64b5f6, #1e88e5)";
         let backgroundImage = "";
 
         switch (task.Estado) {
