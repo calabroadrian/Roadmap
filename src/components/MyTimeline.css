@@ -84,7 +84,7 @@
     text-overflow: ellipsis;
     box-sizing: border-box;
     border-bottom: 1px solid #455a64;
-    min-height: 30px;
+    min-height: 40px;
     display: flex;
     align-items: center;
     width: 300px;
@@ -203,4 +203,11 @@
 .MuiTooltip-tooltip {
     max-width: none !important; /* Evita que el tooltip se corte */
     white-space: normal !important; /* Permite saltos de línea */
+}
+
+.mi-rct-sidebar {
+    height: auto !important; /* Permite que la altura se ajuste al contenido */
+    min-height: 400px; /* Establece una altura mínima */
+    max-height: 600px; /* Establece una altura maxima */
+    min-height: 40px;
 }
