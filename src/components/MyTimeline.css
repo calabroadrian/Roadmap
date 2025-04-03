@@ -1,7 +1,4 @@
-div[style="width: 150px;"] {
-    width: 300px !important; /* Aumenta el ancho y usa !important para forzar el estilo */
-    min-width: 300px !important;
-}
+/* src/components/MyTimeline.css */
 
 .react-calendar-timeline * {
     box-sizing: border-box;
@@ -9,7 +6,7 @@ div[style="width: 150px;"] {
 
 .react-calendar-timeline .rct-outer {
     display: grid;
-    grid-template-columns: auto 1fr; /* Barra lateral y área principal (auto) */
+    grid-template-columns: auto 1fr;
     overflow: hidden;
     white-space: nowrap;
     background: #f9f9f9;
@@ -76,9 +73,8 @@ div[style="width: 150px;"] {
     color: #e0e0e0;
     grid-column: 1;
     grid-row: 1 / span 2;
-    min-width: 300px; /* Ancho mínimo para la barra lateral */
-    max-width: 300px; /* Ancho máximo para la barra lateral (opcional) */
-    width: auto; /* Permite que el ancho se ajuste al contenido */
+    min-width: 300px;
+    max-width: 300px;
 }
 
 .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
@@ -89,7 +85,7 @@ div[style="width: 150px;"] {
     min-height: 30px;
     display: flex;
     align-items: center;
-    width: 300px !important;
+    width: 300px;
 }
 
 .react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-odd {
@@ -186,13 +182,6 @@ div[style="width: 150px;"] {
 
 .mi-timeline-item.mi-timeline-hecho {
     background: linear-gradient(120deg, #c8e6c9, #4caf50) !important;
-}
-
-/* Estilos adicionales para el modal */
-.ReactModal__Content {
-    width: 50%;
-    margin: auto;
-    padding: 20px;
 }
 
 /* Estilos adicionales para el tooltip */
