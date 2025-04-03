@@ -172,6 +172,8 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
               title: item.Titulo,
               startDate: item["Fecha Inicio"] || item.startDate,
               endDate: item["Fecha Fin"] || item.endDate,
+              Estado: item.Estado, // Agregado
+              Estimacion: item.Estimacion, // Agregado
             }))} 
           />
         </>
