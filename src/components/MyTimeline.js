@@ -5,10 +5,24 @@ import "./MyTimeline.css";
 import moment from "moment";
 
 const MyTimeline = ({ tasks }) => {
-    // ... (resto del código sin cambios)
+    const safeTasks = tasks || [];
+
+    const yearStart = moment().startOf("year");
+    const yearEnd = moment().endOf("year");
+
+    const [visibleTimeStart, setVisibleTimeStart] = useState(yearStart.valueOf());
+    const [visibleTimeEnd, setVisibleTimeEnd] = useState(yearEnd.valueOf());
+
+    if (safeTasks.length === 0) {
+        return <p>No hay tareas disponibles</p>;
+    }
+
+    const groups = safeTasks.map((task) => ({
+        id: task.id,
+        title: task.title,
+    }));
 
     const items = safeTasks.map((task) => {
-        let backgroundColor = "linear-gradient(120deg, #64b5f6, #1e88e5)";
         let backgroundImage = "";
 
         switch (task.Estado) {
@@ -48,7 +62,7 @@ const MyTimeline = ({ tasks }) => {
                 alignItems: "center", // Añade esto
                 justifyContent: "center", // Añade esto
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Añade esto
-                minHeight: "40px", // Añade esto                
+                minHeight: "40px", // Añade esto
             },
         };
     });
