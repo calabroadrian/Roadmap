@@ -53,8 +53,8 @@ const MyTimeline = ({ tasks }) => {
             start_time: moment(task.startDate),
             end_time: moment(task.endDate),
             style: {
-                background: backgroundColor,
-                backgroundImage: backgroundImage,
+                background: backgroundColor + " !important",
+                backgroundImage: backgroundImage + " !important",
                 borderRadius: "10px", // Añade esto
                 transition: "transform 0.3s ease, box-shadow 0.3s ease", // Añade esto
                 color: "white", // Añade esto
