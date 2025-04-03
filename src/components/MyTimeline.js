@@ -23,9 +23,8 @@ const MyTimeline = ({ tasks }) => {
     }));
 
     const items = safeTasks.map((task) => {
-        let backgroundColor = "linear-gradient(120deg, #64b5f6, #1e88e5)"; // Color por defecto
+        let backgroundColor = "linear-gradient(120deg, #64b5f6, #1e88e5)";
 
-        // Asignar colores según el estado
         switch (task.Estado) {
             case "Nuevo":
                 backgroundColor = "linear-gradient(120deg, #ffcdd2, #e57373)";
@@ -40,11 +39,12 @@ const MyTimeline = ({ tasks }) => {
                 break;
         }
 
-        // Patrón rayado si la estimación está vacía
         let backgroundImage = "";
         if (!task.Estimacion) {
             backgroundImage = "repeating-linear-gradient(45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
         }
+
+        console.log("Tarea:", task, "Estilos:", { background: backgroundColor, backgroundImage: backgroundImage }); // Depuración
 
         return {
             id: task.id,
@@ -58,6 +58,9 @@ const MyTimeline = ({ tasks }) => {
             },
         };
     });
+
+    console.log("Items:", items); // Depuración
+    console.log("Tareas:", tasks); // Depuración
 
     return (
         <div>
