@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Timeline from "react-calendar-timeline";
-import "react-calendar-timeline/dist/style.css";
 import "./MyTimeline.css";
 import moment from "moment";
 import { Tooltip } from "@mui/material";
@@ -24,18 +23,22 @@ const MyTimeline = ({ tasks }) => {
     }));
 
     const items = safeTasks.map((task) => {
-        let backgroundColor = "linear-gradient(120deg, #64b5f6, rgb(30, 229, 100))"; // Color por defecto
-        let backgroundImage = "none";
+        let backgroundColor = "linear-gradient(120deg, #64b5f6, rgb(30, 229, 100))";
+        let backgroundImage = "";
+        let className = "mi-timeline-item";
 
         switch (task.Estado) {
             case "Nuevo":
                 backgroundColor = "linear-gradient(120deg, #ffcdd2, #e57373)";
+                className += " mi-timeline-nuevo";
                 break;
             case "En curso":
                 backgroundColor = "linear-gradient(120deg, #fff9c4, #ffeb3b)";
+                className += " mi-timeline-encurso";
                 break;
             case "Hecho":
                 backgroundColor = "linear-gradient(120deg, #c8e6c9, #4caf50)";
+                className += " mi-timeline-hecho";
                 break;
             default:
                 break;
@@ -51,13 +54,10 @@ const MyTimeline = ({ tasks }) => {
             title: task.title,
             start_time: moment(task.startDate),
             end_time: moment(task.endDate),
-            estimacion: task.Estimacion,
-            progress: task.progress,
-            dependencias: task.Dependencias,
-            bloqueos: task.Bloqueos,
+            className: className,
             style: {
-                background: backgroundColor, // Color basado en el estado
-                backgroundImage: backgroundImage,
+                background: backgroundColor,
+                backgroundImage: backgroundImage + " !important",
                 borderRadius: "10px",
                 transition: "transform 0.3s ease, box-shadow 0.3s ease",
                 color: "white",
@@ -68,10 +68,14 @@ const MyTimeline = ({ tasks }) => {
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
                 minHeight: "40px",
             },
+            estimacion: task.Estimacion,
+            progress: task.progress,
+            dependencias: task.Dependencias,
+            bloqueos: task.Bloqueos,
         };
     });
 
-    const itemRenderer = ({ item, getItemProps, getResizeProps }) => {
+    const itemRenderer = ({ item, getItemProps }) => {
         const itemProps = getItemProps();
         return (
             <div {...itemProps} style={{ ...itemProps.style, ...item.style }}>
@@ -95,6 +99,9 @@ const MyTimeline = ({ tasks }) => {
             </div>
         );
     };
+
+    console.log("Items:", items);
+    console.log("Tareas:", tasks);
 
     return (
         <div>

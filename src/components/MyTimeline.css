@@ -196,3 +196,9 @@
 .react-tooltip strong {
     font-weight: bold;
 }
+
+/* Estilos adicionales para evitar conflictos con Material UI */
+.MuiTooltip-tooltip {
+    max-width: none !important; /* Evita que el tooltip se corte */
+    white-space: normal !important; /* Permite saltos de línea */
+}
