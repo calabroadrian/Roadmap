@@ -1,7 +1,6 @@
 // src/components/MyTimeline.js
 import React, { useState } from "react";
 import Timeline from "react-calendar-timeline";
-import "react-calendar-timeline/dist/style.css";
 import "./MyTimeline.css"; // Tus estilos personalizados
 import moment from "moment";
 import { Tooltip } from "@mui/material";
