@@ -66,7 +66,7 @@ const MyTimeline = ({ tasks }) => {
                 alignItems: "center",
                 justifyContent: "center",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                minHeight: "40px",
+                minHeight: "40px", // Asegura que las barras tengan min-height de 40px
             },
             estimacion: task.Estimacion,
             progress: task.progress,
@@ -100,8 +100,7 @@ const MyTimeline = ({ tasks }) => {
         );
     };
 
-    console.log("Items:", items);
-    console.log("Tareas:", tasks);
+    const groupHeights = groups.map(() => 40); // Define la altura de las filas a 40px
 
     return (
         <div>
@@ -129,8 +128,9 @@ const MyTimeline = ({ tasks }) => {
                 headerLabelHeight={50}
                 minZoom={1000 * 60 * 60 * 24 * 30}
                 maxZoom={1000 * 60 * 60 * 24 * 365}
-                sidebarWidth={300} // mantiene el ancho del sidebar
-                className={'mi-rct-sidebar'} // Aplica la clase personalizada
+                sidebarWidth={300}
+                className="mi-rct-sidebar"
+                groupHeights={groupHeights} // Aplica la altura de las filas
             />
         </div>
     );
