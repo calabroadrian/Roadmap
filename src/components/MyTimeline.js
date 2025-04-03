@@ -100,6 +100,9 @@ const MyTimeline = ({ tasks }) => {
         );
     };
 
+    console.log("Items:", items);
+    console.log("Tareas:", tasks);
+
     return (
         <div>
             <Timeline
