@@ -28,7 +28,6 @@
 .react-calendar-timeline .rct-item {
     border-radius: 10px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: linear-gradient(120deg, #64b5f6, #1e88e5);
     color: white;
     font-weight: 500;
     cursor: pointer;
