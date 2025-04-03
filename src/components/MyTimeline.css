@@ -150,3 +150,34 @@
 .react-calendar-timeline .rct-scroll::-webkit-scrollbar-thumb:hover {
     background: #1976d2;
 }
+
+.mi-timeline-item {
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 40px;
+}
+
+.mi-timeline-item:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.mi-timeline-item.mi-timeline-nuevo {
+    background: linear-gradient(120deg, #ffcdd2, #e57373) !important;
+}
+
+.mi-timeline-item.mi-timeline-encurso {
+    background: linear-gradient(120deg, #fff9c4, #ffeb3b) !important;
+}
+
+.mi-timeline-item.mi-timeline-hecho {
+    background: linear-gradient(120deg, #c8e6c9, #4caf50) !important;
+}

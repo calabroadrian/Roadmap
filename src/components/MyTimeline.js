@@ -22,18 +22,22 @@ const MyTimeline = ({ tasks }) => {
     }));
 
     const items = safeTasks.map((task) => {
-        let backgroundColor = "linear-gradient(120deg, #64b5f6,rgb(30, 229, 100))";
+        let backgroundColor = "linear-gradient(120deg, #64b5f6, rgb(30, 229, 100))";
         let backgroundImage = "";
+        let className = "mi-timeline-item"; // Nombre de clase personalizado
 
         switch (task.Estado) {
             case "Nuevo":
                 backgroundColor = "linear-gradient(120deg, #ffcdd2, #e57373)";
+                className += " mi-timeline-nuevo"; // Clase específica para el estado "Nuevo"
                 break;
             case "En curso":
                 backgroundColor = "linear-gradient(120deg, #fff9c4, #ffeb3b)";
+                className += " mi-timeline-encurso"; // Clase específica para el estado "En curso"
                 break;
             case "Hecho":
                 backgroundColor = "linear-gradient(120deg, #c8e6c9, #4caf50)";
+                className += " mi-timeline-hecho"; // Clase específica para el estado "Hecho"
                 break;
             default:
                 break;
@@ -43,7 +47,7 @@ const MyTimeline = ({ tasks }) => {
             backgroundImage = "repeating-linear-gradient(45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
         }
 
-        console.log("Tarea:", task, "Estilos:", { background: backgroundColor, backgroundImage: backgroundImage }); // Depuración
+        console.log("Tarea:", task, "Estilos:", { background: backgroundColor, backgroundImage: backgroundImage });
 
         return {
             id: task.id,
@@ -51,24 +55,24 @@ const MyTimeline = ({ tasks }) => {
             title: task.title,
             start_time: moment(task.startDate),
             end_time: moment(task.endDate),
+            className: className, // Aplica la clase personalizada
             style: {
-                background: backgroundColor + " !important",
                 backgroundImage: backgroundImage + " !important",
-                borderRadius: "10px", // Añade esto
-                transition: "transform 0.3s ease, box-shadow 0.3s ease", // Añade esto
-                color: "white", // Añade esto
-                fontWeight: "500", // Añade esto
-                display: "flex", // Añade esto
-                alignItems: "center", // Añade esto
-                justifyContent: "center", // Añade esto
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Añade esto
-                minHeight: "40px", // Añade esto
+                borderRadius: "10px",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                color: "white",
+                fontWeight: "500",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                minHeight: "40px",
             },
         };
     });
 
-    console.log("Items:", items); // Depuración
-    console.log("Tareas:", tasks); // Depuración
+    console.log("Items:", items);
+    console.log("Tareas:", tasks);
 
     return (
         <div>
