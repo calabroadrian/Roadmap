@@ -1,3 +1,8 @@
+div[style="width: 150px;"] {
+    width: 300px !important; /* Aumenta el ancho y usa !important para forzar el estilo */
+    min-width: 300px !important;
+}
+
 .react-calendar-timeline * {
     box-sizing: border-box;
 }
@@ -181,4 +186,24 @@
 
 .mi-timeline-item.mi-timeline-hecho {
     background: linear-gradient(120deg, #c8e6c9, #4caf50) !important;
+}
+
+/* Estilos adicionales para el modal */
+.ReactModal__Content {
+    width: 50%;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Estilos adicionales para el tooltip */
+.react-tooltip {
+    font-size: 14px;
+    padding: 8px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.react-tooltip strong {
+    font-weight: bold;
 }

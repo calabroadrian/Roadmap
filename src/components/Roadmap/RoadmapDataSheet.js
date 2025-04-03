@@ -167,15 +167,18 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             Roadmap Timeline
           </Typography>
           <MyTimeline
-            tasks={items.map((item) => ({
-              id: item.Id,
-              title: item.Titulo,
-              startDate: item["Fecha Inicio"] || item.startDate,
-              endDate: item["Fecha Fin"] || item.endDate,
-              Estado: item.Estado, // Agregado
-              Estimacion: item.Estimacion, // Agregado
-            }))} 
-          />
+    tasks={items.map((item) => ({
+        id: item.Id,
+        title: item.Titulo,
+        startDate: item["Fecha Inicio"] || item.startDate,
+        endDate: item["Fecha Fin"] || item.endDate,
+        Estado: item.Estado,
+        Estimacion: item.Estimacion,
+        progress: item.progress, // Agregado
+        Dependencias: item.Dependencias, // Agregado
+        Bloqueos: item.Bloqueos, // Agregado
+    }))}
+/>
         </>
       )}
     </Box>
