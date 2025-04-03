@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Timeline from "react-calendar-timeline";
 import "./MyTimeline.css";
 import moment from "moment";
-import ReactTooltip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 
 const MyTimeline = ({ tasks }) => {
     const safeTasks = tasks || [];
@@ -111,7 +111,7 @@ const MyTimeline = ({ tasks }) => {
                 maxZoom={1000 * 60 * 60 * 24 * 365}
             />
             {items.map(item => (
-                <ReactTooltip 
+                <Tooltip 
                     key={`tooltip-${item.id}`}
                     id={`task-${item.id}`} 
                     html={true} 
