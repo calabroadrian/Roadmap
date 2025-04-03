@@ -211,3 +211,22 @@
     max-height: 600px; /* Establece una altura maxima */
     min-height: 40px;
 }
+
+.mi-timeline-item {
+    /* ... (otros estilos) ... */
+    min-height: 40px; /* Aumenta la altura mínima */
+    line-height: normal; /* Permite que el texto se centre correctamente */
+    padding: 8px 0; /* Agrega padding vertical para centrar el texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.react-calendar-timeline .rct-item {
+    min-height: 40px;
+    line-height: normal;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
