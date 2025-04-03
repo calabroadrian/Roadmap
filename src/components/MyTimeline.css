@@ -71,7 +71,7 @@
     color: #e0e0e0;
     grid-column: 1;
     grid-row: 1 / span 2;
-    min-width: 150px; /* Ancho mínimo para la barra lateral */
+    min-width: 300px; /* Ancho mínimo para la barra lateral */
     max-width: 300px; /* Ancho máximo para la barra lateral (opcional) */
     width: auto; /* Permite que el ancho se ajuste al contenido */
 }
