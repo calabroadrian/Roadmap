@@ -221,19 +221,19 @@
     min-height: 40px !important;
 }
 
-.mi-timeline-item {
+.react-calendar-timeline .rct-item {
     min-height: 40px !important;
-    line-height: normal;
-    padding: 8px 0;
+    line-height: 40px; /* Ajusta el line-height a la altura de la barra */
+    padding: 0; /* Elimina el padding */
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.react-calendar-timeline .rct-item {
+.mi-timeline-item {
     min-height: 40px !important;
-    line-height: normal;
-    padding: 8px 0;
+    line-height: 40px; /* Ajusta el line-height a la altura de la barra */
+    padding: 0; /* Elimina el padding */
     display: flex;
     align-items: center;
     justify-content: center;
