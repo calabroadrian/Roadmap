@@ -9,6 +9,7 @@
     grid-template-columns: auto 1fr;
     overflow: hidden;
     white-space: nowrap;
+    background: #f9f9f9;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #eee;
@@ -51,16 +52,6 @@
 }
 
 .react-calendar-timeline .rct-sidebar {
-    overflow: hidden;
-    white-space: normal;
-    display: inline-block;
-    vertical-align: top;
-    position: relative;
-    box-sizing: border-box;
-    border-right: 1px solid #eee;
-    color: #e0e0e0;
-    grid-column: 1;
-    grid-row: 1 / span 2;
     min-width: 300px;
     max-width: 300px;
     height: 300px;
