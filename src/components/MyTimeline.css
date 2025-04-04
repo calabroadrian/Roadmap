@@ -42,7 +42,6 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    top: 0 !important; /* Asegura que el item se posicione correctamente dentro de la fila */
 }
 
 .mi-timeline-container .mi-timeline-item.mi-timeline-nuevo {
