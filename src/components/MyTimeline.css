@@ -10,7 +10,10 @@
     background: #37474f !important;
     color: #e0e0e0 !important;
     border-right: 1px solid #eee !important;
+    min-width: 300px !important; /* Restaura el ancho mínimo */
+    max-width: 300px !important; /* Restaura el ancho máximo */
 }
+
 
 .mi-timeline-container .react-calendar-timeline .rct-sidebar .rct-sidebar-row {
     height: 30px !important;
