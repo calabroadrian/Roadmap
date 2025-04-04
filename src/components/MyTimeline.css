@@ -5,21 +5,12 @@
 }
 
 .react-calendar-timeline .rct-outer {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    overflow: hidden;
-    white-space: nowrap;
-    background: #f9f9f9;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #eee;
     height: 300px;
 }
 
 .react-calendar-timeline .rct-item {
     border-radius: 10px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    color: white;
     font-weight: 500;
     cursor: pointer;
     display: flex;
@@ -80,7 +71,6 @@
 
 .react-calendar-timeline .rct-header-root {
     border-bottom: 2px solid #1976d2;
-    color: white;
     font-weight: 600;
     grid-column: 2;
     grid-row: 1;
