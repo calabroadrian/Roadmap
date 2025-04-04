@@ -117,7 +117,6 @@ const MyTimeline = ({ tasks }) => {
     return (
         <div className="mi-timeline-container">
             <Timeline
-                className="mi-custom-timeline"
                 groups={groups}
                 items={items}
                 defaultTimeStart={yearStart}
