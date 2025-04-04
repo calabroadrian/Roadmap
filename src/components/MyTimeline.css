@@ -1,4 +1,8 @@
 /* src/components/MyTimeline.css */
+.react-calendar-timeline .rct-header-root {
+    background: #1976d2;
+    border-bottom: 1px solid #bbb
+}
 
 .react-calendar-timeline * {
     box-sizing: border-box;
@@ -38,8 +42,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    line-height: 40px; /* Ajusta el line-height a la altura de la barra */
-    padding: 0; /* Elimina el padding */
+    min-height: 40px;
 }
 
 .react-calendar-timeline .rct-item:hover {
@@ -80,9 +83,24 @@
     height: 300px;
 }
 
-.mi-rct-sidebar-row {
-    height: 20px !important;
-    line-height: 20px !important;
+.react-calendar-timeline .rct-sidebar .rct-sidebar-row {
+    padding: 12px 8px;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    border-bottom: 1px solid #455a64;
+    height: 40px !important;
+    line-height: 40px !important;
+    display: flex;
+    align-items: center;
+    width: 300px;
+}
+
+.react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-odd {
+    background: #455a64;
+}
+
+.react-calendar-timeline .rct-sidebar .rct-sidebar-row.rct-sidebar-row-even {
+    background: #37474f;
 }
 
 .react-calendar-timeline .rct-horizontal-lines .rct-hl-even,
@@ -143,12 +161,16 @@
 }
 
 .mi-timeline-item {
-    min-height: 25px !important;
-    line-height: 40px;
-    padding: 0;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 40px;
 }
 
 .mi-timeline-item:hover {
@@ -193,4 +215,30 @@
     min-height: 400px; /* Establece una altura mínima */
     max-height: 600px; /* Establece una altura maxima */
     min-height: 40px;
+}
+
+.mi-timeline-item {
+    /* ... (otros estilos) ... */
+    min-height: 40px; /* Aumenta la altura mínima */
+    line-height: normal; /* Permite que el texto se centre correctamente */
+    padding: 8px 0; /* Agrega padding vertical para centrar el texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+}
+
+.react-calendar-timeline .rct-item {
+    min-height: 40px;
+    top: 0px;
+    line-height: normal;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mi-rct-sidebar-row {
+    height: 40px !important;
+    line-height: 40px !important;
 }
