@@ -38,8 +38,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-height: 40px !important;
-    line-height: 40px; /* Ajusta el line-height a la altura de la barra */
+    line-height: 10px; /* Ajusta el line-height a la altura de la barra */
     padding: 0; /* Elimina el padding */
 }
 
@@ -82,8 +81,8 @@
 }
 
 .mi-rct-sidebar-row {
-    height: 40px !important;
-    line-height: 40px !important;
+    height: 20px !important;
+    line-height: 20px !important;
 }
 
 .react-calendar-timeline .rct-horizontal-lines .rct-hl-even,
@@ -144,8 +143,8 @@
 }
 
 .mi-timeline-item {
-    min-height: 40px !important;
-    line-height: 40px;
+    min-height: 25px !important;
+    line-height: 25px;
     padding: 0;
     display: flex;
     align-items: center;
