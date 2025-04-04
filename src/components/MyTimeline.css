@@ -9,7 +9,6 @@
     grid-template-columns: auto 1fr;
     overflow: hidden;
     white-space: nowrap;
-    background: #f9f9f9;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #eee;
@@ -59,7 +58,6 @@
     position: relative;
     box-sizing: border-box;
     border-right: 1px solid #eee;
-    background: #37474f;
     color: #e0e0e0;
     grid-column: 1;
     grid-row: 1 / span 2;
@@ -103,7 +101,6 @@
     justify-content: center;
     height: 100%;
     font-size: 15px;
-    background-color: #e1f5fe;
     border-left: 1px solid #cfd8dc;
     font-weight: 500;
     color: #333;
