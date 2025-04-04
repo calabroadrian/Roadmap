@@ -1,3 +1,194 @@
+/* src/components/MyTimeline.css */
+
+.react-calendar-timeline * {
+    box-sizing: border-box;
+}
+
+.react-calendar-timeline .rct-outer {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    overflow: hidden;
+    white-space: nowrap;
+    background: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+    height: 300px;
+}
+
+.react-calendar-timeline .rct-scroll {
+    display: inline-block;
+    white-space: normal;
+    vertical-align: top;
+    overflow-x: auto;
+    overflow-y: auto;
+    -ms-touch-action: none;
+    touch-action: none;
+    grid-column: 2;
+    grid-row: 2;
+}
+
+.react-calendar-timeline .rct-item {
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 40px !important;
+    line-height: 40px; /* Ajusta el line-height a la altura de la barra */
+    padding: 0; /* Elimina el padding */
+}
+
+.react-calendar-timeline .rct-item:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.react-calendar-timeline .rct-item .rct-item-content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.react-calendar-timeline .rct-sidebar {
+    overflow: hidden;
+    white-space: normal;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    box-sizing: border-box;
+    border-right: 1px solid #eee;
+    background: #37474f;
+    color: #e0e0e0;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    min-width: 300px;
+    max-width: 300px;
+    height: 300px;
+}
+
+.mi-rct-sidebar-row {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+
+.react-calendar-timeline .rct-horizontal-lines .rct-hl-even,
+.react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
+    border-bottom: 1px solid #eee;
+}
+
+.react-calendar-timeline .rct-horizontal-lines .rct-hl-odd {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.react-calendar-timeline .rct-cursor-line {
+    position: absolute;
+    width: 2px;
+    background: #f44336;
+    z-index: 51;
+}
+
+.react-calendar-timeline .rct-header-root {
+    border-bottom: 2px solid #1976d2;
+    color: white;
+    font-weight: 600;
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.react-calendar-timeline .rct-dateHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 15px;
+    background-color: #e1f5fe;
+    border-left: 1px solid #cfd8dc;
+    font-weight: 500;
+    color: #333;
+}
+
+.react-calendar-timeline .rct-vertical-lines .rct-vl.rct-day-6,
+.react-calendar-timeline .rct-vertical-lines .rct-vl.rct-day-0 {
+    background: rgba(255, 235, 59, 0.15);
+}
+
+.react-calendar-timeline .rct-scroll::-webkit-scrollbar {
+    height: 10px;
+}
+
+.react-calendar-timeline .rct-scroll::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+.react-calendar-timeline .rct-scroll::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+}
+
+.react-calendar-timeline .rct-scroll::-webkit-scrollbar-thumb:hover {
+    background: #1976d2;
+}
+
+.mi-timeline-item {
+    min-height: 40px !important;
+    line-height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mi-timeline-item:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.mi-timeline-item.mi-timeline-nuevo {
+    background: linear-gradient(120deg, #ffcdd2, #e57373) !important;
+}
+
+.mi-timeline-item.mi-timeline-encurso {
+    background: linear-gradient(120deg, #fff9c4, #ffeb3b) !important;
+}
+
+.mi-timeline-item.mi-timeline-hecho {
+    background: linear-gradient(120deg, #c8e6c9, #4caf50) !important;
+}
+
+/* Estilos adicionales para el tooltip */
+.react-tooltip {
+    font-size: 14px;
+    padding: 8px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.react-tooltip strong {
+    font-weight: bold;
+}
+
+/* Estilos adicionales para evitar conflictos con Material UI */
+.MuiTooltip-tooltip {
+    max-width: none !important; /* Evita que el tooltip se corte */
+    white-space: normal !important; /* Permite saltos de línea */
+}
+
 .mi-rct-sidebar {
     height: auto !important; /* Permite que la altura se ajuste al contenido */
     min-height: 400px; /* Establece una altura mínima */
