@@ -67,7 +67,6 @@ const MyTimeline = ({ tasks }) => {
                 alignItems: "center",
                 justifyContent: "center",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                minHeight: "40px", // Asegura que las barras tengan min-height de 40px
             },
             estimacion: task.Estimacion,
             progress: task.progress,
@@ -101,7 +100,7 @@ const MyTimeline = ({ tasks }) => {
         );
     };
 
-    const groupHeights = groups.map(() => 40); // Define la altura de las filas a 40px
+    const groupHeights = groups.map(() => 30); // Define la altura de las filas a 30px
 
     const sidebarContentRenderer = ({ group }) => {
         return (
