@@ -59,14 +59,18 @@ const MyTimeline = ({ tasks }) => {
             style: {
                 background: backgroundColor,
                 backgroundImage: backgroundImage + " !important",
-                borderRadius: "10px",
+                borderRadius: "5px",
                 transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                color: "white",
+                color: "black",
                 fontWeight: "500",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                minHeight: "25px",
+                lineHeight: "25px",
+                fontSize: "12px",
+                border: "1px solid #ccc",
             },
             estimacion: task.Estimacion,
             progress: task.progress,
@@ -100,7 +104,7 @@ const MyTimeline = ({ tasks }) => {
         );
     };
 
-    const groupHeights = groups.map(() => 30); // Define la altura de las filas a 30px
+    const groupHeights = groups.map(() => 30);
 
     const sidebarContentRenderer = ({ group }) => {
         return (
@@ -111,8 +115,9 @@ const MyTimeline = ({ tasks }) => {
     };
 
     return (
-        <div>
+        <div className="mi-timeline-container">
             <Timeline
+                className="mi-custom-timeline"
                 groups={groups}
                 items={items}
                 defaultTimeStart={yearStart}
@@ -132,13 +137,13 @@ const MyTimeline = ({ tasks }) => {
                     yearShort: "",
                     yearLong: "",
                 }}
-                headerLabelGroupHeight={50}
-                headerLabelHeight={50}
+                headerLabelGroupHeight={30}
+                headerLabelHeight={30}
                 minZoom={1000 * 60 * 60 * 24 * 30}
                 maxZoom={1000 * 60 * 60 * 24 * 365}
-                sidebarWidth={300}
+                sidebarWidth={150}
                 className="mi-rct-sidebar"
-                groupHeights={groupHeights} // Aplica la altura de las filas
+                groupHeights={groupHeights}
                 sidebarContentRenderer={sidebarContentRenderer}
             />
         </div>
