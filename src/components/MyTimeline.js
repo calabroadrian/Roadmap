@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Timeline from "react-calendar-timeline";
 import "./MyTimeline.css";
-import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 import { Tooltip } from "@mui/material";
 
