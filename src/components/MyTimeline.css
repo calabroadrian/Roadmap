@@ -1,4 +1,11 @@
 /* src/components/MyTimeline.css */
+.react-calendar-timeline .rct-dateHeader {
+    background-color: #a2b4b4;
+}
+
+div {
+    width: 300px;
+}
 
 .mi-timeline-container .react-calendar-timeline .rct-header-root {
     background: #1976d2 !important;
