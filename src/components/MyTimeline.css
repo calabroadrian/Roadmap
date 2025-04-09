@@ -3,10 +3,6 @@
     background-color: #a2b4b4;
 }
 
-div {
-    width: 300px;
-}
-
 .mi-timeline-container .react-calendar-timeline .rct-header-root {
     background: #1976d2 !important;
     border-bottom: 1px solid #bbb !important;
