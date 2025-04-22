@@ -104,7 +104,7 @@ const MyTimeline = ({ tasks }) => {
         start_time: moment(task.startDate),
         end_time: moment(task.endDate),
         state: task.Estado,
-        etapa: task.Etapa,        // Nueva columna Etapa
+        etapa: task.etapa,        // Nueva columna etapa
         style: {
           background: bg,
           backgroundImage: bgImg,
