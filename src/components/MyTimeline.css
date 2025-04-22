@@ -99,3 +99,11 @@
     align-items: center !important;
     padding: 4px !important;
 }
+
+/* MyTimelineEnhanced.css */
+.timeline-wrapper { padding: 1rem; }
+.tag-container { display: flex; gap: 2px; position: absolute; top: 2px; left: 4px; }
+.tag-chip { font-size: 0.6rem; padding: 0 4px; }
+.item-title { text-align: center; font-weight: 500; }
+.timeline-item-cambiodealcance { /* estilos adicionales si quieres */ }
+/* …clases para cada estado… */
