@@ -19,19 +19,21 @@ const ETAPA_STYLES = {
 
 // Definición de estilos para Estados (status)
 const STATE_STYLES = {
-  Nuevo: { gradient: ["#ffcdd2", "#e57373"] },
-  "En curso": { gradient: ["#fff9c4", "#ffeb3b"] },
-  Hecho: { gradient: ["#c8e6c9", "#4caf50"] },
+  "Nuevo":       { gradient: ["#ffcdd2", "#e57373"] },
+  "En curso":    { gradient: ["#fff9c4", "#ffeb3b"] },
+  "En progreso": { gradient: ["#fff9c4", "#ffeb3b"] },
+  "Hecho":       { gradient: ["#c8e6c9", "#4caf50"] },
 };
 
 // Patrón para items sin estimación
 const PATTERNS = {
-  stripes: "repeating-linear-gradient(-45deg, #bbb, #bbb 5px, #ccc 5px, #ccc 10px)",
+  stripes: "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)",
 };
 
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const etapaColor = ETAPA_STYLES[item.etapa]?.color || "#757575";
+
   return (
     <div {...itemProps} style={{ ...itemProps.style, ...item.style }}>
       {item.etapa && (
@@ -86,9 +88,11 @@ const MyTimeline = ({ tasks }) => {
 
   const items = useMemo(
     () => safeTasks.map(task => {
+      // Aplicar gradiente por estado
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
       const bg = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
       const bgImg = !task.Estimacion ? PATTERNS.stripes : undefined;
+
       return {
         id: task.id,
         group: task.id,
@@ -96,10 +100,11 @@ const MyTimeline = ({ tasks }) => {
         start_time: moment(task.startDate),
         end_time: moment(task.endDate),
         state: task.Estado,
-        etapa: task.etapa,         
+        etapa: task.etapa,
         style: {
           background: bg,
           backgroundImage: bgImg,
+          backgroundRepeat: 'repeat',
           borderRadius: "5px",
           padding: "4px",
           color: "#333",
