@@ -1,12 +1,12 @@
 /* src/components/MyTimeline.css */
 .react-calendar-timeline .rct-dateHeader {
-    background-color: #a2b4b4;
+    background: #a2b4b4 !important;
 }
 
 .mi-timeline-container .react-calendar-timeline .rct-header-root {
     background: #1976d2 !important;
     border-bottom: 1px solid #bbb !important;
-    color: white !important;
+    color: rgb(0, 0, 0) !important;
 }
 
 .mi-timeline-container .react-calendar-timeline .rct-sidebar {
