@@ -1,3 +1,4 @@
+// src/components/MyTimeline.js
 import React, { useState, useMemo } from "react";
 import Timeline from "react-calendar-timeline";
 import "./MyTimeline.css";
@@ -18,24 +19,21 @@ const ETAPA_STYLES = {
 
 // Definición de estilos para Estados (status)
 const STATE_STYLES = {
-  "Nuevo": { gradient: ["#ffcdd2", "#e57373"] },
+  Nuevo: { gradient: ["#ffcdd2", "#e57373"] },
   "En curso": { gradient: ["#fff9c4", "#ffeb3b"] },
-  "Hecho": { gradient: ["#c8e6c9", "#4caf50"] },
+  Hecho: { gradient: ["#c8e6c9", "#4caf50"] },
 };
 
-// Patrones opcionales para items sin estimación
+// Patrón para items sin estimación
 const PATTERNS = {
   stripes: "repeating-linear-gradient(-45deg, #bbb, #bbb 5px, #ccc 5px, #ccc 10px)",
 };
 
-// Renderizador externo para mejorar performance
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
-  const etapaStyle = ETAPA_STYLES[item.etapa] || { color: "#757575" };
-
+  const etapaColor = ETAPA_STYLES[item.etapa]?.color || "#757575";
   return (
     <div {...itemProps} style={{ ...itemProps.style, ...item.style }}>
-      {/* Indicador de Etapa como chip */}
       {item.etapa && (
         <Chip
           label={item.etapa}
@@ -44,7 +42,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
             position: 'absolute',
             top: 2,
             right: 2,
-            backgroundColor: etapaStyle.color,
+            backgroundColor: etapaColor,
             color: '#fff',
             fontSize: '10px',
             height: '18px',
@@ -75,28 +73,22 @@ const ItemRenderer = ({ item, getItemProps }) => {
 const MyTimeline = ({ tasks }) => {
   const safeTasks = tasks || [];
   const now = moment();
-
-  // Mostrar intervalo cercano: 2 meses atrás y 2 meses adelante
   const defaultStart = now.clone().subtract(2, "months");
   const defaultEnd = now.clone().add(2, "months");
 
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
-  // Memoización de grupos
   const groups = useMemo(
     () => safeTasks.map(task => ({ id: task.id, title: task.title })),
     [safeTasks]
   );
 
-  // Memoización de items con estilos según estado y etapa
   const items = useMemo(
     () => safeTasks.map(task => {
-      // Estado (status) styling
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
       const bg = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
       const bgImg = !task.Estimacion ? PATTERNS.stripes : undefined;
-
       return {
         id: task.id,
         group: task.id,
@@ -104,7 +96,7 @@ const MyTimeline = ({ tasks }) => {
         start_time: moment(task.startDate),
         end_time: moment(task.endDate),
         state: task.Estado,
-        etapa: task.etapa,        // Nueva columna etapa
+        etapa: task.etapa,         
         style: {
           background: bg,
           backgroundImage: bgImg,
@@ -118,7 +110,7 @@ const MyTimeline = ({ tasks }) => {
           boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
           minHeight: "30px",
           fontSize: "13px",
-          borderLeft: `4px solid ${ETAPA_STYLES[task.Etapa]?.color || '#757575'}`,
+          borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]?.color || '#757575'}`,
           border: "1px solid #ccc",
         },
         estimacion: task.Estimacion,
@@ -129,12 +121,6 @@ const MyTimeline = ({ tasks }) => {
   );
 
   if (!groups.length) return <p>No hay tareas disponibles</p>;
-
-  const groupHeights = groups.map(() => 40);
-
-  const sidebarContentRenderer = ({ group }) => (
-    <div className="mi-rct-sidebar-row">{group.title}</div>
-  );
 
   return (
     <div className="mi-timeline-container">
@@ -153,12 +139,12 @@ const MyTimeline = ({ tasks }) => {
         headerLabelFormats={{ monthShort: "MMM", monthLong: "MMMM YYYY" }}
         headerLabelGroupHeight={30}
         headerLabelHeight={30}
-        minZoom={1000 * 60 * 60 * 24 * 7}     // 1 semana
-        maxZoom={1000 * 60 * 60 * 24 * 31 * 4} // 4 meses
+        minZoom={1000 * 60 * 60 * 24 * 7}
+        maxZoom={1000 * 60 * 60 * 24 * 31 * 4}
         sidebarWidth={180}
         className="mi-rct-sidebar"
-        groupHeights={groupHeights}
-        sidebarContentRenderer={sidebarContentRenderer}
+        sidebarContentRenderer={({ group }) => <div className="mi-rct-sidebar-row">{group.title}</div>}
+        groupHeights={groups.map(() => 40)}
       />
     </div>
   );
