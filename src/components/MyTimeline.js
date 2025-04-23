@@ -88,10 +88,10 @@ const MyTimeline = ({ tasks }) => {
 
   const items = useMemo(
     () => safeTasks.map(task => {
-      // Aplicar gradiente por estado
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-      const bg = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
-      const bgImg = !task.Estimacion ? PATTERNS.stripes : undefined;
+      const gradientCss = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
+      const patternCss = !task.Estimacion ? PATTERNS.stripes : '';
+      const bgImage = patternCss ? `${gradientCss}, ${patternCss}` : gradientCss;
 
       return {
         id: task.id,
@@ -102,9 +102,9 @@ const MyTimeline = ({ tasks }) => {
         state: task.Estado,
         etapa: task.etapa,
         style: {
-          background: bg,
-          backgroundImage: bgImg,
+          backgroundImage: bgImage,
           backgroundRepeat: 'repeat',
+          backgroundSize: '200% 100%',
           borderRadius: "5px",
           padding: "4px",
           color: "#333",
