@@ -107,3 +107,10 @@
 .item-title { text-align: center; font-weight: 500; }
 .timeline-item-cambiodealcance { /* estilos adicionales si quieres */ }
 /* …clases para cada estado… */
+
+.timeline-item { position: relative; }
+.etapa-chip { position: absolute; top: 2px; right: 2px; font-size: 10px; }
+.tooltip-content { line-height: 1.4; }
+.item-title { width: 100%; text-align: center; }
+.zoom-controls { margin-bottom: 8px; display: flex; gap: 8px; }
+.sidebar-row { padding: 4px; font-weight: 500; }
