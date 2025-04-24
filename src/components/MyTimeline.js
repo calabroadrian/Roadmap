@@ -30,12 +30,14 @@ const PATTERNS = {
   stripes: "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)",
 };
 
+// Renderizador de cada item en la timeline
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const etapaColor = ETAPA_STYLES[item.etapa]?.color || "#757575";
 
   return (
     <div {...itemProps} style={{ ...itemProps.style, ...item.style }}>
+      {/* Etiqueta de etapa */}
       {item.etapa && (
         <Chip
           label={item.etapa}
@@ -51,6 +53,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
           }}
         />
       )}
+      {/* Tooltip con detalles */}
       <Tooltip
         title={
           <div style={{ textAlign: "left", fontSize: "0.85rem" }}>
@@ -66,7 +69,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
         placement="top"
         enterDelay={300}
       >
-        <div style={{ width: '100%', textAlign: "center" }}>{item.title}</div>
+        <div style={{ width: '100%', textAlign: 'center' }}>{item.title}</div>
       </Tooltip>
     </div>
   );
@@ -81,11 +84,13 @@ const MyTimeline = ({ tasks }) => {
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
+  // Agrupa tareas
   const groups = useMemo(
     () => safeTasks.map(task => ({ id: task.id, title: task.title })),
     [safeTasks]
   );
 
+  // Prepara items con estilos
   const items = useMemo(
     () => safeTasks.map(task => {
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
@@ -105,18 +110,18 @@ const MyTimeline = ({ tasks }) => {
           backgroundImage: bgImage,
           backgroundRepeat: 'repeat',
           backgroundSize: '200% 100%',
-          borderRadius: "5px",
-          padding: "4px",
-          color: "#333",
+          borderRadius: '5px',
+          padding: '4px',
+          color: '#333',
           fontWeight: 500,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          minHeight: "30px",
-          fontSize: "13px",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          minHeight: '30px',
+          fontSize: '13px',
           borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]?.color || '#757575'}`,
-          border: "1px solid #ccc",
+          border: '1px solid #ccc',
         },
         estimacion: task.Estimacion,
         progress: task.progress,
@@ -129,6 +134,8 @@ const MyTimeline = ({ tasks }) => {
 
   return (
     <div className="mi-timeline-container">
+      {/* Línea visual por semanas */}
+      <style>{`.rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }`}</style>
       <Timeline
         groups={groups}
         items={items}
@@ -141,7 +148,7 @@ const MyTimeline = ({ tasks }) => {
           setVisibleTimeEnd(end);
         }}
         itemRenderer={ItemRenderer}
-        headerLabelFormats={{ monthShort: "MMM", monthLong: "MMMM YYYY" }}
+        headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM YYYY' }}
         headerLabelGroupHeight={30}
         headerLabelHeight={30}
         minZoom={1000 * 60 * 60 * 24 * 7}
