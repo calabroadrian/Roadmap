@@ -1,12 +1,13 @@
 // src/components/MyTimeline.js
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
+import PropTypes from "prop-types";
 import Timeline from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
-import { Tooltip, Chip } from "@mui/material";
+import { Tooltip, Chip, Box, Button } from "@mui/material";
 
-// Definición de estilos para Etapas (phases)
+// Estilos para Etapas
 const ETAPA_STYLES = {
   "Cambio de alcance": { color: "#FF9800" },
   "Impacto en inicio": { color: "#F44336" },
@@ -17,7 +18,7 @@ const ETAPA_STYLES = {
   "Inicio de desarrollo": { color: "#4CAF50" },
 };
 
-// Definición de estilos para Estados (status)
+// Estilos para Estados
 const STATE_STYLES = {
   "Nuevo":       { gradient: ["#ffcdd2", "#e57373"] },
   "En curso":    { gradient: ["#fff9c4", "#ffeb3b"] },
@@ -30,14 +31,12 @@ const PATTERNS = {
   stripes: "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)",
 };
 
-// Renderizador de cada item en la timeline
+// Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const etapaColor = ETAPA_STYLES[item.etapa]?.color || "#757575";
-
   return (
     <div {...itemProps} style={{ ...itemProps.style, ...item.style }}>
-      {/* Etiqueta de etapa */}
       {item.etapa && (
         <Chip
           label={item.etapa}
@@ -53,21 +52,18 @@ const ItemRenderer = ({ item, getItemProps }) => {
           }}
         />
       )}
-      {/* Tooltip con detalles */}
       <Tooltip
         title={
-          <div style={{ textAlign: "left", fontSize: "0.85rem" }}>
+          <div style={{ textAlign: 'left', fontSize: '0.85rem' }}>
             <div><strong>Estado:</strong> {item.state}</div>
             <div><strong>Etapa:</strong> {item.etapa}</div>
-            <div><strong>Estimación:</strong> {item.estimacion || "N/A"}</div>
-            <div><strong>Inicio:</strong> {moment(item.start_time).format("DD/MM/YYYY")}</div>
-            <div><strong>Fin:</strong> {moment(item.end_time).format("DD/MM/YYYY")}</div>
-            <div><strong>Progreso:</strong> {item.progress || "N/A"}</div>
+            <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
+            <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
+            <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
+            <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
           </div>
         }
-        arrow
-        placement="top"
-        enterDelay={300}
+        arrow placement="top" enterDelay={300}
       >
         <div style={{ width: '100%', textAlign: 'center' }}>{item.title}</div>
       </Tooltip>
@@ -78,11 +74,23 @@ const ItemRenderer = ({ item, getItemProps }) => {
 const MyTimeline = ({ tasks }) => {
   const safeTasks = tasks || [];
   const now = moment();
-  const defaultStart = now.clone().subtract(2, "months");
-  const defaultEnd = now.clone().add(2, "months");
+  const defaultStart = now.clone().subtract(2, 'months');
+  const defaultEnd = now.clone().add(2, 'months');
 
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
+
+  // Zoom in/out handlers
+  const zoomIn = useCallback(() => {
+    const span = visibleTimeEnd - visibleTimeStart;
+    setVisibleTimeStart(visibleTimeStart + span * 0.1);
+    setVisibleTimeEnd(visibleTimeEnd - span * 0.1);
+  }, [visibleTimeStart, visibleTimeEnd]);
+  const zoomOut = useCallback(() => {
+    const span = visibleTimeEnd - visibleTimeStart;
+    setVisibleTimeStart(visibleTimeStart - span * 0.1);
+    setVisibleTimeEnd(visibleTimeEnd + span * 0.1);
+  }, [visibleTimeStart, visibleTimeEnd]);
 
   // Agrupa tareas
   const groups = useMemo(
@@ -96,8 +104,7 @@ const MyTimeline = ({ tasks }) => {
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
       const gradientCss = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
       const patternCss = !task.Estimacion ? PATTERNS.stripes : '';
-      const bgImage = patternCss ? `url("${patternCss}"), ${gradientCss}` : gradientCss;
-
+      const bgImage = patternCss ? `${gradientCss}, ${patternCss}` : gradientCss;
       return {
         id: task.id,
         group: task.id,
@@ -106,23 +113,7 @@ const MyTimeline = ({ tasks }) => {
         end_time: moment(task.endDate),
         state: task.Estado,
         etapa: task.etapa,
-        style: {
-          backgroundImage: bgImage,
-          backgroundRepeat: 'repeat',
-          backgroundSize: '200% 100%',
-          borderRadius: '5px',
-          padding: '4px',
-          color: '#333',
-          fontWeight: 500,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          minHeight: '30px',
-          fontSize: '13px',
-          borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]?.color || '#757575'}`,
-          border: '1px solid #ccc',
-        },
+        style: { backgroundImage: bgImage, backgroundRepeat: 'repeat', backgroundSize: '200% 100%' },
         estimacion: task.Estimacion,
         progress: task.progress,
       };
@@ -133,7 +124,11 @@ const MyTimeline = ({ tasks }) => {
   if (!groups.length) return <p>No hay tareas disponibles</p>;
 
   return (
-    <div className="mi-timeline-container">
+    <Box>
+      <Box sx={{ mb: 1, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+        <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
+        <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
+      </Box>
       {/* Líneas semanales visibles */}
       <style>{`.rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }`}</style>
       <Timeline
@@ -143,17 +138,13 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
-        onTimeChange={(start, end) => {
-          setVisibleTimeStart(start);
-          setVisibleTimeEnd(end);
-        }}
+        onTimeChange={(start, end) => { setVisibleTimeStart(start); setVisibleTimeEnd(end); }}
         itemRenderer={ItemRenderer}
         headerLabelFormats={{
-          monthShort: 'MMM',
-          monthLong: 'MMMM YYYY',
-          weekShort: 'W',
-          weekLong: 'Wo [semana]'
+          monthShort: 'MMM', monthLong: 'MMMM YYYY',
+          weekShort: 'W', weekLong: 'Wo [semana]'
         }}
+        todayLineColor="red"
         headerLabelGroupHeight={30}
         headerLabelHeight={30}
         minZoom={1000 * 60 * 60 * 24 * 7}
@@ -163,8 +154,23 @@ const MyTimeline = ({ tasks }) => {
         sidebarContentRenderer={({ group }) => <div className="mi-rct-sidebar-row">{group.title}</div>}
         groupHeights={groups.map(() => 40)}
       />
-    </div>
+    </Box>
   );
+};
+
+MyTimeline.propTypes = {
+  tasks: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      title: PropTypes.string.isRequired,
+      startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      Estado: PropTypes.string,
+      etapa: PropTypes.string,
+      Estimacion: PropTypes.any,
+      progress: PropTypes.any,
+    })
+  ),
 };
 
 export default MyTimeline;
