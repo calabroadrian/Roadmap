@@ -130,7 +130,12 @@ const MyTimeline = ({ tasks }) => {
       {/* Líneas semanales visibles */}
       <style>{`.rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }`}</style>
       {/* Evitar que el seleccionado pierda su color */}
-      <style>{`.rct-item.rct-selected { background-color: transparent !important; }`}</style>
+      {/* Evitar que el seleccionado pierda su color */}
+      <style>{`
+        .rct-item.rct-selected {
+          background: none !important;
+        }
+      `}</style>
       <Timeline
         groups={groups}
         items={items}
