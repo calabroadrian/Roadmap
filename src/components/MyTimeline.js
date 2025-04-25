@@ -1,11 +1,11 @@
 // src/components/MyTimeline.js
 import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
-import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
+import Timeline from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
-import { Tooltip, Chip, Box, Button, TextField } from "@mui/material";
+import { Tooltip, Chip, Box, Button } from "@mui/material";
 
 // Estilos para Etapas
 const ETAPA_STYLES = {
@@ -17,6 +17,7 @@ const ETAPA_STYLES = {
   "En pausa": { color: "#FFEB3B" },
   "Inicio de desarrollo": { color: "#4CAF50" },
 };
+
 // Estilos para Estados
 const STATE_STYLES = {
   "Nuevo":       { gradient: ["#ffcdd2", "#e57373"] },
@@ -24,9 +25,13 @@ const STATE_STYLES = {
   "En progreso": { gradient: ["#fff9c4", "#ffeb3b"] },
   "Hecho":       { gradient: ["#c8e6c9", "#4caf50"] },
 };
-// Patrón para items sin estimación
-const PATTERN = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
+// Patrón para items sin estimación
+const PATTERNS = {
+  stripes: "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)",
+};
+
+// Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const etapaColor = ETAPA_STYLES[item.etapa]?.color || "#757575";
@@ -36,127 +41,96 @@ const ItemRenderer = ({ item, getItemProps }) => {
         <Chip
           label={item.etapa}
           size="small"
-          sx={{
-            position: 'absolute',
-            top: 2,
-            right: 2,
-            bgcolor: etapaColor,
-            color: '#fff',
-            fontSize: '10px',
-            height: '18px',
+          style={{
+            position: 'absolute', top: 2, right: 2,
+            backgroundColor: etapaColor,
+            color: '#fff', fontSize: '10px', height: '18px'
           }}
         />
       )}
       <Tooltip
         title={
-          <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
+          <div style={{ textAlign: 'left', fontSize: '0.85rem' }}>
             <div><strong>Estado:</strong> {item.state}</div>
             <div><strong>Etapa:</strong> {item.etapa}</div>
             <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
             <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
             <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
             <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
-          </Box>
+          </div>
         }
         arrow
         placement="top"
         enterDelay={300}
       >
-        <Box sx={{ width: '100%', textAlign: 'center' }}>{item.title}</Box>
+        <div style={{ width: '100%', textAlign: 'center' }}>{item.title}</div>
       </Tooltip>
     </div>
   );
 };
 
 const MyTimeline = ({ tasks }) => {
-  const [filter, setFilter] = useState("");
-  const filtered = useMemo(
-    () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
-    [tasks, filter]
-  );
-
+  const safeTasks = tasks || [];
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months');
   const defaultEnd = now.clone().add(2, 'months');
 
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
-  const [selectedIds, setSelectedIds] = useState([]);
 
+  // Zoom in/out handlers
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
-    setVisibleTimeStart(v => v + span * 0.1);
-    setVisibleTimeEnd(v => v - span * 0.1);
-  }, []);
+    setVisibleTimeStart(visibleTimeStart + span * 0.1);
+    setVisibleTimeEnd(visibleTimeEnd - span * 0.1);
+  }, [visibleTimeStart, visibleTimeEnd]);
   const zoomOut = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
-    setVisibleTimeStart(v => v - span * 0.1);
-    setVisibleTimeEnd(v => v + span * 0.1);
-  }, []);
+    setVisibleTimeStart(visibleTimeStart - span * 0.1);
+    setVisibleTimeEnd(visibleTimeEnd + span * 0.1);
+  }, [visibleTimeStart, visibleTimeEnd]);
 
   // Agrupa tareas
   const groups = useMemo(
-    () => filtered.map(t => ({ id: t.id, title: t.title })),
-    [filtered]
+    () => safeTasks.map(task => ({ id: task.id, title: task.title })),
+    [safeTasks]
   );
 
-  // Prepara items con estilos correctos
+  // Prepara items con estilos
   const items = useMemo(
-    () => filtered.map(t => {
-      const stateDef = STATE_STYLES[t.Estado] || STATE_STYLES['Nuevo'];
-      const gradient = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
-      const hasPattern = !t.Estimacion;
+    () => safeTasks.map(task => {
+      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
+      const gradientCss = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
+      const patternCss = !task.Estimacion ? PATTERNS.stripes : '';
+      const bgImage = patternCss ? `${gradientCss}, ${patternCss}` : gradientCss;
       return {
-        id: t.id,
-        group: t.id,
-        title: t.title,
-        start_time: moment(t.startDate),
-        end_time: moment(t.endDate),
-        state: t.Estado,
-        etapa: t.etapa,
-        style: {
-          // Fondo de gradiente por estado
-          background: gradient,
-          // Patrón en overlay si no hay estimación
-          ...(hasPattern && { backgroundImage: PATTERN, backgroundRepeat: 'repeat' }),
-          borderRadius: '5px',
-          padding: '4px',
-          color: '#333',
-          fontWeight: 500,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          minHeight: '30px',
-          fontSize: '13px',
-          borderLeft: `4px solid ${ETAPA_STYLES[t.etapa]?.color || '#757575'}`,
-          border: '1px solid #ccc',
-        },
-        estimacion: t.Estimacion,
-        progress: t.progress,
+        id: task.id,
+        group: task.id,
+        title: task.title,
+        start_time: moment(task.startDate),
+        end_time: moment(task.endDate),
+        state: task.Estado,
+        etapa: task.etapa,
+        style: { backgroundImage: bgImage, backgroundRepeat: 'repeat', backgroundSize: '200% 100%' },
+        estimacion: task.Estimacion,
+        progress: task.progress,
       };
     }),
-    [filtered]
+    [safeTasks]
   );
 
   if (!groups.length) return <p>No hay tareas disponibles</p>;
 
   return (
     <Box>
-      <Box sx={{ mb: 1, display: 'flex', gap: 1, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <TextField
-          label="Buscar tarea…"
-          size="small"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        />
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
-          <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
-        </Box>
+      <Box sx={{ mb: 1, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+        <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
+        <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-      {/* Semanas visibles */}
+      {/* Líneas semanales visibles */}
       <style>{`.rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }`}</style>
+      {/* Evitar que el seleccionado pierda su color */}
+      <style>{`.rct-item.rct-selected { background-color: transparent !important; }`}</style>
       <Timeline
         groups={groups}
         items={items}
@@ -164,16 +138,13 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
-        selected={selectedIds}
-        onItemSelect={id => setSelectedIds([id])}
-        onCanvasClick={() => setSelectedIds([])}
-        todayLineColor="red"
+        onTimeChange={(start, end) => { setVisibleTimeStart(start); setVisibleTimeEnd(end); }}
+        itemRenderer={ItemRenderer}
         headerLabelFormats={{
-          dayShort: 'dd',
-          dayLong: 'dddd',
-          monthShort: 'MMM',
-          monthLong: 'MMMM YYYY',
+          monthShort: 'MMM', monthLong: 'MMMM YYYY',
+          weekShort: 'W', weekLong: 'Wo [semana]'
         }}
+        todayLineColor="red"
         headerLabelGroupHeight={30}
         headerLabelHeight={30}
         minZoom={1000 * 60 * 60 * 24 * 7}
