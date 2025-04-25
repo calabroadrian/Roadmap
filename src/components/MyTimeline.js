@@ -115,7 +115,9 @@ const MyTimeline = ({ tasks }) => {
         state: t.Estado,
         etapa: t.etapa,
         style: {
+          // Fondo de gradiente por estado
           background: gradient,
+          // Patrón en overlay si no hay estimación
           ...(hasPattern && { backgroundImage: PATTERN, backgroundRepeat: 'repeat' }),
           borderRadius: '5px',
           padding: '4px',
@@ -166,13 +168,21 @@ const MyTimeline = ({ tasks }) => {
         onItemSelect={id => setSelectedIds([id])}
         onCanvasClick={() => setSelectedIds([])}
         todayLineColor="red"
-      >
-        <TimelineHeaders>
-          <DateHeader unit="primaryHeader" labelFormat="MMMM YYYY" />
-          <DateHeader unit="week" labelFormat="Wo [semana]" />
-          <DateHeader unit="day" labelFormat="DD" />
-        </TimelineHeaders>
-      </Timeline>
+        headerLabelFormats={{
+          dayShort: 'dd',
+          dayLong: 'dddd',
+          monthShort: 'MMM',
+          monthLong: 'MMMM YYYY',
+        }}
+        headerLabelGroupHeight={30}
+        headerLabelHeight={30}
+        minZoom={1000 * 60 * 60 * 24 * 7}
+        maxZoom={1000 * 60 * 60 * 24 * 31 * 4}
+        sidebarWidth={150}
+        className="mi-rct-sidebar"
+        sidebarContentRenderer={({ group }) => <div className="mi-rct-sidebar-row">{group.title}</div>}
+        groupHeights={groups.map(() => 40)}
+      />
     </Box>
   );
 };
