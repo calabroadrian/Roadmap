@@ -128,12 +128,12 @@ const MyTimeline = ({ tasks }) => {
         <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
       </Box>
       {/* Líneas semanales visibles */}
-      <style>{`.rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }`}</style>
-      {/* Evitar que el seleccionado pierda su color */}
-      {/* Evitar que el seleccionado pierda su color */}
       <style>{`
-        .rct-item.rct-selected {
-          background: none !important;
+        .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
+        /* Mantener colores tras selección */
+        .rct-item.rct-selected, .rct-item.rct-selected .rct-item-content {
+          background: unset !important;
+          background-image: unset !important;
         }
       `}</style>
       <Timeline
