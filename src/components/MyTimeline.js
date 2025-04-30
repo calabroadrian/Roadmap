@@ -2,28 +2,38 @@
 import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import Timeline from "react-calendar-timeline";
+import {
+  Paper,
+  Typography,
+  Chip,
+  Box,
+  Button,
+  TextField,
+  Stack,
+  useTheme
+} from "@mui/material";
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
-import { Tooltip, Chip, Box, Button, TextField } from "@mui/material";
 
 // Estilos para Etapas
 const ETAPA_STYLES = {
-  "Cambio de alcance": { color: "#FF9800" },
-  "Impacto en inicio": { color: "#F44336" },
-  "Ajustes": { color: "#2196F3" },
-  "Sin requerimiento": { color: "#9E9E9E" },
-  "Sin estimar": { color: "#EEEEEE" },
-  "En pausa": { color: "#FFEB3B" },
-  "Inicio de desarrollo": { color: "#4CAF50" },
+  "Cambio de alcance": "#FF9800",
+  "Impacto en inicio": "#F44336",
+  "Ajustes": "#2196F3",
+  "Sin requerimiento": "#9E9E9E",
+  "Sin estimar": "#EEEEEE",
+  "En pausa": "#FFEB3B",
+  "Inicio de desarrollo": "#4CAF50",
 };
 
 // Estilos para Estados
 const STATE_STYLES = {
-  "Nuevo":       { gradient: ["#ffcdd2", "#e57373"] },
-  "En curso":    { gradient: ["#fff9c4", "#ffeb3b"] },
-  "En progreso": { gradient: ["#fff9c4", "#ffeb3b"] },
-  "Hecho":       { gradient: ["#c8e6c9", "#4caf50"] },
+  "Nuevo":       ["#ffcdd2", "#e57373"],
+  "En curso":    ["#fff9c4", "#ffeb3b"],
+  "En progreso": ["#fff9c4", "#ffeb3b"],
+  "Hecho":       ["#c8e6c9", "#4caf50"],
 };
 
 // Patrón para items sin estimación
@@ -32,36 +42,34 @@ const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
-  const etapaColor = ETAPA_STYLES[item.etapa]?.color || "#757575";
+  const etapaColor = ETAPA_STYLES[item.etapa] || "#757575";
   return (
-    <div {...itemProps} style={{ ...itemProps.style, ...item.style }}>
+    <div {...itemProps} className="timeline-item">
       {item.etapa && (
         <Chip
           label={item.etapa}
           size="small"
-          style={{ position: 'absolute', top: 2, right: 2, backgroundColor: etapaColor, color: '#fff', fontSize: '10px', height: '18px' }}
+          className="etapa-chip"
+          sx={{ bgcolor: etapaColor }}
         />
       )}
-      <Tooltip
-        title={
-          <div style={{ textAlign: 'left', fontSize: '0.85rem' }}>
-            <div><strong>Estado:</strong> {item.state}</div>
-            <div><strong>Etapa:</strong> {item.etapa}</div>
-            <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
-            <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
-            <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
-            <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
-          </div>
-        }
-        arrow placement="top" enterDelay={300}
-      >
-        <div style={{ width: '100%', textAlign: 'center' }}>{item.title}</div>
-      </Tooltip>
+      <Box sx={{ width: '100%', textAlign: 'center' }}>
+        <Typography noWrap sx={{ fontWeight: 500 }}>{item.title}</Typography>
+      </Box>
+      <Box className="tooltip-box">
+        <Typography variant="caption"><strong>Estado:</strong> {item.state}</Typography><br/>
+        <Typography variant="caption"><strong>Etapa:</strong> {item.etapa}</Typography><br/>
+        <Typography variant="caption"><strong>Estimación:</strong> {item.estimacion||'N/A'}</Typography><br/>
+        <Typography variant="caption"><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</Typography><br/>
+        <Typography variant="caption"><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</Typography><br/>
+        <Typography variant="caption"><strong>Progreso:</strong> {item.progress||'N/A'}</Typography>
+      </Box>
     </div>
   );
 };
 
 const MyTimeline = ({ tasks }) => {
+  const theme = useTheme();
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months');
   const defaultEnd = now.clone().add(2, 'months');
@@ -75,7 +83,6 @@ const MyTimeline = ({ tasks }) => {
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
-  // Zoom handlers
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
     setVisibleTimeStart(v => v + span * 0.1);
@@ -94,8 +101,9 @@ const MyTimeline = ({ tasks }) => {
 
   const items = useMemo(
     () => safeTasks.map(task => {
-      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-      const grad = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
+      const grad = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
+      const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
+      const hasPattern = !task.Estimacion;
       return {
         id: task.id,
         group: task.id,
@@ -104,7 +112,16 @@ const MyTimeline = ({ tasks }) => {
         end_time: moment(task.endDate),
         state: task.Estado,
         etapa: task.etapa,
-        style: { background: grad, ...(task.Estimacion ? {} : { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }), borderRadius: '5px', padding: '4px', color: '#333', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', minHeight: '30px', fontSize: '13px', borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]?.color || '#757575'}`, border: '1px solid #ccc' },
+        style: {
+          background,
+          ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
+          borderRadius: '8px',
+          padding: '4px',
+          color: '#fff',
+          fontWeight: 500,
+          cursor: 'pointer',
+          transition: 'transform 0.2s',
+        },
         estimacion: task.Estimacion,
         progress: task.progress,
       };
@@ -112,26 +129,32 @@ const MyTimeline = ({ tasks }) => {
     [safeTasks]
   );
 
-  if (!groups.length) return <p>No hay tareas disponibles</p>;
-
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-        <TextField
-          label="Buscar tarea…"
-          size="small"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        />
-        <Box sx={{ display: 'flex', gap: 1 }}>
+    <Paper elevation={3} sx={{ p:2, bgcolor: theme.palette.background.paper }}>
+      <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center', mb:1 }}>
+        <ScheduleIcon sx={{ mr:1 }} /> Roadmap
+      </Typography>
+      <Stack direction="row" spacing={1} sx={{ mb:1, flexWrap: 'wrap' }}>
+        {Object.entries(STATE_STYLES).map(([status, grad]) => (
+          <Chip key={status} label={status} size="small" sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color:'#fff' }} />
+        ))}
+      </Stack>
+      <Stack direction="row" spacing={1} sx={{ mb:2, flexWrap: 'wrap' }}>
+        {Object.entries(ETAPA_STYLES).map(([etapa, def]) => (
+          <Chip key={etapa} label={etapa} size="small" sx={{ backgroundColor: def, color:'#fff' }} />
+        ))}
+      </Stack>
+      <Box sx={{ mb:1, display:'flex', gap:2, flexWrap:'wrap' }}>
+        <TextField size="small" label="Buscar…" value={filter} onChange={e=>setFilter(e.target.value)} />
+        <Box sx={{ display:'flex', gap:1 }}>
           <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
           <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
         </Box>
       </Box>
-      {/* Semanas visibles y mantener colores tras selección */}
       <style>{`
-        .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
-        .rct-item.rct-selected { background: none !important; }
+        .rct-day-background:nth-child(7n+1) { border-left: 2px solid ${theme.palette.divider}; }
+        .timeline-item:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .etapa-chip { position:absolute; top:4px; right:4px; font-size:0.7rem; }
       `}</style>
       <Timeline
         groups={groups}
@@ -140,18 +163,14 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
-        onTimeChange={(start, end) => { setVisibleTimeStart(start); setVisibleTimeEnd(end); }}
+        onTimeChange={(s,e)=>{setVisibleTimeStart(s);setVisibleTimeEnd(e);}}
         itemRenderer={ItemRenderer}
         headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM YYYY' }}
-        todayLineColor="red"
-        minZoom={1000 * 60 * 60 * 24 * 7}
-        maxZoom={1000 * 60 * 60 * 24 * 31 * 4}
+        todayLineColor={theme.palette.error.main}
         sidebarWidth={150}
         className="mi-rct-sidebar"
-        sidebarContentRenderer={({ group }) => <div className="mi-rct-sidebar-row">{group.title}</div>}
-        groupHeights={groups.map(() => 40)}
       />
-    </Box>
+    </Paper>
   );
 };
 
