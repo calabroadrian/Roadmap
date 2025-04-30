@@ -211,15 +211,22 @@ const MyTimeline = ({ tasks }) => {
         visibleTimeEnd={visibleTimeEnd}
         onTimeChange={(s, e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
         itemRenderer={ItemRenderer}
-        headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM YYYY' }}
-        timelineHeaders={
-          <TimelineHeaders>
-            <DateHeader unit="primaryHeader" labelFormat="MMMM YYYY" />
-            <DateHeader unit="week" labelFormat="Wo [semana]" />
-            <DateHeader unit="day" labelFormat="DD" />
-          </TimelineHeaders>
-        }
         todayLineColor="red"
+        sidebarWidth={150}
+        className="mi-rct-sidebar"
+        groupHeights={groups.map(() => 40)}
+      >
+        {/* Cabeceras multinca */}
+        <TimelineHeaders>
+          <DateHeader unit="primaryHeader" labelFormat="MMMM YYYY" />
+          <DateHeader unit="week" labelFormat="Wo [semana]" />
+          <DateHeader unit="day" labelFormat="DD" />
+        </TimelineHeaders>
+        {/* Indicadores: hoy, dependencias y milestones */}
+        <TimelineMarkers>
+          <TodayMarker />
+          {markersElements}
+        </TimelineMarkers>="red"
         sidebarWidth={150}
         className="mi-rct-sidebar"
         groupHeights={groups.map(() => 40)}
