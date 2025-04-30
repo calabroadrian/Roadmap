@@ -2,20 +2,11 @@
 import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import Timeline from "react-calendar-timeline";
-import {
-  Paper,
-  Typography,
-  Chip,
-  Box,
-  Button,
-  TextField,
-  Stack,
-  useTheme
-} from "@mui/material";
-import ScheduleIcon from '@mui/icons-material/Schedule';
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
+import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from "@mui/material";
+import ScheduleIcon from '@mui/icons-material/Schedule';
 
 // Estilos para Etapas
 const ETAPA_STYLES = {
@@ -42,34 +33,39 @@ const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
-  const etapaColor = ETAPA_STYLES[item.etapa] || "#757575";
+  const grad = STATE_STYLES[item.state] || STATE_STYLES['Nuevo'];
+  const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
   return (
-    <div {...itemProps} className="timeline-item">
+    <div {...itemProps} style={{ ...itemProps.style, ...item.style, background }}>
       {item.etapa && (
         <Chip
           label={item.etapa}
           size="small"
-          className="etapa-chip"
-          sx={{ bgcolor: etapaColor }}
+          sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[item.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }}
         />
       )}
-      <Box sx={{ width: '100%', textAlign: 'center' }}>
-        <Typography noWrap sx={{ fontWeight: 500 }}>{item.title}</Typography>
-      </Box>
-      <Box className="tooltip-box">
-        <Typography variant="caption"><strong>Estado:</strong> {item.state}</Typography><br/>
-        <Typography variant="caption"><strong>Etapa:</strong> {item.etapa}</Typography><br/>
-        <Typography variant="caption"><strong>Estimación:</strong> {item.estimacion||'N/A'}</Typography><br/>
-        <Typography variant="caption"><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</Typography><br/>
-        <Typography variant="caption"><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</Typography><br/>
-        <Typography variant="caption"><strong>Progreso:</strong> {item.progress||'N/A'}</Typography>
-      </Box>
+      <Tooltip
+        title={
+          <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
+            <div><strong>Estado:</strong> {item.state}</div>
+            <div><strong>Etapa:</strong> {item.etapa}</div>
+            <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
+            <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
+            <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
+            <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
+          </Box>
+        }
+        arrow
+        placement="top"
+        enterDelay={300}
+      >
+        <Box sx={{ width: '100%', textAlign: 'center', color: '#fff', fontWeight: 500 }}>{item.title}</Box>
+      </Tooltip>
     </div>
   );
 };
 
 const MyTimeline = ({ tasks }) => {
-  const theme = useTheme();
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months');
   const defaultEnd = now.clone().add(2, 'months');
@@ -101,8 +97,8 @@ const MyTimeline = ({ tasks }) => {
 
   const items = useMemo(
     () => safeTasks.map(task => {
-      const grad = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-      const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
+      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
+      const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
       const hasPattern = !task.Estimacion;
       return {
         id: task.id,
@@ -112,49 +108,65 @@ const MyTimeline = ({ tasks }) => {
         end_time: moment(task.endDate),
         state: task.Estado,
         etapa: task.etapa,
+        estimacion: task.Estimacion,
+        progress: task.progress,
         style: {
-          background,
+          background: grad,
           ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
-          borderRadius: '8px',
+          borderRadius: '5px',
           padding: '4px',
           color: '#fff',
           fontWeight: 500,
-          cursor: 'pointer',
-          transition: 'transform 0.2s',
-        },
-        estimacion: task.Estimacion,
-        progress: task.progress,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          minHeight: '30px',
+          fontSize: '13px',
+          borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
+        }
       };
-    }),
-    [safeTasks]
+    }), [safeTasks]
   );
 
   return (
-    <Paper elevation={3} sx={{ p:2, bgcolor: theme.palette.background.paper }}>
-      <Typography variant="h5" sx={{ display: 'flex', alignItems: 'center', mb:1 }}>
-        <ScheduleIcon sx={{ mr:1 }} /> Roadmap
+    <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
+      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <ScheduleIcon /> Roadmap Timeline
       </Typography>
-      <Stack direction="row" spacing={1} sx={{ mb:1, flexWrap: 'wrap' }}>
+      <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
         {Object.entries(STATE_STYLES).map(([status, grad]) => (
-          <Chip key={status} label={status} size="small" sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color:'#fff' }} />
+          <Chip
+            key={status}
+            label={status}
+            size="small"
+            sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color: '#fff' }}
+          />
         ))}
       </Stack>
-      <Stack direction="row" spacing={1} sx={{ mb:2, flexWrap: 'wrap' }}>
-        {Object.entries(ETAPA_STYLES).map(([etapa, def]) => (
-          <Chip key={etapa} label={etapa} size="small" sx={{ backgroundColor: def, color:'#fff' }} />
+      <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
+        {Object.entries(ETAPA_STYLES).map(([etapa, color]) => (
+          <Chip
+            key={etapa}
+            label={etapa}
+            size="small"
+            sx={{ backgroundColor: color, color: '#fff' }}
+          />
         ))}
       </Stack>
-      <Box sx={{ mb:1, display:'flex', gap:2, flexWrap:'wrap' }}>
-        <TextField size="small" label="Buscar…" value={filter} onChange={e=>setFilter(e.target.value)} />
-        <Box sx={{ display:'flex', gap:1 }}>
-          <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
-          <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
-        </Box>
+      <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <TextField
+          label="Buscar…"
+          size="small"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+        />
+        <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
+        <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
       </Box>
       <style>{`
-        .rct-day-background:nth-child(7n+1) { border-left: 2px solid ${theme.palette.divider}; }
-        .timeline-item:hover { transform: scale(1.02); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .etapa-chip { position:absolute; top:4px; right:4px; font-size:0.7rem; }
+        .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
+        .rct-item.rct-selected { background: none !important; }
       `}</style>
       <Timeline
         groups={groups}
@@ -163,12 +175,13 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
-        onTimeChange={(s,e)=>{setVisibleTimeStart(s);setVisibleTimeEnd(e);}}
+        onTimeChange={(s, e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
         itemRenderer={ItemRenderer}
         headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM YYYY' }}
-        todayLineColor={theme.palette.error.main}
+        todayLineColor="red"
         sidebarWidth={150}
         className="mi-rct-sidebar"
+        groupHeights={groups.map(() => 40)}
       />
     </Paper>
   );
