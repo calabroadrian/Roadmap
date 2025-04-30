@@ -5,7 +5,7 @@ import Timeline from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
-import { Tooltip, Chip, Box, Button } from "@mui/material";
+import { Tooltip, Chip, Box, Button, TextField } from "@mui/material";
 
 // Estilos para Etapas
 const ETAPA_STYLES = {
@@ -27,9 +27,7 @@ const STATE_STYLES = {
 };
 
 // Patrón para items sin estimación
-const PATTERNS = {
-  stripes: "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)",
-};
+const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
@@ -41,11 +39,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
         <Chip
           label={item.etapa}
           size="small"
-          style={{
-            position: 'absolute', top: 2, right: 2,
-            backgroundColor: etapaColor,
-            color: '#fff', fontSize: '10px', height: '18px'
-          }}
+          style={{ position: 'absolute', top: 2, right: 2, backgroundColor: etapaColor, color: '#fff', fontSize: '10px', height: '18px' }}
         />
       )}
       <Tooltip
@@ -59,9 +53,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
             <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
           </div>
         }
-        arrow
-        placement="top"
-        enterDelay={300}
+        arrow placement="top" enterDelay={300}
       >
         <div style={{ width: '100%', textAlign: 'center' }}>{item.title}</div>
       </Tooltip>
@@ -70,38 +62,40 @@ const ItemRenderer = ({ item, getItemProps }) => {
 };
 
 const MyTimeline = ({ tasks }) => {
-  const safeTasks = tasks || [];
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months');
   const defaultEnd = now.clone().add(2, 'months');
 
+  const [filter, setFilter] = useState("");
+  const safeTasks = useMemo(
+    () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
+    [tasks, filter]
+  );
+
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
-  // Zoom in/out handlers
+  // Zoom handlers
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
-    setVisibleTimeStart(visibleTimeStart + span * 0.1);
-    setVisibleTimeEnd(visibleTimeEnd - span * 0.1);
-  }, [visibleTimeEnd, visibleTimeStart]);
+    setVisibleTimeStart(v => v + span * 0.1);
+    setVisibleTimeEnd(v => v - span * 0.1);
+  }, [visibleTimeStart, visibleTimeEnd]);
   const zoomOut = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
-    setVisibleTimeStart(visibleTimeStart - span * 0.1);
-    setVisibleTimeEnd(visibleTimeEnd + span * 0.1);
-  }, [visibleTimeEnd, visibleTimeStart]);
+    setVisibleTimeStart(v => v - span * 0.1);
+    setVisibleTimeEnd(v => v + span * 0.1);
+  }, [visibleTimeStart, visibleTimeEnd]);
 
-  // Agrupa tareas
   const groups = useMemo(
     () => safeTasks.map(task => ({ id: task.id, title: task.title })),
     [safeTasks]
   );
 
-  // Prepara items con estilos
   const items = useMemo(
     () => safeTasks.map(task => {
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-      const gradientCss = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
-      const patternCss = !task.Estimacion ? PATTERNS.stripes : '';
+      const grad = `linear-gradient(120deg, ${stateDef.gradient[0]}, ${stateDef.gradient[1]})`;
       return {
         id: task.id,
         group: task.id,
@@ -110,22 +104,7 @@ const MyTimeline = ({ tasks }) => {
         end_time: moment(task.endDate),
         state: task.Estado,
         etapa: task.etapa,
-        style: {
-          background: gradientCss,
-          ...(patternCss && { backgroundImage: patternCss, backgroundRepeat: 'repeat' }),
-          borderRadius: '5px',
-          padding: '4px',
-          color: '#333',
-          fontWeight: 500,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          minHeight: '30px',
-          fontSize: '13px',
-          borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]?.color || '#757575'}`,
-          border: '1px solid #ccc',
-        },
+        style: { background: grad, ...(task.Estimacion ? {} : { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }), borderRadius: '5px', padding: '4px', color: '#333', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', minHeight: '30px', fontSize: '13px', borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]?.color || '#757575'}`, border: '1px solid #ccc' },
         estimacion: task.Estimacion,
         progress: task.progress,
       };
@@ -136,16 +115,23 @@ const MyTimeline = ({ tasks }) => {
   if (!groups.length) return <p>No hay tareas disponibles</p>;
 
   return (
-    <Box>
-      <Box sx={{ mb: 1, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-        <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
-        <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+        <TextField
+          label="Buscar tarea…"
+          size="small"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+        />
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
+          <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
+        </Box>
       </Box>
-      {/* Líneas semanales visibles y override de selección */}
+      {/* Semanas visibles y mantener colores tras selección */}
       <style>{`
         .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
-        /* Eliminar overlay azul de selección */
-        .rct-item.rct-selected { box-shadow: none !important; }
+        .rct-item.rct-selected { background: none !important; }
       `}</style>
       <Timeline
         groups={groups}
@@ -156,14 +142,8 @@ const MyTimeline = ({ tasks }) => {
         visibleTimeEnd={visibleTimeEnd}
         onTimeChange={(start, end) => { setVisibleTimeStart(start); setVisibleTimeEnd(end); }}
         itemRenderer={ItemRenderer}
-        selected={[]} // desactivar fondo de selección
-        headerLabelFormats={{
-          monthShort: 'MMM', monthLong: 'MMMM YYYY',
-          weekShort: 'W', weekLong: 'Wo [semana]'
-        }}
+        headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM YYYY' }}
         todayLineColor="red"
-        headerLabelGroupHeight={30}
-        headerLabelHeight={30}
         minZoom={1000 * 60 * 60 * 24 * 7}
         maxZoom={1000 * 60 * 60 * 24 * 31 * 4}
         sidebarWidth={150}
