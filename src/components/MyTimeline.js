@@ -1,7 +1,7 @@
 // src/components/MyTimeline.js
 import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
-import Timeline from "react-calendar-timeline";
+import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
@@ -9,6 +9,7 @@ import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from 
 import ScheduleIcon from '@mui/icons-material/Schedule';
 
 // Estilos para Etapas
+t
 const ETAPA_STYLES = {
   "Cambio de alcance": "#FF9800",
   "Impacto en inicio": "#F44336",
@@ -18,7 +19,6 @@ const ETAPA_STYLES = {
   "En pausa": "#FFEB3B",
   "Inicio de desarrollo": "#4CAF50",
 };
-
 // Estilos para Estados
 const STATE_STYLES = {
   "Nuevo":       ["#ffcdd2", "#e57373"],
@@ -26,7 +26,6 @@ const STATE_STYLES = {
   "En progreso": ["#fff9c4", "#ffeb3b"],
   "Hecho":       ["#c8e6c9", "#4caf50"],
 };
-
 // Patrón para items sin estimación
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
@@ -36,7 +35,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
   const grad = STATE_STYLES[item.state] || STATE_STYLES['Nuevo'];
   const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
   return (
-    <div {...itemProps} style={{ ...itemProps.style, ...item.style, background }}>
+    <div {...itemProps} className="timeline-item-hover" style={{ ...itemProps.style, ...item.style, background }}>
       {item.etapa && (
         <Chip
           label={item.etapa}
@@ -75,7 +74,6 @@ const MyTimeline = ({ tasks }) => {
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
-
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
@@ -94,7 +92,6 @@ const MyTimeline = ({ tasks }) => {
     () => safeTasks.map(task => ({ id: task.id, title: task.title })),
     [safeTasks]
   );
-
   const items = useMemo(
     () => safeTasks.map(task => {
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
@@ -167,6 +164,8 @@ const MyTimeline = ({ tasks }) => {
       <style>{`
         .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
         .rct-item.rct-selected { background: none !important; }
+        /* Hover más elaborado */
+        .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
       `}</style>
       <Timeline
         groups={groups}
@@ -178,6 +177,13 @@ const MyTimeline = ({ tasks }) => {
         onTimeChange={(s, e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
         itemRenderer={ItemRenderer}
         headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM YYYY' }}
+        timelineHeaders={
+          <TimelineHeaders>
+            <DateHeader unit="primaryHeader" labelFormat="MMMM YYYY" />
+            <DateHeader unit="week" labelFormat="Wo [semana]" />
+            <DateHeader unit="day" labelFormat="DD" />
+          </TimelineHeaders>
+        }
         todayLineColor="red"
         sidebarWidth={150}
         className="mi-rct-sidebar"
