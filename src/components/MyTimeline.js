@@ -9,7 +9,6 @@ import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from 
 import ScheduleIcon from '@mui/icons-material/Schedule';
 
 // Estilos para Etapas
-t
 const ETAPA_STYLES = {
   "Cambio de alcance": "#FF9800",
   "Impacto en inicio": "#F44336",
