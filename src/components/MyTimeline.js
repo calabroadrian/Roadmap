@@ -253,5 +253,4 @@ MyTimeline.propTypes = {
     })
   ).isRequired
 };
-
 export default MyTimeline;
