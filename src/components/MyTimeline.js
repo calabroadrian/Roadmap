@@ -175,7 +175,8 @@ const MyTimeline = ({ tasks }) => {
         },
         dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
         top: 0,  // Agregamos top y left para el posicionamiento
-        left: 0
+        left: 0,
+        height: 30 // Agregamos la altura
       };
     });
   }, [filteredTasks]);
@@ -232,15 +233,15 @@ const MyTimeline = ({ tasks }) => {
           type: 'custom',
           time: start, // Usamos la fecha de inicio de la dependencia como referencia
           element: (
-            <svg key={id} style={{ position: 'absolute', overflow: 'visible', zIndex: 10,
-              left: `${xStart}px`, top: `${yStart}px`,
-              width: `${length}px`, height: '0px',
-              transform: `rotate(${angle}deg)`
-
+            <svg key={id} style={{
+              position: 'absolute', overflow: 'visible', zIndex: 10,
+              left: '0px', top: '0px',  // Establecer en 0,0 y usar transform
+              width: `${length}px`, height: '0px',  // Altura en 0, la línea no tiene altura
+              transform: `translate(${xStart}px, ${yStart}px) rotate(${angle}deg)` // Trasladar y rotar
             }}>
               {/* Calculamos las coordenadas de inicio y fin de la flecha */}
               <line
-                x1={0} // Inicio en 0 porque el marker se posicionará
+                x1={0} // Inicio en 0,0
                 y1={0}
                 x2={length} // Longitud de la línea
                 y2={0}
@@ -264,9 +265,10 @@ const MyTimeline = ({ tasks }) => {
           ),
           // Agregamos estilos para posicionar el marker correctamente
           style: {
-            left: `${xStart}px`,  // Posición izquierda del marker
-            top: `${yStart}px`, // Posición vertical
+            left: 0,  // Posición izquierda del marker
+            top: 0, // Posición vertical
             pointerEvents: 'none', // Permite la interacción con los items
+            position: 'absolute'
           }
         });
       }
@@ -379,4 +381,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
