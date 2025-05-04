@@ -48,7 +48,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
           <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
             <div><strong>Estado:</strong> {item.Estado}</div>
             <div><strong>Etapa:</strong> {item.etapa}</div>
-            <div><strong>Estimación:</strong> {item.Estimacion || 'N/A'}</div>
+            <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
             <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
             <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
             <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
@@ -70,7 +70,7 @@ const MyTimeline = ({ tasks }) => {
   const defaultEnd = now.clone().add(2, 'months');
 
   const [filter, setFilter] = useState("");
-  const safeTasks = useMemo(
+  const filteredTasks = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
@@ -89,13 +89,13 @@ const MyTimeline = ({ tasks }) => {
   }, [visibleTimeStart, visibleTimeEnd]);
 
   const groups = useMemo(
-    () => safeTasks.map(task => ({ id: task.id, title: task.title })),
-    [safeTasks]
+    () => filteredTasks.map(task => ({ id: task.id, title: task.title })),
+    [filteredTasks]
   );
 
   const itemsWithDependencies = useMemo(() => {
     // Primero, mapeamos las tareas para tener un acceso rápido por ID
-    const taskMap = safeTasks.reduce((acc, task) => {
+    const taskMap = filteredTasks.reduce((acc, task) => {
       acc[task.id] = {
         ...task,
         start_time: moment(task.startDate),
@@ -122,7 +122,8 @@ const MyTimeline = ({ tasks }) => {
       // Agregamos esta verificación para asegurarnos de que task.dependencies sea un array
       if (Array.isArray(task.dependencies)) {
         task.dependencies.forEach(dependencyId => {
-          const dependencyEndDate = getAdjustedStartTime(dependencyId, new Set(visited)).end_time;
+          const dependencyTask = taskMap[dependencyId]; // Obtener la tarea dependiente
+          const dependencyEndDate = dependencyTask ? getAdjustedStartTime(dependencyId, new Set(visited)).end_time : moment(null); // Verificar si la tarea existe
           if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
             latestDependencyEndDate = dependencyEndDate;
           }
@@ -140,7 +141,7 @@ const MyTimeline = ({ tasks }) => {
       return task.start_time;
     };
 
-    return safeTasks.map(task => {
+    return filteredTasks.map(task => {
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
       const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
       const hasPattern = !task.Estimacion;
@@ -174,19 +175,20 @@ const MyTimeline = ({ tasks }) => {
         dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
       };
     });
-  }, [safeTasks]);
+  }, [filteredTasks]);
 
   const dependencies = useMemo(() => {
-    const taskMap = safeTasks.reduce((acc, task) => {
+    const taskMap = filteredTasks.reduce((acc, task) => {
       acc[task.id] = task;
       return acc;
     }, {});
 
     const deps = [];
-    safeTasks.forEach(task => {
+    filteredTasks.forEach(task => {
       if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
         task.dependencies.forEach(dependencyId => {
-          if (taskMap[dependencyId]) {
+          const dependencyTask = taskMap[dependencyId]; // Obtener la tarea dependiente
+          if (dependencyTask) { // Verificar si la tarea dependiente existe
             deps.push({
               fromItem: dependencyId,
               toItem: task.id,
@@ -200,7 +202,7 @@ const MyTimeline = ({ tasks }) => {
     });
     console.log("Dependencies:", deps); // Imprimimos las dependencias para inspección
     return deps;
-  }, [safeTasks]);
+  }, [filteredTasks]);
 
   const dependencyRenderer = useCallback(({ dependencies, getItemById, itemLinkRenderer }) => {
     return (
@@ -251,7 +253,7 @@ const MyTimeline = ({ tasks }) => {
         })}
       </div>
     );
-  }, [safeTasks]);
+  }, [filteredTasks]);
 
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -341,4 +343,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-

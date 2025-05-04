@@ -172,6 +172,18 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           <Typography variant="h5" gutterBottom>
             Roadmap Timeline
           </Typography>
+          {console.log("Items passed to MyTimeline:", items.map(item => ({
+            id: item.Id,
+            title: item.Titulo,
+            startDate: item["Fecha Inicio"] || item.startDate,
+            endDate: item["Fecha Fin"] || item.endDate,
+            etapa: item["etapa"] || item.etapa,
+            Estado: item.Estado,
+            Estimacion: item.Estimacion,
+            progress: item.progress,
+            dependencies: item.dependencies, // Aquí está el console.log
+            Bloqueos: item.Bloqueos,
+          })))}
           <MyTimeline
             tasks={items.map((item) => ({
               id: item.Id,
@@ -181,9 +193,9 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
               etapa: item["etapa"] || item.etapa,
               Estado: item.Estado,
               Estimacion: item.Estimacion,
-              progress: item.progress, // Agregado
-              dependencies: item.dependencies, // Pasando las dependencias ya parseadas
-              Bloqueos: item.Bloqueos, // Agregado
+              progress: item.progress,
+              dependencies: item.dependencies,
+              Bloqueos: item.Bloqueos,
             }))}
           />
         </>
@@ -193,4 +205,3 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 };
 
 export default RoadmapDataSheet;
-
