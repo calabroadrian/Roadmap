@@ -25,7 +25,7 @@ const STATE_STYLES = {
   "Hecho": ["#c8e6c9", "#4caf50"],
 };
 // Patrón para items sin estimación
-const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
+const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #eee 10px, #ddd 20px)";
 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
@@ -118,12 +118,19 @@ const MyTimeline = ({ tasks }) => {
       visited.add(taskId);
 
       let latestDependencyEndDate = moment(null);
-      task.dependencies.forEach(dependencyId => {
-        const dependencyEndDate = getAdjustedStartTime(dependencyId, new Set(visited)).end_time;
-        if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
-          latestDependencyEndDate = dependencyEndDate;
-        }
-      });
+      // Agregamos esta verificación para asegurarnos de que task.dependencies sea un array
+      if (Array.isArray(task.dependencies)) {
+        task.dependencies.forEach(dependencyId => {
+          const dependencyEndDate = getAdjustedStartTime(dependencyId, new Set(visited)).end_time;
+          if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
+            latestDependencyEndDate = dependencyEndDate;
+          }
+        });
+      } else {
+        console.error(`task.dependencies no es un array para la tarea ${task.title} (${task.id}).`);
+        task.dependencies = []; // Tratamos task.dependencies como un array vacío para evitar el error
+      }
+
 
       // Si alguna dependencia tiene una fecha de fin posterior a la fecha de inicio original, ajustamos la fecha de inicio
       if (latestDependencyEndDate.isValid() && latestDependencyEndDate.isAfter(task.start_time)) {
