@@ -178,6 +178,7 @@ const MyTimeline = ({ tasks }) => {
         top: 0,  // Agregamos top y left para el posicionamiento
         left: 0,
         height: 30,
+        width: 100 // Agregamos un ancho por defecto
       };
     });
 
@@ -386,3 +387,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
