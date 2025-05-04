@@ -99,7 +99,8 @@ const MyTimeline = ({ tasks }) => {
       acc[task.id] = {
         ...task,
         start_time: moment(task.startDate),
-        end_time: moment(task.endDate)
+        end_time: moment(task.endDate),
+        dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
       };
       return acc;
     }, {});
@@ -170,6 +171,7 @@ const MyTimeline = ({ tasks }) => {
           fontSize: '13px',
           borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
         },
+        dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
       };
     });
   }, [safeTasks]);
@@ -182,7 +184,7 @@ const MyTimeline = ({ tasks }) => {
 
     const deps = [];
     safeTasks.forEach(task => {
-      if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) { // Verificación adicional
+      if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
         task.dependencies.forEach(dependencyId => {
           if (taskMap[dependencyId]) {
             deps.push({
@@ -196,6 +198,7 @@ const MyTimeline = ({ tasks }) => {
         });
       }
     });
+    console.log("Dependencies:", deps); // Imprimimos las dependencias para inspección
     return deps;
   }, [safeTasks]);
 
@@ -338,3 +341,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
