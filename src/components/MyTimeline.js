@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
+import Timeline, { TimelineHeaders, DateHeader, TimelineMarkers, TodayMarker, CustomMarker } from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
@@ -205,95 +205,59 @@ const MyTimeline = ({ tasks }) => {
     return deps;
   }, [filteredTasks]);
 
-    const dependencyRenderer = useCallback(({ dependencies, getItemById, itemLinkRenderer }) => {
-        return (
-          <div className="dependencies">
-            {dependencies.map((dependency) => {
-              const fromItem = getItemById(dependency.fromItem);
-              const toItem = getItemById(dependency.toItem);
-    
-              if (!fromItem || !toItem) {
-                return null;
-              }
-    
-              const fromAnchor = moment(fromItem.end_time).valueOf();
-              const toAnchor = moment(toItem.start_time).valueOf();
-    
-              // Ajusta la posición vertical para que la flecha no se superponga con el texto
-              const fromY = fromItem.top + fromItem.height / 2;
-              const toY = toItem.top + toItem.height / 2;
-    
-              // Define los puntos de la línea y la flecha
-              const points = `
-                ${fromItem.left + fromItem.width},${fromY}
-                ${fromItem.left + fromItem.width + 20},${fromY}
-                ${fromItem.left + fromItem.width + 20},${toY}
-                ${toItem.left - 5},${toY}
-              `;
-    
-              const arrowPoints = `
-                ${toItem.left - 5},${toY - 5}
-                ${toItem.left + 5},${toY}
-                ${toItem.left - 5},${toY + 5}
-              `;
-    
-              return (
-                <svg
-                  key={`dep-${dependency.fromItem}-${dependency.toItem}`}
-                  style={{ position: 'absolute', overflow: 'visible', zIndex: 10 }}
-                >
-                  <polyline
-                    points={points}
-                    stroke="#757575"
-                    strokeWidth={1.5}
-                    fill="none"
-                    markerEnd="url(#arrowhead)"
-                  />
-                  <marker
-                    id="arrowhead"
-                    viewBox="0 0 10 10"
-                    refX="0"
-                    refY="5"
-                    markerUnits="strokeWidth"
-                    markerWidth="8"
-                    markerHeight="6"
-                    orient="auto"
-                  >
-                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
-                  </marker>
-                </svg>
-              );
-            })}
-          </div>
-        );
-      }, [filteredTasks]);
-
+  const [dependencyMarkers, setDependencyMarkers] = useState([]);
   useEffect(() => {
-    const updateItemPositions = () => {
-        if (timelineRef.current) {
-            // Access the correct DOM node.
-            const timelineElement = timelineRef.current.closest('.rct-calendar-timeline');
-            if (timelineElement) {
-                const itemElements = timelineElement.querySelectorAll('.rct-item');
-                itemElements.forEach(el => {
-                    const itemId = el.getAttribute('data-item-id');
-                    const item = itemsWithDependencies.find(i => i.id.toString() === itemId);
-                    if (item) {
-                        el.style.left = `${el.offsetLeft}px`;
-                        el.style.top = `${el.offsetTop}px`;
-                        el.style.width = `${el.offsetWidth}px`;
-                        el.style.height = `${el.offsetHeight}px`;
-                    }
-                });
-            }
-        }
-    };
+    const markers = [];
+    dependencies.forEach(dep => {
+      const fromItem = itemsWithDependencies.find(item => item.id.toString() === dep.fromItem);
+      const toItem = itemsWithDependencies.find(item => item.id.toString() === dep.toItem);
 
-    // Delay the execution to allow the Timeline component to render its items.
-    const timer = setTimeout(updateItemPositions, 0);
+      if (fromItem && toItem) {
+        const start = fromItem.end_time.valueOf();
+        const end = toItem.start_time.valueOf();
+        const id = `dep-${dep.fromItem}-${dep.toItem}`;
 
-    return () => clearTimeout(timer); // Cleanup the timeout if the component unmounts.
-}, [itemsWithDependencies]);
+        markers.push({
+          id: id,
+          type: 'custom',
+          time: start, // Usamos la fecha de inicio de la dependencia como referencia
+          element: (
+            <svg key={id} style={{ position: 'absolute', overflow: 'visible', zIndex: 10 }}>
+              {/* Calculamos las coordenadas de inicio y fin de la flecha */}
+              <line
+                x1={0} // Inicio en 0 porque el marker se posicionará
+                y1={0}
+                x2={end - start} // Longitud de la línea
+                y2={0}
+                stroke="#757575"
+                strokeWidth={1.5}
+                markerEnd="url(#arrowhead)"
+              />
+              <marker
+                id="arrowhead"
+                viewBox="0 0 10 10"
+                refX="0"
+                refY="5"
+                markerUnits="strokeWidth"
+                markerWidth="8"
+                markerHeight="6"
+                orient="auto"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
+              </marker>
+            </svg>
+          ),
+          // Agregamos estilos para posicionar el marker correctamente
+          style: {
+            left: `${0}px`,  // Posición izquierda del marker
+            top: `${fromItem.top + fromItem.height / 2}px`, // Posición vertical
+            pointerEvents: 'none', // Permite la interacción con los items
+          }
+        });
+      }
+    });
+    setDependencyMarkers(markers);
+  }, [dependencies, itemsWithDependencies]);
 
 
   return (
@@ -336,7 +300,8 @@ const MyTimeline = ({ tasks }) => {
         .rct-item.rct-selected { background: none !important; }
         /* Hover más elaborado */
         .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
-        .dependencies svg { position: absolute; z-index: 10; }
+        .dependencies svg { position: absolute; z-index: 10; pointer-events: none;
+        }
         .rct-calendar-timeline {
           width: 100%;
           height: 100%;
@@ -367,9 +332,16 @@ const MyTimeline = ({ tasks }) => {
         sidebarWidth={150}
         className="mi-rct-sidebar"
         groupHeights={groups.map(() => 40)}
-        dependencyRenderer={dependencyRenderer}
-        dependencies={dependencies}
-      />
+        //dependencyRenderer={dependencyRenderer}
+        //dependencies={dependencies}
+        >
+          <TimelineMarkers>
+            <TodayMarker />
+            {dependencyMarkers.map(marker => (
+              <CustomMarker key={marker.id} {...marker} />
+            ))}
+          </TimelineMarkers>
+        </Timeline>
     </Paper>
   );
 };
@@ -392,4 +364,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
