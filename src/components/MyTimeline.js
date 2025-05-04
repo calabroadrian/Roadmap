@@ -92,8 +92,11 @@ const MyTimeline = ({ tasks }) => {
     [safeTasks]
   );
 
-  const items = useMemo(
+    const items = useMemo(
     () => safeTasks.map(task => {
+      // Log dependencias to inspect type
+      console.log(`Task ${task.id} Dependencias:`, task.Dependencias, typeof task.Dependencias);
+
       const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
       const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
       const hasPattern = !task.Estimacion;
@@ -107,7 +110,7 @@ const MyTimeline = ({ tasks }) => {
         etapa: task.etapa,
         estimacion: task.Estimacion,
         progress: task.progress,
-        Dependencias: task.Dependencias || [],
+        Dependencias: Array.isArray(task.Dependencias) ? task.Dependencias : [],
         style: {
           background: grad,
           ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
