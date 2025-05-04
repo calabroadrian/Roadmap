@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
 import "./MyTimeline.css";
@@ -76,6 +76,7 @@ const MyTimeline = ({ tasks }) => {
   );
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
+  const timelineRef = useRef(null);
 
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
@@ -255,6 +256,23 @@ const MyTimeline = ({ tasks }) => {
     );
   }, [filteredTasks]);
 
+  useEffect(() => {
+    if (timelineRef.current) {
+      const timelineEl = timelineRef.current;
+      const itemElements = timelineEl.querySelectorAll('.rct-item');
+      itemElements.forEach(el => {
+        const itemId = el.getAttribute('data-item-id');
+        const item = itemsWithDependencies.find(i => i.id.toString() === itemId);
+        if (item) {
+          el.style.left = `${el.offsetLeft}px`;
+          el.style.top = `${el.offsetTop}px`;
+          el.style.width = `${el.offsetWidth}px`;
+          el.style.height = `${el.offsetHeight}px`;
+        }
+      });
+    }
+  }, [itemsWithDependencies]);
+
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
       <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -298,6 +316,7 @@ const MyTimeline = ({ tasks }) => {
         .dependencies svg { position: absolute; z-index: 10; }
       `}</style>
       <Timeline
+        ref={timelineRef}
         groups={groups}
         items={itemsWithDependencies}
         defaultTimeStart={defaultStart}
@@ -343,3 +362,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
