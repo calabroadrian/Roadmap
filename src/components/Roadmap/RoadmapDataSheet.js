@@ -176,7 +176,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         Estado: item.Estado,
         Estimacion: item.Estimacion,
         progress: item.progress, // Agregado
-        Dependencias: item.Dependencias, // Agregado
+        dependencies: item.dependencies, // Agregado
         Bloqueos: item.Bloqueos, // Agregado
     }))}
 />
