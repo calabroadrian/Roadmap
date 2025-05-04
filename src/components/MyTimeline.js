@@ -74,7 +74,7 @@ const MyTimeline = ({ tasks }) => {
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
-  const [visibleTimeStart, setVisibleTimeStart(defaultStart.valueOf());
+  const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
   const timelineRef = useRef(null);
   const [mounted, setMounted] = useState(false); // Nuevo estado para controlar el montaje
@@ -386,4 +386,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
