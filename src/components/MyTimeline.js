@@ -294,7 +294,7 @@ const MyTimeline = ({ tasks }) => {
         .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
         .rct-item.rct-selected { background: none !important; }
         /* Hover más elaborado */
-        .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
         .dependencies svg { position: absolute; z-index: 10; }
       `}</style>
       <Timeline
