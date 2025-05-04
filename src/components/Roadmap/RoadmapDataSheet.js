@@ -49,10 +49,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 
             // Parsear la columna de dependencias
             const dependenciesValue = row[dependenciesColumnIndex];
-            item.dependencies = dependenciesValue
-              ? dependenciesValue.split(",").map((depId) => depId.trim())
-              : [];
-
+            item.dependencies = dependenciesValue ? [dependenciesValue].filter(Boolean) : []; // Convertir a array, filtrar valores vacíos
             return item;
           });
 
