@@ -1,4 +1,3 @@
-// src/components/MyTimeline.js
 import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
 import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
@@ -7,7 +6,6 @@ import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from "@mui/material";
 import ScheduleIcon from '@mui/icons-material/Schedule';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 // Estilos para Etapas
 const ETAPA_STYLES = {
@@ -21,10 +19,10 @@ const ETAPA_STYLES = {
 };
 // Estilos para Estados
 const STATE_STYLES = {
-  "Nuevo":       ["#ffcdd2", "#e57373"],
-  "En curso":    ["#fff9c4", "#ffeb3b"],
+  "Nuevo": ["#ffcdd2", "#e57373"],
+  "En curso": ["#fff9c4", "#ffeb3b"],
   "En progreso": ["#fff9c4", "#ffeb3b"],
-  "Hecho":       ["#c8e6c9", "#4caf50"],
+  "Hecho": ["#c8e6c9", "#4caf50"],
 };
 // Patrón para items sin estimación
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
@@ -32,7 +30,7 @@ const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
-  const grad = STATE_STYLES[item.state] || STATE_STYLES['Nuevo'];
+  const grad = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo']; // Usa item.Estado
   const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
   return (
     <div {...itemProps} className="timeline-item-hover" style={{ ...itemProps.style, ...item.style, background }}>
@@ -40,15 +38,17 @@ const ItemRenderer = ({ item, getItemProps }) => {
         <Chip
           label={item.etapa}
           size="small"
-          sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[item.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }}
+          sx={{
+            position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[item.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px'
+          }}
         />
       )}
       <Tooltip
         title={
           <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
-            <div><strong>Estado:</strong> {item.state}</div>
+            <div><strong>Estado:</strong> {item.Estado}</div> {/* Usa item.Estado */}
             <div><strong>Etapa:</strong> {item.etapa}</div>
-            <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
+            <div><strong>Estimación:</strong> {item.Estimacion || 'N/A'}</div>
             <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
             <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
             <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
@@ -96,7 +96,11 @@ const MyTimeline = ({ tasks }) => {
   const itemsWithDependencies = useMemo(() => {
     // Primero, mapeamos las tareas para tener un acceso rápido por ID
     const taskMap = safeTasks.reduce((acc, task) => {
-      acc[task.id] = { ...task, start_time: moment(task.startDate), end_time: moment(task.endDate) };
+      acc[task.id] = {
+        ...task,
+        start_time: moment(task.startDate),
+        end_time: moment(task.endDate)
+      };
       return acc;
     }, {});
 
@@ -130,7 +134,7 @@ const MyTimeline = ({ tasks }) => {
     };
 
     return safeTasks.map(task => {
-      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
+      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo']; // Usa task.Estado
       const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
       const hasPattern = !task.Estimacion;
       const adjustedStartTime = getAdjustedStartTime(task.id);
@@ -141,7 +145,7 @@ const MyTimeline = ({ tasks }) => {
         title: task.title,
         start_time: adjustedStartTime,
         end_time: moment(task.endDate),
-        state: task.Estado,
+        Estado: task.Estado, // Usa task.Estado
         etapa: task.etapa,
         estimacion: task.Estimacion,
         progress: task.progress,
@@ -317,11 +321,12 @@ MyTimeline.propTypes = {
       title: PropTypes.string.isRequired,
       startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
       endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      Estado: PropTypes.string,
+      Estado: PropTypes.string, // Usa PropTypes.string para Estado
       etapa: PropTypes.string,
       Estimacion: PropTypes.any,
       progress: PropTypes.any,
       dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])), // Nuevo campo para las dependencias
+      Bloqueos: PropTypes.arrayOf(PropTypes.string),
     })
   ).isRequired,
 };
