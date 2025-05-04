@@ -40,19 +40,22 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           const headers = data.values[0];
           const tagsColumnIndex = headers.indexOf("Tags");
           const sprintColumnIndex = headers.indexOf("Sprint");
-          const dependenciesColumnIndex = headers.indexOf("Dependencies"); // Obtener el índice de la columna "Dependencies"
+          const dependenciesColumnIndex = headers.indexOf("Dependencies");
           const parsedData = data.values.slice(1).map((row) => {
             const item = headers.reduce((obj, key, index) => {
               obj[key] = row[index] || "";
               return obj;
             }, {});
-            // Parsear la columna de dependencias, asegurándose de que sea un array de strings
+
+            // Parsear la columna de dependencias
             const dependenciesValue = row[dependenciesColumnIndex];
             item.dependencies = dependenciesValue
               ? dependenciesValue.split(",").map((depId) => depId.trim())
               : [];
+
             return item;
           });
+
           parsedData.forEach((item) => {
             item.tags = item[headers[tagsColumnIndex]] || "";
           });
@@ -181,7 +184,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             Estado: item.Estado,
             Estimacion: item.Estimacion,
             progress: item.progress,
-            dependencies: item.dependencies, // Aquí está el console.log
+            dependencies: item.dependencies,
             Bloqueos: item.Bloqueos,
           })))}
           <MyTimeline
@@ -197,7 +200,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
                 progress: item.progress,
                 dependencies: item.dependencies,
                 Bloqueos: item.Bloqueos,
-              }
+              };
             })}
           />
         </>
@@ -207,4 +210,3 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 };
 
 export default RoadmapDataSheet;
-
