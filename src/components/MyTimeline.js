@@ -154,34 +154,42 @@ const MyTimeline = ({ tasks }) => {
     [safeTasks]
   );
 
-  const items = useMemo(
-    () => safeTasks.map(task => ({
-      id: task.id,
-      group: task.id,
-      title: task.title,
-      start_time: moment(task.startDate),
-      end_time: moment(task.endDate),
-      state: task.Estado,
-      etapa: task.etapa,
-      estimacion: task.Estimacion,
-      progress: task.progress,
-      dependencias: task.Dependencias || [],
-      style: {
-        background: `linear-gradient(120deg, ${STATE_STYLES[task.Estado]?.[0]||STATE_STYLES['Nuevo'][0]}, ${STATE_STYLES[task.Estado]?.[1]||STATE_STYLES['Nuevo'][1]})`,
-        ...(task.Estimacion?{}:{ backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
-        borderRadius: '5px',
-        padding: '4px',
-        color: '#fff',
-        fontWeight: 500,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        minHeight: '30px',
-        fontSize: '13px',
-        borderLeft: `4px solid ${ETAPA_STYLES[task.etapa]||'#757575'}`
-      }
-    })), [safeTasks]
+    const items = useMemo(
+    () => safeTasks.map(task => {
+      // Parse dates in M/D/YYYY or ISO
+      const start = moment(task.startDate, ['YYYY-MM-DD', 'M/D/YYYY']);
+      const end = moment(task.endDate, ['YYYY-MM-DD', 'M/D/YYYY']);
+      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
+      const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
+      const hasPattern = !task.Estimacion;
+      return {
+        id: task.id,
+        group: task.id,
+        title: task.title,
+        start_time: start,
+        end_time: end,
+        state: task.Estado,
+        etapa: task.etapa,
+        estimacion: task.Estimacion,
+        progress: task.progress,
+        Dependencias: task.Dependencias,
+        style: {
+          background: grad,
+          ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
+          borderRadius: '5px',
+          padding: '4px',
+          color: '#fff',
+          fontWeight: 500,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          minHeight: '30px',
+          fontSize: '13px',
+          borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
+        }
+      };
+    }), [safeTasks]
   );
 
   // Dependencias como CustomMarker
