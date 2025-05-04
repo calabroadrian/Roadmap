@@ -205,73 +205,96 @@ const MyTimeline = ({ tasks }) => {
     return deps;
   }, [filteredTasks]);
 
-  const dependencyRenderer = useCallback(({ dependencies, getItemById, itemLinkRenderer }) => {
-    return (
-      <div className="dependencies">
-        {dependencies.map((dependency) => {
-          const fromItem = getItemById(dependency.fromItem);
-          const toItem = getItemById(dependency.toItem);
-
-          if (!fromItem || !toItem) {
-            return null;
-          }
-
-          const fromAnchor = moment(fromItem.end_time).valueOf();
-          const toAnchor = moment(toItem.start_time).valueOf();
-
-          // Ajusta la posición vertical para que la flecha no se superponga con el texto
-          const fromY = fromItem.top + fromItem.height / 2;
-          const toY = toItem.top + toItem.height / 2;
-
-          // Define los puntos de la línea y la flecha
-          const points = `
-            ${fromItem.left + fromItem.width},${fromY}
-            ${fromItem.left + fromItem.width + 20},${fromY}
-            ${fromItem.left + fromItem.width + 20},${toY}
-            ${toItem.left - 5},${toY}
-          `;
-
-          const arrowPoints = `
-            ${toItem.left - 5},${toY - 5}
-            ${toItem.left + 5},${toY}
-            ${toItem.left - 5},${toY + 5}
-          `;
-
-          return (
-            <svg key={`dep-${dependency.fromItem}-${dependency.toItem}`} style={{ position: 'absolute', overflow: 'visible', zIndex: 10 }}>
-              <polyline
-                points={points}
-                stroke="#757575"
-                strokeWidth={1.5}
-                fill="none"
-                markerEnd="url(#arrowhead)"
-              />
-              <marker id="arrowhead" viewBox="0 0 10 10" refX="0" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
-              </marker>
-            </svg>
-          );
-        })}
-      </div>
-    );
-  }, [filteredTasks]);
+    const dependencyRenderer = useCallback(({ dependencies, getItemById, itemLinkRenderer }) => {
+        return (
+          <div className="dependencies">
+            {dependencies.map((dependency) => {
+              const fromItem = getItemById(dependency.fromItem);
+              const toItem = getItemById(dependency.toItem);
+    
+              if (!fromItem || !toItem) {
+                return null;
+              }
+    
+              const fromAnchor = moment(fromItem.end_time).valueOf();
+              const toAnchor = moment(toItem.start_time).valueOf();
+    
+              // Ajusta la posición vertical para que la flecha no se superponga con el texto
+              const fromY = fromItem.top + fromItem.height / 2;
+              const toY = toItem.top + toItem.height / 2;
+    
+              // Define los puntos de la línea y la flecha
+              const points = `
+                ${fromItem.left + fromItem.width},${fromY}
+                ${fromItem.left + fromItem.width + 20},${fromY}
+                ${fromItem.left + fromItem.width + 20},${toY}
+                ${toItem.left - 5},${toY}
+              `;
+    
+              const arrowPoints = `
+                ${toItem.left - 5},${toY - 5}
+                ${toItem.left + 5},${toY}
+                ${toItem.left - 5},${toY + 5}
+              `;
+    
+              return (
+                <svg
+                  key={`dep-${dependency.fromItem}-${dependency.toItem}`}
+                  style={{ position: 'absolute', overflow: 'visible', zIndex: 10 }}
+                >
+                  <polyline
+                    points={points}
+                    stroke="#757575"
+                    strokeWidth={1.5}
+                    fill="none"
+                    markerEnd="url(#arrowhead)"
+                  />
+                  <marker
+                    id="arrowhead"
+                    viewBox="0 0 10 10"
+                    refX="0"
+                    refY="5"
+                    markerUnits="strokeWidth"
+                    markerWidth="8"
+                    markerHeight="6"
+                    orient="auto"
+                  >
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
+                  </marker>
+                </svg>
+              );
+            })}
+          </div>
+        );
+      }, [filteredTasks]);
 
   useEffect(() => {
-    if (timelineRef.current) {
-      const timelineEl = timelineRef.current;
-      const itemElements = timelineEl.querySelectorAll('.rct-item');
-      itemElements.forEach(el => {
-        const itemId = el.getAttribute('data-item-id');
-        const item = itemsWithDependencies.find(i => i.id.toString() === itemId);
-        if (item) {
-          el.style.left = `${el.offsetLeft}px`;
-          el.style.top = `${el.offsetTop}px`;
-          el.style.width = `${el.offsetWidth}px`;
-          el.style.height = `${el.offsetHeight}px`;
+    const updateItemPositions = () => {
+        if (timelineRef.current) {
+            // Access the correct DOM node.
+            const timelineElement = timelineRef.current.closest('.rct-calendar-timeline');
+            if (timelineElement) {
+                const itemElements = timelineElement.querySelectorAll('.rct-item');
+                itemElements.forEach(el => {
+                    const itemId = el.getAttribute('data-item-id');
+                    const item = itemsWithDependencies.find(i => i.id.toString() === itemId);
+                    if (item) {
+                        el.style.left = `${el.offsetLeft}px`;
+                        el.style.top = `${el.offsetTop}px`;
+                        el.style.width = `${el.offsetWidth}px`;
+                        el.style.height = `${el.offsetHeight}px`;
+                    }
+                });
+            }
         }
-      });
-    }
-  }, [itemsWithDependencies]);
+    };
+
+    // Delay the execution to allow the Timeline component to render its items.
+    const timer = setTimeout(updateItemPositions, 0);
+
+    return () => clearTimeout(timer); // Cleanup the timeout if the component unmounts.
+}, [itemsWithDependencies]);
+
 
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -314,6 +337,13 @@ const MyTimeline = ({ tasks }) => {
         /* Hover más elaborado */
         .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
         .dependencies svg { position: absolute; z-index: 10; }
+        .rct-calendar-timeline {
+          width: 100%;
+          height: 100%;
+          overflow-x: auto;
+          overflow-y: auto;
+          position: relative;
+        }
       `}</style>
       <Timeline
         ref={timelineRef}
