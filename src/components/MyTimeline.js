@@ -1,7 +1,13 @@
 // src/components/MyTimeline.js
 import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
-import Timeline, { TimelineHeaders, DateHeader, TimelineMarkers, TodayMarker, CustomMarker } from "react-calendar-timeline";
+import Timeline, {
+  TimelineHeaders,
+  DateHeader,
+  TimelineMarkers,
+  TodayMarker,
+  CustomMarker
+} from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
@@ -82,14 +88,13 @@ const ItemRenderer = ({ item, getItemProps }) => {
       </Tooltip>
     </div>
   );
-};
-
+};n
 ItemRenderer.propTypes = {
   item: PropTypes.object.isRequired,
   getItemProps: PropTypes.func.isRequired
 };
 
-const MyTimeline = ({ tasks }) => {
+const MyTimeline = ({ tasks, onTasksChange }) => {
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months');
   const defaultEnd = now.clone().add(2, 'months');
@@ -129,6 +134,8 @@ const MyTimeline = ({ tasks }) => {
       estimacion: t.Estimacion,
       progress: t.progress,
       Dependencias: t.Dependencias,
+      canMove: true,
+      canResize: 'both',
       style: {
         background: `linear-gradient(120deg, ${STATE_STYLES[t.Estado]?.[0] || STATE_STYLES['Nuevo'][0]}, ${STATE_STYLES[t.Estado]?.[1] || STATE_STYLES['Nuevo'][1]})`,
         ...(t.Estimacion ? {} : { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
@@ -148,19 +155,37 @@ const MyTimeline = ({ tasks }) => {
     [safeTasks]
   );
 
+  // Validador de dependencia al mover/resize
+  const moveResizeValidator = useCallback((action, item, time, resizeEdge) => {
+    const deps = item.Dependencias || [];
+    if (!deps.length) return true;
+    const maxDepEnd = deps.reduce((max, depId) => {
+      const dep = items.find(i => i.id === depId);
+      return dep ? Math.max(max, dep.end_time.valueOf()) : max;
+    }, 0);
+    // en mover, 'time' es nuevo start
+    const newStart = action === 'move' ? time : (action === 'resize' && resizeEdge === 'left' ? time : item.start_time.valueOf());
+    if (newStart < maxDepEnd) {
+      alert('La tarea no puede comenzar antes de la finalización de sus dependencias.');
+      return false;
+    }
+    return true;
+  }, [items]);
+
   // Marcadores de dependencia
   const dependencyMarkers = useMemo(
     () => items.flatMap(item =>
       item.Dependencias.map(depId => {
         const dep = items.find(i => i.id === depId);
-        return dep && (
+        if (!dep) return null;
+        return (
           <CustomMarker
             key={`dep-${depId}-${item.id}`}
             date={dep.end_time.valueOf()}
             render={({ style }) => (
-              <svg style={{ ...style, overflow: 'visible' }} height={20} width={60}>
-                <line x1={0} y1={10} x2={60} y2={10} stroke="gray" strokeWidth={2} />
-                <polygon points="60,5 70,10 60,15" fill="gray" />
+              <svg style={{ ...style, overflow: 'visible' }} height={40} width={80}>
+                <line x1={0} y1={10} x2={80} y2={10} stroke="gray" strokeWidth={2} />
+                <polygon points="80,5 90,10 80,15" fill="gray" />
               </svg>
             )}
           />
@@ -205,6 +230,7 @@ const MyTimeline = ({ tasks }) => {
         visibleTimeEnd={visibleTimeEnd}
         onTimeChange={(s,e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
         itemRenderer={ItemRenderer}
+        moveResizeValidator={moveResizeValidator}
         todayLineColor="red"
         sidebarWidth={150}
         className="mi-rct-sidebar"
