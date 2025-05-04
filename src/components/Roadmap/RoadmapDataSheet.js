@@ -40,7 +40,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           const headers = data.values[0];
           const tagsColumnIndex = headers.indexOf("Tags");
           const sprintColumnIndex = headers.indexOf("Sprint");
-          const dependenciesColumnIndex = headers.indexOf("Dependencies");
+          const dependenciesColumnIndex = headers.indexOf("dependencies");
 
           const parsedData = data.values.slice(1).map((row) => {
             const item = headers.reduce((obj, key, index) => {
