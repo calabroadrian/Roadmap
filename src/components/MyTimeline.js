@@ -1,28 +1,14 @@
 // src/components/MyTimeline.js
 import React, { useState, useMemo, useCallback } from "react";
-import Timeline, {
-  TimelineHeaders,
-  DateHeader,
-  TimelineMarkers,
-  TodayMarker,
-  CustomMarker
-} from "react-calendar-timeline";
 import PropTypes from "prop-types";
+import Timeline, { TimelineHeaders, DateHeader, TimelineMarkers, TodayMarker, CustomMarker } from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
-import {
-  Tooltip,
-  Chip,
-  Box,
-  Button,
-  TextField,
-  Paper,
-  Stack,
-  Typography
-} from "@mui/material";
+import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from "@mui/material";
 import ScheduleIcon from '@mui/icons-material/Schedule';
 
+// Estilos para Etapas
 const ETAPA_STYLES = {
   "Cambio de alcance": "#FF9800",
   "Impacto en inicio": "#F44336",
@@ -32,14 +18,17 @@ const ETAPA_STYLES = {
   "En pausa": "#FFEB3B",
   "Inicio de desarrollo": "#4CAF50",
 };
+// Estilos para Estados
 const STATE_STYLES = {
   "Nuevo":       ["#ffcdd2", "#e57373"],
   "En curso":    ["#fff9c4", "#ffeb3b"],
   "En progreso": ["#fff9c4", "#ffeb3b"],
   "Hecho":       ["#c8e6c9", "#4caf50"],
 };
+// Patrón para items sin estimación
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
+// Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const [startGrad, endGrad] = STATE_STYLES[item.state] || STATE_STYLES['Nuevo'];
@@ -109,7 +98,7 @@ const MyTimeline = ({ tasks }) => {
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
-  // normalize dependencies
+  // Normalizar dependencias
   const safeTasks = useMemo(() =>
     tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()))
       .map(t => ({
@@ -159,11 +148,12 @@ const MyTimeline = ({ tasks }) => {
     [safeTasks]
   );
 
+  // Marcadores de dependencia
   const dependencyMarkers = useMemo(
     () => items.flatMap(item =>
       item.Dependencias.map(depId => {
         const dep = items.find(i => i.id === depId);
-        return dep ? (
+        return dep && (
           <CustomMarker
             key={`dep-${depId}-${item.id}`}
             date={dep.end_time.valueOf()}
@@ -174,10 +164,9 @@ const MyTimeline = ({ tasks }) => {
               </svg>
             )}
           />
-        ) : null;
+        );
       })
-    ),
-    [items]
+    ), [items]
   );
 
   const zoomIn = useCallback(() => {
