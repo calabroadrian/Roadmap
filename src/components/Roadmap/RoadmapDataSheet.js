@@ -1,5 +1,5 @@
 // src/components/RoadmapDataSheet.js
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -39,33 +39,20 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
         const data = await response.json();
         if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
           const headers = data.values[0];
-          const parsedData = data.values.slice(1).map((row, index) => {
-            const item = headers.reduce((obj, key, headerIndex) => {
-              obj[key] = row[headerIndex] || "";
+          const tagsColumnIndex = headers.indexOf("Tags");
+          const sprintColumnIndex = headers.indexOf("Sprint");
+          const parsedData = data.values.slice(1).map((row) => {
+            return headers.reduce((obj, key, index) => {
+              obj[key] = row[index] || "";
               return obj;
             }, {});
-            // Add an Id, default to the index if no Id is found.  Important for dependencies
-            item.Id = item.Id ? parseInt(item.Id, 10) : index + 1;
-
-            // Parse the dependencies.  Important for dependencies
-            if (item.dependencies) {
-              try {
-                item.dependencies = JSON.parse(item.dependencies);
-                if (!Array.isArray(item.dependencies)) {
-                  item.dependencies = [];
-                }
-              } catch (e) {
-                console.error(`Error parsing dependencies for item ${item.Id}:`, e);
-                item.dependencies = [];
-              }
-            } else {
-              item.dependencies = [];
-            }
-            return item;
+          });
+          parsedData.forEach((item) => {
+            item.tags = item[headers[tagsColumnIndex]] || "";
           });
           setItems(parsedData);
           setStatuses([...new Set(parsedData.map((item) => item.Estado))]);
-          setSprints([...new Set(parsedData.map((item) => item.Sprint))]);
+          setSprints([...new Set(parsedData.map((item) => item[headers[sprintColumnIndex]]))]);
         } else {
           console.error("No se encontraron datos válidos en la respuesta API");
         }
@@ -105,7 +92,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
     <Box sx={{ padding: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
         <Button variant={view === "vertical" ? "contained" : "outlined"} onClick={() => setView("vertical")}>
-          Tablero
+          Tablero 
         </Button>
         <Button variant={view === "horizontal" ? "contained" : "outlined"} onClick={() => setView("horizontal")}>
           Roadmap Timeline
@@ -180,19 +167,19 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             Roadmap Timeline
           </Typography>
           <MyTimeline
-            tasks={items.map((item) => ({
-              id: item.Id,
-              title: item.Titulo,
-              startDate: item["Fecha Inicio"] || item.startDate,
-              endDate: item["Fecha Fin"] || item.endDate,
-              etapa: item.etapa,
-              Estado: item.Estado,
-              Estimacion: item.Estimacion,
-              progress: item.progress,
-              dependencies: item.dependencies,
-              Bloqueos: item.Bloqueos,
-            }))}
-          />
+    tasks={items.map((item) => ({
+        id: item.Id,
+        title: item.Titulo,
+        startDate: item["Fecha Inicio"] || item.startDate,
+        endDate: item["Fecha Fin"] || item.endDate,
+        etapa:  item["etapa"] ||  item.etapa,
+        Estado: item.Estado,
+        Estimacion: item.Estimacion,
+        progress: item.progress, // Agregado
+        dependencies: item.dependencies, // Agregado
+        Bloqueos: item.Bloqueos, // Agregado
+    }))}
+/>
         </>
       )}
     </Box>

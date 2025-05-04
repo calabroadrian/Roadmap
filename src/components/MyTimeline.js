@@ -25,12 +25,12 @@ const STATE_STYLES = {
   "Hecho": ["#c8e6c9", "#4caf50"],
 };
 // Patrón para items sin estimación
-const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #eee 10px, #ddd 20px)";
+const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
-  const grad = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo']; // Usa item.Estado
+  const grad = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo'];
   const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
   return (
     <div {...itemProps} className="timeline-item-hover" style={{ ...itemProps.style, ...item.style, background }}>
@@ -46,7 +46,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
       <Tooltip
         title={
           <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
-            <div><strong>Estado:</strong> {item.Estado}</div> {/* Usa item.Estado */}
+            <div><strong>Estado:</strong> {item.Estado}</div>
             <div><strong>Etapa:</strong> {item.etapa}</div>
             <div><strong>Estimación:</strong> {item.Estimacion || 'N/A'}</div>
             <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
@@ -108,12 +108,12 @@ const MyTimeline = ({ tasks }) => {
     const getAdjustedStartTime = (taskId, visited = new Set()) => {
       const task = taskMap[taskId];
       if (!task || !task.dependencies || task.dependencies.length === 0) {
-        return task ? task.start_time : moment(null); // Retorna la fecha de inicio original si no hay dependencias
+        return task ? task.start_time : moment(null);
       }
 
       if (visited.has(taskId)) {
         console.warn(`Ciclo de dependencia detectado en la tarea ${task.title} (${task.id}).`);
-        return task.start_time; // Evitar bucles
+        return task.start_time;
       }
       visited.add(taskId);
 
@@ -127,21 +127,20 @@ const MyTimeline = ({ tasks }) => {
           }
         });
       } else {
-        console.error(`task.dependencies no es un array para la tarea ${task.title} (${task.id}).`);
-        task.dependencies = []; // Tratamos task.dependencies como un array vacío para evitar el error
+        console.warn(`task.dependencies no es un array para la tarea ${task.title} (${task.id}).`);
+        return task.start_time;
       }
-
 
       // Si alguna dependencia tiene una fecha de fin posterior a la fecha de inicio original, ajustamos la fecha de inicio
       if (latestDependencyEndDate.isValid() && latestDependencyEndDate.isAfter(task.start_time)) {
-        return latestDependencyEndDate.clone().add(1, 'day'); // Puedes ajustar esto según cómo definas la dependencia (empieza al día siguiente, etc.)
+        return latestDependencyEndDate.clone().add(1, 'day');
       }
 
       return task.start_time;
     };
 
     return safeTasks.map(task => {
-      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo']; // Usa task.Estado
+      const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
       const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
       const hasPattern = !task.Estimacion;
       const adjustedStartTime = getAdjustedStartTime(task.id);
@@ -152,7 +151,7 @@ const MyTimeline = ({ tasks }) => {
         title: task.title,
         start_time: adjustedStartTime,
         end_time: moment(task.endDate),
-        Estado: task.Estado, // Usa task.Estado
+        Estado: task.Estado,
         etapa: task.etapa,
         estimacion: task.Estimacion,
         progress: task.progress,
@@ -183,7 +182,7 @@ const MyTimeline = ({ tasks }) => {
 
     const deps = [];
     safeTasks.forEach(task => {
-      if (task.dependencies && task.dependencies.length > 0) {
+      if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) { // Verificación adicional
         task.dependencies.forEach(dependencyId => {
           if (taskMap[dependencyId]) {
             deps.push({
@@ -328,11 +327,11 @@ MyTimeline.propTypes = {
       title: PropTypes.string.isRequired,
       startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
       endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      Estado: PropTypes.string, // Usa PropTypes.string para Estado
+      Estado: PropTypes.string,
       etapa: PropTypes.string,
       Estimacion: PropTypes.any,
       progress: PropTypes.any,
-      dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])), // Nuevo campo para las dependencias
+      dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
       Bloqueos: PropTypes.arrayOf(PropTypes.string),
     })
   ).isRequired,
