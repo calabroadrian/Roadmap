@@ -112,10 +112,27 @@ const MyTimeline = ({ tasks }) => {
   const safeTasks = useMemo(
     () => tasks
       .filter(t => t.title.toLowerCase().includes(filter.toLowerCase()))
-      .map(t => ({
-        ...t,
-        dependencias: Array.isArray(t.Dependencias) ? t.Dependencias : [],
-      })),
+      .map(t => {
+        // Parse dependencias field (may come as JSON string)
+        let deps = [];
+        if (Array.isArray(t.Dependencias)) {
+          deps = t.Dependencias;
+        } else if (typeof t.Dependencias === 'string') {
+          try {
+            deps = JSON.parse(t.Dependencias);
+          } catch {
+            deps = t.Dependencias
+              .replace(/\[|\]/g, "")
+              .split(",")
+              .map(s => s.trim())
+              .filter(Boolean);
+          }
+        }
+        return {
+          ...t,
+          Dependencias: Array.isArray(deps) ? deps : [],
+        };
+      }),
     [tasks, filter]
   );
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
@@ -253,4 +270,5 @@ MyTimeline.propTypes = {
     })
   ).isRequired
 };
+
 export default MyTimeline;
