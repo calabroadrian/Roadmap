@@ -88,7 +88,7 @@ const ItemRenderer = ({ item, getItemProps }) => {
       </Tooltip>
     </div>
   );
-};n
+};
 ItemRenderer.propTypes = {
   item: PropTypes.object.isRequired,
   getItemProps: PropTypes.func.isRequired
