@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import ScheduleIcon from '@mui/icons-material/Schedule';
 
-// Estilos para Etapas
 const ETAPA_STYLES = {
   "Cambio de alcance": "#FF9800",
   "Impacto en inicio": "#F44336",
@@ -33,17 +32,14 @@ const ETAPA_STYLES = {
   "En pausa": "#FFEB3B",
   "Inicio de desarrollo": "#4CAF50",
 };
-// Estilos para Estados
 const STATE_STYLES = {
   "Nuevo":       ["#ffcdd2", "#e57373"],
   "En curso":    ["#fff9c4", "#ffeb3b"],
   "En progreso": ["#fff9c4", "#ffeb3b"],
   "Hecho":       ["#c8e6c9", "#4caf50"],
 };
-// Patrón para items sin estimación
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
-// Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const [startGrad, endGrad] = STATE_STYLES[item.state] || STATE_STYLES['Nuevo'];
@@ -113,6 +109,7 @@ const MyTimeline = ({ tasks }) => {
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
 
+  // normalize dependencies
   const safeTasks = useMemo(() =>
     tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()))
       .map(t => ({
@@ -166,8 +163,7 @@ const MyTimeline = ({ tasks }) => {
     () => items.flatMap(item =>
       item.Dependencias.map(depId => {
         const dep = items.find(i => i.id === depId);
-        if (!dep) return null;
-        return (
+        return dep ? (
           <CustomMarker
             key={`dep-${depId}-${item.id}`}
             date={dep.end_time.valueOf()}
@@ -178,9 +174,9 @@ const MyTimeline = ({ tasks }) => {
               </svg>
             )}
           />
-        );
+        ) : null;
       })
-    ).filter(Boolean),
+    ),
     [items]
   );
 
@@ -201,13 +197,8 @@ const MyTimeline = ({ tasks }) => {
       <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <ScheduleIcon /> Roadmap Timeline
       </Typography>
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>        
-        <TextField
-          label="Buscar…"
-          size="small"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        />
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+        <TextField label="Buscar…" size="small" value={filter} onChange={e => setFilter(e.target.value)} />
         <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
         <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
       </Stack>
@@ -223,7 +214,7 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
-        onTimeChange={(s, e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
+        onTimeChange={(s,e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
         itemRenderer={ItemRenderer}
         todayLineColor="red"
         sidebarWidth={150}
