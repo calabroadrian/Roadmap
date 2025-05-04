@@ -185,18 +185,20 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             Bloqueos: item.Bloqueos,
           })))}
           <MyTimeline
-            tasks={items.map((item) => ({
-              id: item.Id,
-              title: item.Titulo,
-              startDate: item["Fecha Inicio"] || item.startDate,
-              endDate: item["Fecha Fin"] || item.endDate,
-              etapa: item["etapa"] || item.etapa,
-              Estado: item.Estado,
-              Estimacion: item.Estimacion,
-              progress: item.progress,
-              dependencies: item.dependencies,
-              Bloqueos: item.Bloqueos,
-            }))}
+            tasks={items.map((item) => {
+              return {
+                id: item.Id,
+                title: item.Titulo,
+                startDate: item["Fecha Inicio"] || item.startDate,
+                endDate: item["Fecha Fin"] || item.endDate,
+                etapa: item["etapa"] || item.etapa,
+                Estado: item.Estado,
+                Estimacion: item.Estimacion,
+                progress: item.progress,
+                dependencies: item.dependencies,
+                Bloqueos: item.Bloqueos,
+              }
+            })}
           />
         </>
       )}
@@ -205,3 +207,4 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 };
 
 export default RoadmapDataSheet;
+
