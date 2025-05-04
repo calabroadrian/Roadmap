@@ -1,5 +1,4 @@
-// src/components/RoadmapDataSheet.js
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -41,11 +40,18 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           const headers = data.values[0];
           const tagsColumnIndex = headers.indexOf("Tags");
           const sprintColumnIndex = headers.indexOf("Sprint");
+          const dependenciesColumnIndex = headers.indexOf("Dependencies"); // Obtener el índice de la columna "Dependencies"
           const parsedData = data.values.slice(1).map((row) => {
-            return headers.reduce((obj, key, index) => {
+            const item = headers.reduce((obj, key, index) => {
               obj[key] = row[index] || "";
               return obj;
             }, {});
+            // Parsear la columna de dependencias, asegurándose de que sea un array de strings
+            const dependenciesValue = row[dependenciesColumnIndex];
+            item.dependencies = dependenciesValue
+              ? dependenciesValue.split(",").map((depId) => depId.trim())
+              : [];
+            return item;
           });
           parsedData.forEach((item) => {
             item.tags = item[headers[tagsColumnIndex]] || "";
@@ -92,7 +98,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
     <Box sx={{ padding: 2 }}>
       <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
         <Button variant={view === "vertical" ? "contained" : "outlined"} onClick={() => setView("vertical")}>
-          Tablero 
+          Tablero
         </Button>
         <Button variant={view === "horizontal" ? "contained" : "outlined"} onClick={() => setView("horizontal")}>
           Roadmap Timeline
@@ -167,19 +173,19 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             Roadmap Timeline
           </Typography>
           <MyTimeline
-    tasks={items.map((item) => ({
-        id: item.Id,
-        title: item.Titulo,
-        startDate: item["Fecha Inicio"] || item.startDate,
-        endDate: item["Fecha Fin"] || item.endDate,
-        etapa:  item["etapa"] ||  item.etapa,
-        Estado: item.Estado,
-        Estimacion: item.Estimacion,
-        progress: item.progress, // Agregado
-        dependencies: item.dependencies, // Agregado
-        Bloqueos: item.Bloqueos, // Agregado
-    }))}
-/>
+            tasks={items.map((item) => ({
+              id: item.Id,
+              title: item.Titulo,
+              startDate: item["Fecha Inicio"] || item.startDate,
+              endDate: item["Fecha Fin"] || item.endDate,
+              etapa: item["etapa"] || item.etapa,
+              Estado: item.Estado,
+              Estimacion: item.Estimacion,
+              progress: item.progress, // Agregado
+              dependencies: item.dependencies, // Pasando las dependencias ya parseadas
+              Bloqueos: item.Bloqueos, // Agregado
+            }))}
+          />
         </>
       )}
     </Box>
@@ -187,3 +193,4 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
 };
 
 export default RoadmapDataSheet;
+
