@@ -41,7 +41,6 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           const tagsColumnIndex = headers.indexOf("Tags");
           const sprintColumnIndex = headers.indexOf("Sprint");
           const dependenciesColumnIndex = headers.indexOf("dependencies");
-
           const parsedData = data.values.slice(1).map((row) => {
             const item = headers.reduce((obj, key, index) => {
               obj[key] = row[index] || "";
@@ -49,12 +48,8 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
             }, {});
 
             // Parsear la columna de dependencias
-            if (dependenciesColumnIndex !== -1) { // Verifica si la columna "Dependencies" existe
-              const dependenciesValue = row[dependenciesColumnIndex];
-              item.dependencies = dependenciesValue ? [dependenciesValue] : [];
-            } else {
-              item.dependencies = []; // Asegura que la propiedad "dependencies" siempre exista
-            }
+            const dependenciesValue = row[dependenciesColumnIndex];
+            item.dependencies = dependenciesValue ? [dependenciesValue] : []; // Convertir a array, mantener vacío si no hay valor
             return item;
           });
 
