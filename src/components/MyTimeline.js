@@ -44,7 +44,7 @@ const STATE_STYLES = {
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
 // Renderizador de cada item
-tconst ItemRenderer = ({ item, getItemProps }) => {
+const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
   const [startGrad, endGrad] = STATE_STYLES[item.state] || STATE_STYLES['Nuevo'];
   const background = `linear-gradient(120deg, ${startGrad}, ${endGrad})`;
