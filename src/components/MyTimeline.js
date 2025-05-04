@@ -174,6 +174,8 @@ const MyTimeline = ({ tasks }) => {
           borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
         },
         dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
+        top: 0,  // Agregamos top y left para el posicionamiento
+        left: 0
       };
     });
   }, [filteredTasks]);
@@ -217,17 +219,30 @@ const MyTimeline = ({ tasks }) => {
         const end = toItem.start_time.valueOf();
         const id = `dep-${dep.fromItem}-${dep.toItem}`;
 
+        const xStart = fromItem.left + fromItem.width;
+        const yStart = fromItem.top + fromItem.height / 2;
+        const xEnd = toItem.left;
+        const yEnd = toItem.top + toItem.height / 2;
+        const length = Math.sqrt(Math.pow(xEnd - xStart, 2) + Math.pow(yEnd - yStart, 2));
+        const angle = Math.atan2(yEnd - yStart, xEnd - xStart) * 180 / Math.PI;
+
+
         markers.push({
           id: id,
           type: 'custom',
           time: start, // Usamos la fecha de inicio de la dependencia como referencia
           element: (
-            <svg key={id} style={{ position: 'absolute', overflow: 'visible', zIndex: 10 }}>
+            <svg key={id} style={{ position: 'absolute', overflow: 'visible', zIndex: 10,
+              left: `${xStart}px`, top: `${yStart}px`,
+              width: `${length}px`, height: '0px',
+              transform: `rotate(${angle}deg)`
+
+            }}>
               {/* Calculamos las coordenadas de inicio y fin de la flecha */}
               <line
                 x1={0} // Inicio en 0 porque el marker se posicionará
                 y1={0}
-                x2={end - start} // Longitud de la línea
+                x2={length} // Longitud de la línea
                 y2={0}
                 stroke="#757575"
                 strokeWidth={1.5}
@@ -249,8 +264,8 @@ const MyTimeline = ({ tasks }) => {
           ),
           // Agregamos estilos para posicionar el marker correctamente
           style: {
-            left: `${0}px`,  // Posición izquierda del marker
-            top: `${fromItem.top + fromItem.height / 2}px`, // Posición vertical
+            left: `${xStart}px`,  // Posición izquierda del marker
+            top: `${yStart}px`, // Posición vertical
             pointerEvents: 'none', // Permite la interacción con los items
           }
         });
@@ -364,3 +379,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
