@@ -45,6 +45,7 @@
     "serve": "^14.2.4",
     "styled-components": "^5.3.9",
     "util": "^0.12.5",
+    "vis-timeline": "^7.7.3",
     "vm-browserify": "^1.1.2",
     "web-vitals": "^2.1.4",
     "yarn": "^1.22.19"
