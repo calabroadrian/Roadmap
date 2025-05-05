@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
 import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
 import "./MyTimeline.css";
@@ -62,6 +62,33 @@ const ItemRenderer = ({ item, getItemProps }) => {
   );
 };
 
+// Renderizador nativo de dependencias
+const dependencyRenderer = ({ dependency, getItemDimensions }) => {
+  const { fromItem, toItem } = dependency;
+  const fromDim = getItemDimensions(fromItem);
+  const toDim = getItemDimensions(toItem);
+  if (!fromDim || !toDim) return null;
+  const x1 = fromDim.left + fromDim.width;
+  const y1 = fromDim.top + fromDim.height / 2;
+  const x2 = toDim.left;
+  const y2 = toDim.top + toDim.height / 2;
+  const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  return (
+    <svg
+      key={`dep-${fromItem}-${toItem}`}
+      style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none' }}
+    >
+      <g transform={`translate(${x1},${y1}) rotate(${angle})`}>
+        <line x1={0} y1={0} x2={length} y2={0} stroke="#757575" strokeWidth={1.5} markerEnd="url(#arrowhead)" />
+        <marker id="arrowhead" viewBox="0 0 10 10" refX={0} refY={5} markerUnits="strokeWidth" markerWidth={8} markerHeight={6} orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#757575" />
+        </marker>
+      </g>
+    </svg>
+  );
+};
+
 const MyTimeline = ({ tasks }) => {
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months');
@@ -74,19 +101,17 @@ const MyTimeline = ({ tasks }) => {
   );
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
-  const timelineRef = useRef(null);
-  const [mounted, setMounted] = useState(false);
 
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
     setVisibleTimeStart(v => v + span * 0.1);
     setVisibleTimeEnd(v => v - span * 0.1);
-  }, [visibleTimeEnd, visibleTimeStart]);
+  }, [visibleTimeStart, visibleTimeEnd]);
   const zoomOut = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
     setVisibleTimeStart(v => v - span * 0.1);
     setVisibleTimeEnd(v => v + span * 0.1);
-  }, [visibleTimeEnd, visibleTimeStart]);
+  }, [visibleTimeStart, visibleTimeEnd]);
 
   const groups = useMemo(
     () => filteredTasks.map(task => ({ id: task.id, title: task.title })),
@@ -103,24 +128,22 @@ const MyTimeline = ({ tasks }) => {
         dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
       }
     }), {});
-
-    const getAdjustedStartTime = (taskId, visited = new Set()) => {
-      const task = taskMap[taskId];
+    const getAdjustedStartTime = (id, visited = new Set()) => {
+      const task = taskMap[id];
       if (!task || task.dependencies.length === 0) return task.start_time;
-      if (visited.has(taskId)) return task.start_time;
-      visited.add(taskId);
+      if (visited.has(id)) return task.start_time;
+      visited.add(id);
       let latest = moment(null);
-      task.dependencies.forEach(depId => {
-        const depTask = taskMap[depId];
+      task.dependencies.forEach(dep => {
+        const depTask = taskMap[dep];
         if (!depTask) return;
-        const depEnd = getAdjustedStartTime(depId, new Set(visited)).end_time;
-        if (depEnd.isAfter(latest)) latest = depEnd;
+        const end = getAdjustedStartTime(dep, new Set(visited)).end_time;
+        if (end.isAfter(latest)) latest = end;
       });
-      return (latest.isValid() && latest.isAfter(task.start_time))
+      return latest.isValid() && latest.isAfter(task.start_time)
         ? latest.clone().add(1, 'day')
         : task.start_time;
     };
-
     return filteredTasks.map(task => ({
       id: task.id,
       group: task.id,
@@ -138,66 +161,15 @@ const MyTimeline = ({ tasks }) => {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)', minHeight: '30px', fontSize: '13px',
         borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
-      }
+      },
+      dependencies: Array.isArray(task.dependencies) ? task.dependencies.map(dep => ({ fromItem: dep, toItem: task.id })) : []
     }));
   }, [filteredTasks]);
 
-  const dependencies = useMemo(() => {
-    const ids = filteredTasks.map(t => t.id);
-    return filteredTasks.flatMap(task =>
-      Array.isArray(task.dependencies)
-        ? task.dependencies.map(depId => ids.includes(depId) ? { fromItem: depId, toItem: task.id } : null).filter(Boolean)
-        : []
-    );
-  }, [filteredTasks]);
-
-  const [svgs, setSvgs] = useState([]);
-
-  useEffect(() => {
-    if (!mounted || !timelineRef.current) return;
-    const newSvgs = dependencies.map(({ fromItem, toItem }) => {
-      const fromDim = timelineRef.current.getItemDimensions(fromItem);
-      const toDim = timelineRef.current.getItemDimensions(toItem);
-      if (!fromDim || !toDim) return null;
-      const xStart = fromDim.left + fromDim.width;
-      const yStart = fromDim.top + fromDim.height / 2;
-      const xEnd = toDim.left;
-      const yEnd = toDim.top + toDim.height / 2;
-      const length = Math.hypot(xEnd - xStart, yEnd - yStart);
-      const angle = Math.atan2(yEnd - yStart, xEnd - xStart) * 180 / Math.PI;
-      return (
-        <svg
-          key={`${fromItem}-${toItem}`}
-          style={{ position: 'absolute', top: 0, left: 0, overflow: 'visible', pointerEvents: 'none', zIndex: 10 }}
-        >
-          <g transform={`translate(${xStart}, ${yStart}) rotate(${angle})`}>
-            <line
-              x1={0}
-              y1={0}
-              x2={length}
-              y2={0}
-              stroke="#757575"
-              strokeWidth={1.5}
-              markerEnd="url(#arrowhead)"
-            />
-            <marker
-              id="arrowhead"
-              viewBox="0 0 10 10"
-              refX={0}
-              refY={5}
-              markerUnits="strokeWidth"
-              markerWidth={8}
-              markerHeight={6}
-              orient="auto"
-            >
-              <path d="M0,0 L10,5 L0,10 z" fill="#757575" />
-            </marker>
-          </g>
-        </svg>
-      );
-    }).filter(Boolean);
-    setSvgs(newSvgs);
-  }, [dependencies, mounted]);
+  // Recolectar dependencias a pasar al Timeline
+  const dependencies = useMemo(() => (
+    itemsWithDependencies.flatMap(item => item.dependencies)
+  ), [itemsWithDependencies]);
 
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -220,9 +192,10 @@ const MyTimeline = ({ tasks }) => {
         <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
       </Box>
       <Timeline
-        ref={timelineRef}
         groups={groups}
         items={itemsWithDependencies}
+        dependencies={dependencies}
+        dependencyRenderer={dependencyRenderer}
         defaultTimeStart={defaultStart}
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
@@ -238,9 +211,7 @@ const MyTimeline = ({ tasks }) => {
         }
         sidebarWidth={150}
         groupHeights={groups.map(() => 40)}
-      >
-        {svgs}
-      </Timeline>
+      />
     </Paper>
   );
 };
