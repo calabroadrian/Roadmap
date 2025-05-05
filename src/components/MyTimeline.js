@@ -209,21 +209,26 @@ const MyTimeline = ({ tasks }) => {
         });
       }
     });
+    console.log("Dependencies:", deps); // Imprimimos las dependencias para inspección
     return deps;
   }, [filteredTasks]);
+
+  const [svgs, setSvgs] = useState([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!mounted || !timelineRef.current) return;
 
-    const timelineEl = timelineRef.current.querySelector('.rct-calendar-timeline-items');  // Selector específico para el contenedor de items
-    if (!timelineEl) return;
-    setTimelineRect(timelineEl.getBoundingClientRect());
-
-  }, [mounted, key]); // Add key to dependency array
+    const timelineItemsElement = timelineRef.current.querySelector('.rct-calendar-timeline-items');
+    if (!timelineItemsElement) {
+        console.warn("No se encontró el contenedor de items del timeline.");
+        return;
+    }
+    setTimelineRect(timelineItemsElement.getBoundingClientRect());
+  }, [mounted, key]); 
 
   useEffect(() => {
     if (!mounted || !timelineRef.current || !timelineRect) return;
@@ -295,6 +300,7 @@ const MyTimeline = ({ tasks }) => {
     setKey(prevKey => prevKey + 1); // Update key to force re-render
   }, [dependencies, itemsWithDependencies, mounted, timelineRect]);
 
+
   const handleTimeChange = useCallback((start, end) => {
     setVisibleTimeStart(start);
     setVisibleTimeEnd(end);
@@ -341,6 +347,8 @@ const MyTimeline = ({ tasks }) => {
         .rct-item.rct-selected { background: none !important; }
         /* Hover más elaborado */
         .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+        .dependencies svg { position: absolute; z-index: 10; pointer-events: none;
+        }
         .rct-calendar-timeline {
           width: 100%;
           height: 100%;
@@ -351,7 +359,6 @@ const MyTimeline = ({ tasks }) => {
         .rct-calendar-timeline-items {
           position: relative; /* Asegura que los SVGs se posicionen correctamente dentro del contenedor de items */
         }
-
       `}</style>
       <Timeline
         key={key}
