@@ -155,7 +155,7 @@ const MyTimeline = ({ tasks }) => {
             const hasPattern = !task.Estimacion;
             const adjustedStartTime = getAdjustedStartTime(task.id);
             const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
-            const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601']);
+            const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
             return {
                 id: task.id,
                 group: task.id,
