@@ -80,7 +80,8 @@ const MyTimeline = ({ tasks }) => {
     const [mounted, setMounted] = useState(false);
     const [svgs, setSvgs] = useState([]);
     const [itemsWithDependencies, setItemsWithDependencies] = useState([]);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 }); // Add this line
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [timelineKey, setTimelineKey] = useState(0); // Add a key
 
 
     const zoomIn = useCallback(() => {
@@ -196,9 +197,9 @@ const MyTimeline = ({ tasks }) => {
             if (timelineRef.current) {
                 const container = timelineRef.current.parentElement;
                 if (container) {
-                  const width = container.offsetWidth;
-                  const height = container.offsetHeight;
-                  setDimensions({ width, height });
+                    const width = container.offsetWidth;
+                    const height = container.offsetHeight;
+                    setDimensions({ width, height });
                 }
             }
         };
@@ -312,7 +313,7 @@ const MyTimeline = ({ tasks }) => {
             }
         });
         setSvgs(newSvgs);
-    }, [itemsWithDependencies, mounted, dimensions]);
+    }, [itemsWithDependencies, mounted, dimensions, timelineKey]); // Add timelineKey as dependency
 
     return (
         <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -365,6 +366,7 @@ const MyTimeline = ({ tasks }) => {
         }
       `}</style>
             <Timeline
+                key={timelineKey} // Use the key here
                 ref={timelineRef}
                 groups={groups}
                 items={itemsWithDependencies}
@@ -411,3 +413,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
