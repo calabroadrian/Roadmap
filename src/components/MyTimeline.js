@@ -98,10 +98,13 @@ const MyTimeline = ({ tasks }) => {
   const itemsWithDependencies = useMemo(() => {
     // Primero, mapeamos las tareas para tener un acceso rápido por ID
     const taskMap = filteredTasks.reduce((acc, task) => {
+      const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);  // <-- Añadido formatos
+      const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);    // <-- Añadido formatos
+      
       acc[task.id] = {
         ...task,
-        start_time: moment(task.startDate),
-        end_time: moment(task.endDate),
+        start_time: start,
+        end_time: end,
         dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
       };
       return acc;
@@ -148,13 +151,14 @@ const MyTimeline = ({ tasks }) => {
       const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
       const hasPattern = !task.Estimacion;
       const adjustedStartTime = getAdjustedStartTime(task.id);
-
+        const start = moment(task.startDate,  ['DD/MM/YYYY', moment.ISO_8601]);
+        const end = moment(task.endDate,  ['DD/MM/YYYY', moment.ISO_8601]);
       return {
         id: task.id,
         group: task.id,
         title: task.title,
         start_time: adjustedStartTime,
-        end_time: moment(task.endDate),
+        end_time: end,
         Estado: task.Estado,
         etapa: task.etapa,
         estimacion: task.Estimacion,
@@ -213,18 +217,28 @@ const MyTimeline = ({ tasks }) => {
   }, [filteredTasks]);
 
   const [svgs, setSvgs] = useState([]);
+  const [timelineItems, setTimelineItems] = useState(itemsWithDependencies); // Nuevo estado para los items del timeline
 
   useEffect(() => {
     setMounted(true); // Establecemos el estado a montado cuando el componente se monta
   }, []);
 
+    useEffect(() => {
+        setTimelineItems(itemsWithDependencies);
+    }, [itemsWithDependencies]);
+
   useEffect(() => {
     if (!mounted) return;
     const newSvgs = [];
 
+        const calculatedItems = itemsWithDependencies.reduce((acc, item) => {
+            acc[item.id] = { ...item, left: 0, top: 0 };
+            return acc;
+        }, {});
+
     dependencies.forEach(dependency => {
-      const fromItem = itemsWithDependencies.find(item => item.id === dependency.fromItem);
-      const toItem = itemsWithDependencies.find(item => item.id === dependency.toItem);
+      const fromItem = calculatedItems[dependency.fromItem];
+      const toItem = calculatedItems[dependency.toItem];
 
       if (fromItem && toItem) {
         const xStart = fromItem.left + fromItem.width;
@@ -285,7 +299,7 @@ const MyTimeline = ({ tasks }) => {
       }
     });
     setSvgs(newSvgs);
-  }, [dependencies, itemsWithDependencies, mounted]);
+  }, [dependencies, mounted, itemsWithDependencies]);
 
 
   return (
@@ -341,7 +355,7 @@ const MyTimeline = ({ tasks }) => {
       <Timeline
         ref={timelineRef}
         groups={groups}
-        items={itemsWithDependencies}
+        items={timelineItems}
         defaultTimeStart={defaultStart}
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
@@ -362,6 +376,17 @@ const MyTimeline = ({ tasks }) => {
         groupHeights={groups.map(() => 40)}
         //dependencyRenderer={dependencyRenderer}
         //dependencies={dependencies}
+        onItemMove={(itemId, newGroupOrder, newTime) => {
+                const movedItem = timelineItems.find(item => item.id === itemId);
+                if (movedItem) {
+                    const updatedItems = timelineItems.map(item =>
+                        item.id === itemId
+                            ? { ...item, start_time: newTime, end_time: moment(newTime).add(1, 'day') } // Ajustar end_time según sea necesario
+                            : item
+                    );
+                    setTimelineItems(updatedItems);
+                }
+            }}
         >
         {svgs}
       </Timeline>
