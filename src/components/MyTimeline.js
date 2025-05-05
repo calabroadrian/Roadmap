@@ -80,6 +80,7 @@ const MyTimeline = ({ tasks }) => {
   const [mounted, setMounted] = useState(false); // Nuevo estado para controlar el montaje
   const [svgs, setSvgs] = useState([]);
   const [timelineRect, setTimelineRect] = useState(null);
+  const [key, setKey] = useState(0); // Add a key
 
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
@@ -222,7 +223,7 @@ const MyTimeline = ({ tasks }) => {
     if (!timelineEl) return;
     setTimelineRect(timelineEl.getBoundingClientRect());
 
-  }, [mounted]);
+  }, [mounted, key]); // Add key to dependency array
 
   useEffect(() => {
     if (!mounted || !timelineRef.current || !timelineRect) return;
@@ -291,6 +292,7 @@ const MyTimeline = ({ tasks }) => {
       }
     });
     setSvgs(newSvgs);
+    setKey(prevKey => prevKey + 1); // Update key to force re-render
   }, [dependencies, itemsWithDependencies, mounted, timelineRect]);
 
   const handleTimeChange = useCallback((start, end) => {
@@ -352,6 +354,7 @@ const MyTimeline = ({ tasks }) => {
 
       `}</style>
       <Timeline
+        key={key}
         ref={timelineRef}
         groups={groups}
         items={itemsWithDependencies}
@@ -398,4 +401,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
