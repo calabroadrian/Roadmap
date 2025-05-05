@@ -5,7 +5,7 @@ import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from "@mui/material";
-import ScheduleIcon from '@mui/icons-material/Schedule';
+import ScheduleIcon from '@mui/icons-material-Schedule';
 
 // Estilos para Etapas
 const ETAPA_STYLES = {
@@ -77,7 +77,7 @@ const MyTimeline = ({ tasks }) => {
     const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
     const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
     const timelineRef = useRef(null);
-    const [mounted, setMounted] = useState(false);
+    const [mounted, setMounted] = useState(false); // Nuevo estado para controlar el montaje
     const [svgs, setSvgs] = useState([]);
 
     const zoomIn = useCallback(() => {
@@ -97,6 +97,7 @@ const MyTimeline = ({ tasks }) => {
     );
 
     const itemsWithDependencies = useMemo(() => {
+        // Primero, mapeamos las tareas para tener un acceso rápido por ID
         const taskMap = filteredTasks.reduce((acc, task) => {
             const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
             const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
@@ -104,11 +105,12 @@ const MyTimeline = ({ tasks }) => {
                 ...task,
                 start_time: start,
                 end_time: end,
-                dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
+                dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
             };
             return acc;
         }, {});
 
+        // Función para calcular la fecha de inicio ajustada por dependencias
         const getAdjustedStartTime = (taskId, visited = new Set()) => {
             const task = taskMap[taskId];
             if (!task || !task.dependencies || task.dependencies.length === 0) {
@@ -122,10 +124,11 @@ const MyTimeline = ({ tasks }) => {
             visited.add(taskId);
 
             let latestDependencyEndDate = moment(null);
+            // Agregamos esta verificación para asegurarnos de que task.dependencies sea un array
             if (Array.isArray(task.dependencies)) {
                 task.dependencies.forEach(dependencyId => {
-                    const dependencyTask = taskMap[dependencyId];
-                    const dependencyEndDate = dependencyTask ? getAdjustedStartTime(dependencyId, new Set(visited)).end_time : moment(null);
+                    const dependencyTask = taskMap[dependencyId]; // Obtener la tarea dependiente
+                    const dependencyEndDate = dependencyTask ? getAdjustedStartTime(dependencyId, new Set(visited)).end_time : moment(null); // Verificar si la tarea existe
                     if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
                         latestDependencyEndDate = dependencyEndDate;
                     }
@@ -135,6 +138,7 @@ const MyTimeline = ({ tasks }) => {
                 return task.start_time;
             }
 
+            // Si alguna dependencia tiene una fecha de fin posterior a la fecha de inicio original, ajustamos la fecha de inicio
             if (latestDependencyEndDate.isValid() && latestDependencyEndDate.isAfter(task.start_time)) {
                 return latestDependencyEndDate.clone().add(1, 'day');
             }
@@ -173,11 +177,11 @@ const MyTimeline = ({ tasks }) => {
                     fontSize: '13px',
                     borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
                 },
-                dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
-                top: 0,
+                dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
+                top: 0,  // Agregamos top y left para el posicionamiento
                 left: 0,
                 height: 30,
-                width: 100
+                width: 100 // Agregamos un ancho por defecto
             };
         });
 
@@ -194,8 +198,8 @@ const MyTimeline = ({ tasks }) => {
         filteredTasks.forEach(task => {
             if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
                 task.dependencies.forEach(dependencyId => {
-                    const dependencyTask = taskMap[dependencyId];
-                    if (dependencyTask) {
+                    const dependencyTask = taskMap[dependencyId]; // Obtener la tarea dependiente
+                    if (dependencyTask) { // Verificar si la tarea dependiente existe
                         deps.push({
                             fromItem: dependencyId,
                             toItem: task.id,
@@ -207,80 +211,103 @@ const MyTimeline = ({ tasks }) => {
                 });
             }
         });
-        console.log("Dependencies:", deps);
+        console.log("Dependencies:", deps); // Imprimimos las dependencias para inspección
         return deps;
     }, [filteredTasks]);
 
+    const [containerRect, setContainerRect] = useState(null);
+
     useEffect(() => {
-        setMounted(true);
+        setMounted(true); // Establecemos el estado a montado cuando el componente se monta
     }, []);
 
     useEffect(() => {
-        if (!mounted) return;
-        const newSvgs = [];
+        const updateSvgPositions = () => {
+            if (!mounted || !timelineRef.current) return;
 
-        dependencies.forEach(dependency => {
-            const fromItem = itemsWithDependencies.find(item => item.id === dependency.fromItem);
-            const toItem = itemsWithDependencies.find(item => item.id === dependency.toItem);
+            const newSvgs = [];
+            const itemElements = timelineRef.current.querySelectorAll('.rct-item-content');
+            const calculatedItems = {};
 
-            if (fromItem && toItem) {
-                const xStart = fromItem.left + fromItem.width;
-                const yStart = fromItem.top + fromItem.height / 2;
-                const xEnd = toItem.left;
-                const yEnd = toItem.top + toItem.height / 2;
-                const length = Math.sqrt(Math.pow(xEnd - xStart, 2) + Math.pow(yEnd - yStart, 2));
-                const angle = Math.atan2(yEnd - yStart, xEnd - xStart) * 180 / Math.PI;
-
-                if (isNaN(length) || isNaN(xStart) || isNaN(yStart) || isNaN(angle)) {
-                    console.warn(
-                        "Valores NaN detectados al calcular la dependencia:",
-                        { fromItem, toItem, xStart, yStart, xEnd, yEnd, length, angle }
-                    );
-                    return;
+            itemElements.forEach((element) => {
+                const itemId = element.getAttribute('data-item-id');
+                if (itemId) {
+                    const rect = element.getBoundingClientRect();
+                    calculatedItems[itemId] = {
+                        left: rect.left,
+                        top: rect.top,
+                        width: rect.width,
+                        height: rect.height,
+                    };
                 }
+            });
 
-                const svg = (
-                    <svg
-                        key={`${dependency.fromItem}-${dependency.toItem}`}
-                        style={{
-                            position: 'absolute',
-                            overflow: 'visible',
-                            zIndex: 10,
-                            left: '0px',
-                            top: '0px',
-                            width: `${length}px`,
-                            height: '0px',
-                            transform: `translate(${xStart}px, ${yStart}px) rotate(${angle}deg)`,
-                            pointerEvents: 'none',
-                        }}
-                    >
-                        <line
-                            x1="0"
-                            y1="0"
-                            x2={length}
-                            y2="0"
-                            stroke="#757575"
-                            strokeWidth="1.5"
-                            markerEnd="url(#arrowhead)"
-                        />
-                        <marker
-                            id="arrowhead"
-                            viewBox="0 0 10 10"
-                            refX="0"
-                            refY="5"
-                            markerUnits="strokeWidth"
-                            markerWidth="8"
-                            markerHeight="6"
-                            orient="auto"
+            dependencies.forEach(dependency => {
+                const fromItem = calculatedItems[dependency.fromItem];
+                const toItem = calculatedItems[dependency.toItem];
+
+                if (fromItem && toItem) {
+                    const xStart = fromItem.left + fromItem.width;
+                    const yStart = fromItem.top + fromItem.height / 2;
+                    const xEnd = toItem.left;
+                    const yEnd = toItem.top + toItem.height / 2;
+                    const length = Math.sqrt(Math.pow(xEnd - xStart, 2) + Math.pow(yEnd - yStart, 2));
+                    const angle = Math.atan2(yEnd - yStart, xEnd - xStart) * 180 / Math.PI;
+
+                    // Validación para evitar valores NaN
+                    if (isNaN(length) || isNaN(xStart) || isNaN(yStart) || isNaN(angle)) {
+                        console.warn(
+                            "Valores NaN detectados al calcular la dependencia:",
+                            { fromItem, toItem, xStart, yStart, xEnd, yEnd, length, angle }
+                        );
+                        return; // No renderizar la línea si los valores son inválidos
+                    }
+
+                    const svg = (
+                        <svg
+                            key={`${dependency.fromItem}-${dependency.toItem}`}
+                            style={{
+                                position: 'absolute',
+                                overflow: 'visible',
+                                zIndex: 10,
+                                left: '0px',  // Set to 0, and use transform to position
+                                top: '0px',   //  Set to 0, and use transform to position
+                                width: `${length}px`,
+                                height: '0px',
+                                transform: `translate(${xStart}px, ${yStart}px) rotate(${angle}deg)`,
+                                pointerEvents: 'none',
+                            }}
                         >
-                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
-                        </marker>
-                    </svg>
-                );
-                newSvgs.push(svg);
-            }
-        });
-        setSvgs(newSvgs);
+                            <line
+                                x1="0"
+                                y1="0"
+                                x2={length}
+                                y2="0"
+                                stroke="#757575"
+                                strokeWidth="1.5"
+                                markerEnd="url(#arrowhead)"
+                            />
+                            <marker
+                                id="arrowhead"
+                                viewBox="0 0 10 10"
+                                refX="0"
+                                refY="5"
+                                markerUnits="strokeWidth"
+                                markerWidth="8"
+                                markerHeight="6"
+                                orient="auto"
+                            >
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
+                            </marker>
+                        </svg>
+                    );
+                    newSvgs.push(svg);
+                }
+            });
+            setSvgs(newSvgs);
+        }
+
+        updateSvgPositions();
     }, [dependencies, itemsWithDependencies, mounted]);
 
 
@@ -381,3 +408,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
