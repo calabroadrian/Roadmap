@@ -133,7 +133,7 @@ const MyTimeline = ({ tasks }) => {
       if (!task || task.dependencies.length === 0) return task.start_time;
       if (visited.has(id)) return task.start_time;
       visited.add(id);
-      let latest = moment(null);
+      let latest = task.start_time.clone();
       task.dependencies.forEach(dep => {
         const depTask = taskMap[dep];
         if (!depTask) return;
