@@ -77,8 +77,9 @@ const MyTimeline = ({ tasks }) => {
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
   const timelineRef = useRef(null);
-  const [mounted, setMounted] = useState(false); // Nuevo estado para controlar el montaje
+  const [mounted, setMounted] = useState(false);
   const [svgs, setSvgs] = useState([]);
+  const [timelineRect, setTimelineRect] = useState(null); // Nuevo estado para almacenar las dimensiones del timeline
 
   const zoomIn = useCallback(() => {
     const span = visibleTimeEnd - visibleTimeStart;
@@ -216,7 +217,6 @@ const MyTimeline = ({ tasks }) => {
     const timelineEl = timelineRef.current.querySelector('.rct-calendar-timeline');
     if (!timelineEl) return;
 
-    const timelineRect = timelineEl.getBoundingClientRect();
     const newSvgs = [];
 
     dependencies.forEach(dependency => {
@@ -227,7 +227,7 @@ const MyTimeline = ({ tasks }) => {
         const fromElement = timelineRef.current.querySelector(`.rct-item[data-item-id="${fromItem.id}"]`);
         const toElement = timelineRef.current.querySelector(`.rct-item[data-item-id="${toItem.id}"]`);
 
-        if (fromElement && toElement) {
+        if (fromElement && toElement && timelineRect) { // Verificar si los elementos existen y timelineRect está definido
           const fromRect = fromElement.getBoundingClientRect();
           const toRect = toElement.getBoundingClientRect();
 
@@ -281,7 +281,21 @@ const MyTimeline = ({ tasks }) => {
       }
     });
     setSvgs(newSvgs);
-  }, [dependencies, itemsWithDependencies, mounted]);
+  }, [dependencies, itemsWithDependencies, mounted, timelineRect]); // Agregamos timelineRect como dependencia
+
+  const handleTimeChange = useCallback((start, end) => {
+    setVisibleTimeStart(start);
+    setVisibleTimeEnd(end);
+  }, []);
+
+  const handleTimelineRender = useCallback(() => {
+    if (timelineRef.current) {
+      const timelineEl = timelineRef.current.querySelector('.rct-calendar-timeline');
+      if (timelineEl) {
+        setTimelineRect(timelineEl.getBoundingClientRect());
+      }
+    }
+  }, []);
 
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -339,7 +353,7 @@ const MyTimeline = ({ tasks }) => {
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
-        onTimeChange={(s, e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
+        onTimeChange={handleTimeChange}
         itemRenderer={ItemRenderer}
         headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM' }}
         timelineHeaders={
@@ -353,6 +367,7 @@ const MyTimeline = ({ tasks }) => {
         sidebarWidth={150}
         className="mi-rct-sidebar"
         groupHeights={groups.map(() => 40)}
+        onRender={handleTimelineRender} // Llamar a handleTimelineRender cuando se renderice el timeline
       >
         {svgs}
       </Timeline>
@@ -378,3 +393,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
