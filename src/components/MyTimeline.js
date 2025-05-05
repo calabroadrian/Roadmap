@@ -77,9 +77,9 @@ const MyTimeline = ({ tasks }) => {
   const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
   const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
   const timelineRef = useRef(null);
-  const [mounted, setMounted] = useState(false); // Nuevo estado para controlar el montaje
+  const [mounted, setMounted] = useState(false);
   const [svgs, setSvgs] = useState([]);
-  const [timelineItems, setTimelineItems] = useState([]);
+  const [itemsWithDependencies, setItemsWithDependencies] = useState([]);
 
 
   const zoomIn = useCallback(() => {
@@ -98,111 +98,126 @@ const MyTimeline = ({ tasks }) => {
     [filteredTasks]
   );
 
-    const itemsWithDependencies = useMemo(() => {
-        // Primero, mapeamos las tareas para tener un acceso rápido por ID
-        const taskMap = filteredTasks.reduce((acc, task) => {
-            const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
-            const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
-
-            acc[task.id] = {
-                ...task,
-                start_time: start,
-                end_time: end,
-                dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
-            };
-            return acc;
-        }, {});
-
-        // Función para calcular la fecha de inicio ajustada por dependencias
-        const getAdjustedStartTime = (taskId, visited = new Set()) => {
-            const task = taskMap[taskId];
-            if (!task || !task.dependencies || task.dependencies.length === 0) {
-                return task ? task.start_time : moment(null);
-            }
-
-            if (visited.has(taskId)) {
-                console.warn(`Ciclo de dependencia detectado en la tarea ${task.title} (${task.id}).`);
-                return task.start_time;
-            }
-            visited.add(taskId);
-
-            let latestDependencyEndDate = moment(null);
-            // Agregamos esta verificación para asegurarnos de que task.dependencies sea un array
-            if (Array.isArray(task.dependencies)) {
-                task.dependencies.forEach(dependencyId => {
-                    const dependencyTask = taskMap[dependencyId]; // Obtener la tarea dependiente
-                    const dependencyEndDate = dependencyTask ? getAdjustedStartTime(dependencyId, new Set(visited)).end_time : moment(null); // Verificar si la tarea existe
-                    if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
-                        latestDependencyEndDate = dependencyEndDate;
-                    }
-                });
-            } else {
-                console.warn(`task.dependencies no es un array para la tarea ${task.title} (${task.id}).`);
-                return task.start_time;
-            }
-
-            // Si alguna dependencia tiene una fecha de fin posterior a la fecha de inicio original, ajustamos la fecha de inicio
-            if (latestDependencyEndDate.isValid() && latestDependencyEndDate.isAfter(task.start_time)) {
-                return latestDependencyEndDate.clone().add(1, 'day');
-            }
-
-            return task.start_time;
+  useEffect(() => {
+    const processItems = () => {
+      const taskMap = filteredTasks.reduce((acc, task) => {
+        const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
+        const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
+        acc[task.id] = {
+          ...task,
+          start_time: start,
+          end_time: end,
+          dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
         };
+        return acc;
+      }, {});
 
-        const processedItems = filteredTasks.map(task => {
-            const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-            const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
-            const hasPattern = !task.Estimacion;
-            const adjustedStartTime = getAdjustedStartTime(task.id);
-            const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
-            const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
-            return {
-                id: task.id,
-                group: task.id,
-                title: task.title,
-                start_time: adjustedStartTime,
-                end_time: end,
-                Estado: task.Estado,
-                etapa: task.etapa,
-                estimacion: task.Estimacion,
-                progress: task.progress,
-                style: {
-                    background: grad,
-                    ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
-                    borderRadius: '5px',
-                    padding: '4px',
-                    color: '#fff',
-                    fontWeight: 500,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    minHeight: '30px',
-                    fontSize: '13px',
-                    borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
-                },
-                dependencies: Array.isArray(task.dependencies) ? task.dependencies : [], // Aseguramos que dependencies sea un array
-                top: 0,  // Agregamos top y left para el posicionamiento
-                left: 0,
-                height: 30,
-                width: 100 // Agregamos un ancho por defecto
-            };
-        });
+      const getAdjustedStartTime = (taskId, visited = new Set()) => {
+        const task = taskMap[taskId];
+        if (!task || !task.dependencies || task.dependencies.length === 0) {
+          return task ? task.start_time : moment(null);
+        }
 
-        return processedItems;
-    }, [filteredTasks]);
+        if (visited.has(taskId)) {
+          console.warn(`Ciclo de dependencia detectado en la tarea ${task.title} (${task.id}).`);
+          return task.start_time;
+        }
+        visited.add(taskId);
 
-  const dependencies = useMemo(() => {
-    const taskMap = filteredTasks.reduce((acc, task) => {
-      acc[task.id] = task;
-      return acc;
-    }, {});
+        let latestDependencyEndDate = moment(null);
+        if (Array.isArray(task.dependencies)) {
+          task.dependencies.forEach(dependencyId => {
+            const dependencyTask = taskMap[dependencyId];
+            const dependencyEndDate = dependencyTask ? getAdjustedStartTime(dependencyId, new Set(visited)).end_time : moment(null);
+            if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
+              latestDependencyEndDate = dependencyEndDate;
+            }
+          });
+        } else {
+          console.warn(`task.dependencies no es un array para la tarea ${task.title} (${task.id}).`);
+          return task.start_time;
+        }
+
+        if (latestDependencyEndDate.isValid() && latestDependencyEndDate.isAfter(task.start_time)) {
+          return latestDependencyEndDate.clone().add(1, 'day');
+        }
+        return task.start_time;
+      };
+
+      const processedItems = filteredTasks.map(task => {
+        const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
+        const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
+        const hasPattern = !task.Estimacion;
+        const adjustedStartTime = getAdjustedStartTime(task.id);
+        const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
+        const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
+        return {
+          id: task.id,
+          group: task.id,
+          title: task.title,
+          start_time: adjustedStartTime,
+          end_time: end,
+          Estado: task.Estado,
+          etapa: task.etapa,
+          estimacion: task.Estimacion,
+          progress: task.progress,
+          style: {
+            background: grad,
+            ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
+            borderRadius: '5px',
+            padding: '4px',
+            color: '#fff',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            minHeight: '30px',
+            fontSize: '13px',
+            borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
+          },
+          dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
+          top: 0,
+          left: 0,
+          height: 30,
+          width: 100
+        };
+      });
+      setItemsWithDependencies(processedItems);
+    };
+    processItems();
+  }, [filteredTasks]);
+
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !timelineRef.current) return;
+
+    const newSvgs = [];
+    const itemElements = timelineRef.current.querySelectorAll('.rct-item-content');
+    const calculatedItems = {};
+
+    itemElements.forEach((element) => {
+      const itemId = element.getAttribute('data-item-id');
+      if (itemId) {
+        const rect = element.getBoundingClientRect();
+        calculatedItems[itemId] = {
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+        };
+      }
+    });
 
     const deps = [];
-    filteredTasks.forEach(task => {
+    itemsWithDependencies.forEach(task => {
       if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
         task.dependencies.forEach(dependencyId => {
-          const dependencyTask = taskMap[dependencyId];
+          const dependencyTask = itemsWithDependencies.find(item => item.id === dependencyId);
           if (dependencyTask) {
             deps.push({
               fromItem: dependencyId,
@@ -215,35 +230,9 @@ const MyTimeline = ({ tasks }) => {
         });
       }
     });
-    return deps;
-  }, [filteredTasks]);
 
-  useEffect(() => {
-    setMounted(true);
-    setTimelineItems(itemsWithDependencies);
-  }, [itemsWithDependencies]);
 
-  useEffect(() => {
-    if (!mounted || !timelineRef.current) return;
-
-    const newSvgs = [];
-    const itemElements = timelineRef.current.querySelectorAll('.rct-item-content');
-    const calculatedItems = {};
-
-        itemElements.forEach((element) => {
-            const itemId = element.getAttribute('data-item-id');
-            if (itemId) {
-                const rect = element.getBoundingClientRect();
-                calculatedItems[itemId] = {
-                    left: rect.left,
-                    top: rect.top,
-                    width: rect.width,
-                    height: rect.height,
-                };
-            }
-        });
-
-    dependencies.forEach(dependency => {
+    deps.forEach(dependency => {
       const fromItem = calculatedItems[dependency.fromItem];
       const toItem = calculatedItems[dependency.toItem];
 
@@ -255,13 +244,12 @@ const MyTimeline = ({ tasks }) => {
         const length = Math.sqrt(Math.pow(xEnd - xStart, 2) + Math.pow(yEnd - yStart, 2));
         const angle = Math.atan2(yEnd - yStart, xEnd - xStart) * 180 / Math.PI;
 
-        // Validación para evitar valores NaN
         if (isNaN(length) || isNaN(xStart) || isNaN(yStart) || isNaN(angle)) {
           console.warn(
             "Valores NaN detectados al calcular la dependencia:",
             { fromItem, toItem, xStart, yStart, xEnd, yEnd, length, angle }
           );
-          return; // No renderizar la línea si los valores son inválidos
+          return;
         }
 
         const svg = (
@@ -306,8 +294,7 @@ const MyTimeline = ({ tasks }) => {
       }
     });
     setSvgs(newSvgs);
-  }, [dependencies, mounted, timelineItems]);
-
+  }, [itemsWithDependencies, mounted]);
 
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -362,7 +349,7 @@ const MyTimeline = ({ tasks }) => {
       <Timeline
         ref={timelineRef}
         groups={groups}
-        items={timelineItems}
+        items={itemsWithDependencies}
         defaultTimeStart={defaultStart}
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
@@ -381,30 +368,6 @@ const MyTimeline = ({ tasks }) => {
         sidebarWidth={150}
         className="mi-rct-sidebar"
         groupHeights={groups.map(() => 40)}
-        //dependencyRenderer={dependencyRenderer}
-        //dependencies={dependencies}
-        onItemMove={(itemId, newGroupOrder, newTime) => {
-                const movedItem = timelineItems.find(item => item.id === itemId);
-                if (movedItem) {
-                    const updatedItems = timelineItems.map(item =>
-                        item.id === itemId
-                            ? { ...item, start_time: newTime, end_time: moment(newTime).add(1, 'day') } // Ajustar end_time según sea necesario
-                            : item
-                    );
-                    setTimelineItems(updatedItems);
-                }
-            }}
-        onItemResize={(itemId, newStart, newEnd) => {
-          const resizedItem = timelineItems.find(item => item.id === itemId);
-           if (resizedItem) {
-                const updatedItems = timelineItems.map(item =>
-                    item.id === itemId
-                        ? { ...item, start_time: newStart, end_time: newEnd }
-                        : item
-                );
-                setTimelineItems(updatedItems);
-            }
-        }}
         >
         {svgs}
       </Timeline>
