@@ -1,6 +1,12 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import PropTypes from "prop-types";
-import Timeline, { TimelineHeaders, DateHeader } from "react-calendar-timeline";
+import Timeline, {
+  TimelineHeaders,
+  DateHeader,
+  TimelineMarkers,
+  TodayMarker,
+  CustomMarker
+} from "react-calendar-timeline";
 import "./MyTimeline.css";
 import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
@@ -30,38 +36,70 @@ const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, 
 // Renderizador de cada item
 const ItemRenderer = ({ item, getItemProps }) => {
   const itemProps = getItemProps();
-  const grad = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo'];
-  const background = `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`;
+  const [g1, g2] = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo'];
+  const background = `linear-gradient(120deg, ${g1}, ${g2})`;
+
   return (
-    <div {...itemProps} className="timeline-item-hover" style={{ ...itemProps.style, ...item.style, background }}>
-      {item.etapa && (
+    <Tooltip
+      title={
+        <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
+          <div><strong>Estado:</strong> {item.Estado}</div>
+          <div><strong>Etapa:</strong> {item.etapa}</div>
+          <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
+          <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
+          <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
+          <div><strong>Progreso:</strong> {item.progress != null ? `${item.progress}%` : 'N/A'}</div>
+        </Box>
+      }
+      arrow
+      placement="top"
+      enterDelay={300}
+    >
+      <div
+        {...itemProps}
+        className="timeline-item-hover"
+        style={{
+          ...itemProps.style,
+          ...item.style,
+          background,
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        {typeof item.progress === 'number' && (
+          <Box sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            height: 4,
+            width: `${item.progress}%`,
+            backgroundColor: 'rgba(255,255,255,0.8)',
+            borderBottomLeftRadius: 2,
+            borderBottomRightRadius: item.progress === 100 ? 2 : 0
+          }} />
+        )}
         <Chip
-          label={item.etapa}
+          icon={<ScheduleIcon fontSize="small" />}
+          label={item.title}
           size="small"
           sx={{
-            position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[item.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px'
+            bgcolor: 'rgba(255,255,255,0.7)',
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}
         />
-      )}
-      <Tooltip
-        title={
-          <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
-            <div><strong>Estado:</strong> {item.Estado}</div>
-            <div><strong>Etapa:</strong> {item.etapa}</div>
-            <div><strong>Estimación:</strong> {item.estimacion || 'N/A'}</div>
-            <div><strong>Inicio:</strong> {moment(item.start_time).format('DD/MM/YYYY')}</div>
-            <div><strong>Fin:</strong> {moment(item.end_time).format('DD/MM/YYYY')}</div>
-            <div><strong>Progreso:</strong> {item.progress || 'N/A'}</div>
-          </Box>
-        }
-        arrow
-        placement="top"
-        enterDelay={300}
-      >
-        <Box sx={{ width: '100%', textAlign: 'center', color: '#fff', fontWeight: 500 }}>{item.title}</Box>
-      </Tooltip>
-    </div>
+      </div>
+    </Tooltip>
   );
+};
+
+ItemRenderer.propTypes = {
+  item: PropTypes.object.isRequired,
+  getItemProps: PropTypes.func.isRequired,
 };
 
 const MyTimeline = ({ tasks }) => {
@@ -70,306 +108,126 @@ const MyTimeline = ({ tasks }) => {
   const defaultEnd = now.clone().add(2, 'months');
 
   const [filter, setFilter] = useState("");
+  const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
+  const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
+
   const filteredTasks = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
-  const [visibleTimeStart, setVisibleTimeStart] = useState(defaultStart.valueOf());
-  const [visibleTimeEnd, setVisibleTimeEnd] = useState(defaultEnd.valueOf());
-  const timelineRef = useRef(null);
-  const [mounted, setMounted] = useState(false);
-  const [svgs, setSvgs] = useState([]);
-  const [itemsWithDependencies, setItemsWithDependencies] = useState([]);
-
-
-  const zoomIn = useCallback(() => {
-    const span = visibleTimeEnd - visibleTimeStart;
-    setVisibleTimeStart(v => v + span * 0.1);
-    setVisibleTimeEnd(v => v - span * 0.1);
-  }, [visibleTimeStart, visibleTimeEnd]);
-  const zoomOut = useCallback(() => {
-    const span = visibleTimeEnd - visibleTimeStart;
-    setVisibleTimeStart(v => v - span * 0.1);
-    setVisibleTimeEnd(v => v + span * 0.1);
-  }, [visibleTimeStart, visibleTimeEnd]);
 
   const groups = useMemo(
-    () => filteredTasks.map(task => ({ id: task.id, title: task.title })),
+    () => filteredTasks.map(t => ({ id: t.id, title: t.title })),
     [filteredTasks]
   );
 
-  useEffect(() => {
-    const processItems = () => {
-      const taskMap = filteredTasks.reduce((acc, task) => {
-        const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
-        const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
-        acc[task.id] = {
-          ...task,
-          start_time: start,
-          end_time: end,
-          dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
-        };
-        return acc;
-      }, {});
+  const items = useMemo(
+    () => filteredTasks.map(t => ({
+      id: t.id,
+      group: t.id,
+      title: t.title,
+      start_time: moment(t.startDate),
+      end_time: moment(t.endDate),
+      Estado: t.Estado,
+      etapa: t.etapa,
+      estimacion: t.Estimacion,
+      progress: t.progress,
+      dependencies: Array.isArray(t.dependencies) ? t.dependencies : [],
+      canMove: true,
+      canResize: 'both',
+      style: {
+        background: `linear-gradient(120deg, ${STATE_STYLES[t.Estado]?.[0]}, ${STATE_STYLES[t.Estado]?.[1]})`,
+        ...(t.Estimacion ? {} : { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
+        borderRadius: 4,
+        padding: 4,
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        borderLeft: `4px solid ${ETAPA_STYLES[t.etapa] || '#757575'}`
+      }
+    })),
+    [filteredTasks]
+  );
 
-      const getAdjustedStartTime = (taskId, visited = new Set()) => {
-        const task = taskMap[taskId];
-        if (!task || !task.dependencies || task.dependencies.length === 0) {
-          return task ? task.start_time : moment(null);
-        }
+  // Dependencias nativas
+  const dependencies = useMemo(
+    () => items.flatMap(item =>
+      item.dependencies.map(depId => ({ fromItem: depId, toItem: item.id }))
+    ),
+    [items]
+  );
 
-        if (visited.has(taskId)) {
-          console.warn(`Ciclo de dependencia detectado en la tarea ${task.title} (${task.id}).`);
-          return task.start_time;
-        }
-        visited.add(taskId);
-
-        let latestDependencyEndDate = moment(null);
-        if (Array.isArray(task.dependencies)) {
-          task.dependencies.forEach(dependencyId => {
-            const dependencyTask = taskMap[dependencyId];
-            const dependencyEndDate = dependencyTask ? getAdjustedStartTime(dependencyId, new Set(visited)).end_time : moment(null);
-            if (dependencyEndDate && dependencyEndDate.isAfter(latestDependencyEndDate)) {
-              latestDependencyEndDate = dependencyEndDate;
-            }
-          });
-        } else {
-          console.warn(`task.dependencies no es un array para la tarea ${task.title} (${task.id}).`);
-          return task.start_time;
-        }
-
-        if (latestDependencyEndDate.isValid() && latestDependencyEndDate.isAfter(task.start_time)) {
-          return latestDependencyEndDate.clone().add(1, 'day');
-        }
-        return task.start_time;
-      };
-
-      const processedItems = filteredTasks.map(task => {
-        const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-        const grad = `linear-gradient(120deg, ${stateDef[0]}, ${stateDef[1]})`;
-        const hasPattern = !task.Estimacion;
-        const adjustedStartTime = getAdjustedStartTime(task.id);
-        const start = moment(task.startDate, ['DD/MM/YYYY', moment.ISO_8601]);
-        const end = moment(task.endDate, ['DD/MM/YYYY', moment.ISO_8601]);
-        return {
-          id: task.id,
-          group: task.id,
-          title: task.title,
-          start_time: adjustedStartTime,
-          end_time: end,
-          Estado: task.Estado,
-          etapa: task.etapa,
-          estimacion: task.Estimacion,
-          progress: task.progress,
-          style: {
-            background: grad,
-            ...(hasPattern && { backgroundImage: PATTERNS, backgroundRepeat: 'repeat' }),
-            borderRadius: '5px',
-            padding: '4px',
-            color: '#fff',
-            fontWeight: 500,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            minHeight: '30px',
-            fontSize: '13px',
-            borderLeft: `4px solid ${ETAPA_STYLES[task.etapa] || '#757575'}`
-          },
-          dependencies: Array.isArray(task.dependencies) ? task.dependencies : [],
-          top: 0,
-          left: 0,
-          height: 30,
-          width: 100
-        };
-      });
-      setItemsWithDependencies(processedItems);
-    };
-    processItems();
-  }, [filteredTasks]);
-
-
-  useEffect(() => {
-    setMounted(true);
+  // Renderizador de flechas
+  const dependencyRenderer = useCallback(({ fromItem, toItem, getItemById }) => {
+    const from = getItemById(fromItem);
+    const to   = getItemById(toItem);
+    if (!from || !to) return null;
+    const width = Math.abs(to.right - from.right) + 10;
+    return (
+      <CustomMarker key={`${fromItem}-${toItem}`} date={from.end_time.valueOf()}>
+        <svg style={{ overflow: 'visible' }} height={20} width={width}>
+          <line
+            x1={0} y1={10}
+            x2={width - 10} y2={10}
+            stroke="gray" strokeWidth={2}
+          />
+          <polygon
+            points={`${width - 10},5 ${width},10 ${width - 10},15`}
+            fill="gray"
+          />
+        </svg>
+      </CustomMarker>
+    );
   }, []);
 
-  useEffect(() => {
-    if (!mounted || !timelineRef.current) return;
-
-    const newSvgs = [];
-    const itemElements = timelineRef.current.querySelectorAll('.rct-item-content');
-    const calculatedItems = {};
-
-    itemElements.forEach((element) => {
-      const itemId = element.getAttribute('data-item-id');
-      if (itemId) {
-        const rect = element.getBoundingClientRect();
-        calculatedItems[itemId] = {
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height,
-        };
-      }
-    });
-
-    const deps = [];
-    itemsWithDependencies.forEach(task => {
-      if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
-        task.dependencies.forEach(dependencyId => {
-          const dependencyTask = itemsWithDependencies.find(item => item.id === dependencyId);
-          if (dependencyTask) {
-            deps.push({
-              fromItem: dependencyId,
-              toItem: task.id,
-              label: '',
-            });
-          } else {
-            console.warn(`Dependencia no encontrada: Tarea ${task.title} (${task.id}) depende de ${dependencyId}`);
-          }
-        });
-      }
-    });
-
-
-    deps.forEach(dependency => {
-      const fromItem = calculatedItems[dependency.fromItem];
-      const toItem = calculatedItems[dependency.toItem];
-
-      if (fromItem && toItem) {
-        const xStart = fromItem.left + fromItem.width;
-        const yStart = fromItem.top + fromItem.height / 2;
-        const xEnd = toItem.left;
-        const yEnd = toItem.top + toItem.height / 2;
-        const length = Math.sqrt(Math.pow(xEnd - xStart, 2) + Math.pow(yEnd - yStart, 2));
-        const angle = Math.atan2(yEnd - yStart, xEnd - xStart) * 180 / Math.PI;
-
-        if (isNaN(length) || isNaN(xStart) || isNaN(yStart) || isNaN(angle)) {
-          console.warn(
-            "Valores NaN detectados al calcular la dependencia:",
-            { fromItem, toItem, xStart, yStart, xEnd, yEnd, length, angle }
-          );
-          return;
-        }
-
-        const svg = (
-          <svg
-            key={`${dependency.fromItem}-${dependency.toItem}`}
-            style={{
-              position: 'absolute',
-              overflow: 'visible',
-              zIndex: 10,
-              left: '0px',
-              top: '0px',
-              width: `${length}px`,
-              height: '0px',
-              transform: `translate(${xStart}px, ${yStart}px) rotate(${angle}deg)`,
-              pointerEvents: 'none',
-            }}
-          >
-            <line
-              x1="0"
-              y1="0"
-              x2={length}
-              y2="0"
-              stroke="#757575"
-              strokeWidth="1.5"
-              markerEnd="url(#arrowhead)"
-            />
-            <marker
-              id="arrowhead"
-              viewBox="0 0 10 10"
-              refX="0"
-              refY="5"
-              markerUnits="strokeWidth"
-              markerWidth="8"
-              markerHeight="6"
-              orient="auto"
-            >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#757575" />
-            </marker>
-          </svg>
-        );
-        newSvgs.push(svg);
-      }
-    });
-    setSvgs(newSvgs);
-  }, [itemsWithDependencies, mounted]);
+  const zoom = delta => {
+    const span = visibleTimeEnd - visibleTimeStart;
+    setVisibleTimeStart(v => v + delta * span * 0.1);
+    setVisibleTimeEnd(e => e - delta * span * 0.1);
+  };
 
   return (
     <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
       <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <ScheduleIcon /> Roadmap Timeline
       </Typography>
-      <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
-        {Object.entries(STATE_STYLES).map(([status, grad]) => (
-          <Chip
-            key={status}
-            label={status}
-            size="small"
-            sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color: '#fff' }}
-          />
-        ))}
-      </Stack>
-      <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
-        {Object.entries(ETAPA_STYLES).map(([etapa, color]) => (
-          <Chip
-            key={etapa}
-            label={etapa}
-            size="small"
-            sx={{ backgroundColor: color, color: '#fff' }}
-          />
-        ))}
-      </Stack>
-      <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
         <TextField
           label="Buscar…"
           size="small"
           value={filter}
           onChange={e => setFilter(e.target.value)}
         />
-        <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
-        <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
-      </Box>
-      <style>{`
-        .rct-day-background:nth-child(7n+1) { border-left: 2px solid #ccc; }
-        .rct-item.rct-selected { background: none !important; }
-        /* Hover más elaborado */
-        .timeline-item-hover:hover { transform: translateY(-2px); box-shadow: 0 0 5px rgba(0,0,0,0.3); }
-        .dependencies svg { position: absolute; z-index: 10; pointer-events: none;
-        }
-        .rct-calendar-timeline {
-          width: 100%;
-          height: 100%;
-          overflow-x: auto;
-          overflow-y: auto;
-          position: relative;
-        }
-      `}</style>
+        <Button onClick={() => zoom(-1)}>- Zoom</Button>
+        <Button onClick={() => zoom(1)}>+ Zoom</Button>
+      </Stack>
       <Timeline
         ref={timelineRef}
         groups={groups}
-        items={itemsWithDependencies}
+        items={items}
+        dependencies={dependencies}
+        dependencyRenderer={dependencyRenderer}
         defaultTimeStart={defaultStart}
         defaultTimeEnd={defaultEnd}
         visibleTimeStart={visibleTimeStart}
         visibleTimeEnd={visibleTimeEnd}
         onTimeChange={(s, e) => { setVisibleTimeStart(s); setVisibleTimeEnd(e); }}
         itemRenderer={ItemRenderer}
-        headerLabelFormats={{ monthShort: 'MMM', monthLong: 'MMMM' }}
-        timelineHeaders={
-          <TimelineHeaders>
-            <DateHeader unit="primaryHeader" labelFormat="MMMM" />
-            <DateHeader unit="week" labelFormat="Wo [semana]" />
-            <DateHeader unit="day" labelFormat="DD" />
-          </TimelineHeaders>
-        }
         todayLineColor="red"
         sidebarWidth={150}
         className="mi-rct-sidebar"
         groupHeights={groups.map(() => 40)}
-        >
-        {svgs}
+      >
+        <TimelineHeaders>
+          <DateHeader unit="primaryHeader" labelFormat="MMMM YYYY" />
+          <DateHeader unit="week" labelFormat="Wo [semana]" />
+          <DateHeader unit="day" labelFormat="DD" />
+        </TimelineHeaders>
+        <TimelineMarkers>
+          <TodayMarker />
+        </TimelineMarkers>
       </Timeline>
     </Paper>
   );
@@ -380,16 +238,15 @@ MyTimeline.propTypes = {
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       title: PropTypes.string.isRequired,
-      startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      startDate: PropTypes.string.isRequired,
+      endDate: PropTypes.string.isRequired,
       Estado: PropTypes.string,
       etapa: PropTypes.string,
       Estimacion: PropTypes.any,
-      progress: PropTypes.any,
-      dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
-      Bloqueos: PropTypes.arrayOf(PropTypes.string),
+      progress: PropTypes.number,
+      dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number]))
     })
-  ).isRequired,
+  ).isRequired
 };
 
 export default MyTimeline;
