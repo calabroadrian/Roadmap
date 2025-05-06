@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Gantt } from 'gantt-task-react';
-import 'gantt-task-react/dist/index.css';
+import 'gantt-task-react/dist/style.css';
 import moment from 'moment';
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -77,13 +77,17 @@ const MyTimeline = ({ tasks }) => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
-            // Parsea las fechas usando el formato d/m/aaaa
-            const startDate = task.FechaInicio ? moment(task.FechaInicio, "DD/MM/YYYY").toDate() : defaultStart.toDate();
-            const endDate = task.FechaFin ? moment(task.FechaFin, "DD/MM/YYYY").toDate() : defaultEnd.toDate();
+            // Parsea las fechas usando el formato d/m/aaaa si es necesario, y convierte a Date
+            const startDate = task.startDate
+                ? (typeof task.startDate === 'string' ? moment(task.startDate, "DD/MM/YYYY").toDate() : task.startDate)
+                : defaultStart.toDate();
+            const endDate = task.endDate
+                ? (typeof task.endDate === 'string' ? moment(task.endDate, "DD/MM/YYYY").toDate() : task.endDate)
+                : defaultEnd.toDate();
 
             return {
-                id: task.IdSprint.toString(),
-                name: task.Titulo,
+                id: task.id?.toString() || '',
+                name: task.title,
                 startDate: startDate,
                 endDate: endDate,
                 color: stateDef[0],
@@ -103,7 +107,7 @@ const MyTimeline = ({ tasks }) => {
             if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
                 task.dependencies.forEach(depId => {
                     deps.push({
-                        source: task.IdSprint.toString(),
+                        source: task.id?.toString() || '',
                         target: depId.toString(),
                         type: 'finish-to-start'
                     });
@@ -243,3 +247,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
