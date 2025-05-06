@@ -87,12 +87,11 @@ const MyTimeline = ({ tasks }) => {
 
   const handleSelectTask = useCallback(
     ganttTask => {
-      if (selectedTask) return;          // ← Esto evita reabrir
       const t = tasks.find(t => String(t.id) === ganttTask.id);
       setSelectedTask(t);
     },
-    [tasks, selectedTask]
-  );  
+    [tasks]
+  );
   const closeDrawer = () => setSelectedTask(null);
 
   const taskContent = useCallback(task => (
@@ -155,32 +154,19 @@ const MyTimeline = ({ tasks }) => {
 <Drawer
   anchor="right"
   open={Boolean(selectedTask)}
-  onClose={(e, reason) => {
-    // Evita que el clic de backdrop o ESC burbujee al Gantt
-    e.stopPropagation();
-    closeDrawer();
-  }}
+  onClose={closeDrawer}   // Llamará a closeDrawer ya sea por backdrop o ESC
   ModalProps={{
     keepMounted: true,
-    BackdropProps: {
-      // Ya no necesitamos onClick aquí
-    }
+    onBackdropClick: closeDrawer,    // click fondo
+    onEscapeKeyDown: closeDrawer,    // tecla ESC
   }}
   PaperProps={{
     sx: { width: 350, p: 2 },
-    // Evita que el drag o clic dentro del panel cierre el Drawer
-    onMouseDown: e => e.stopPropagation(),
   }}
 >
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
     <Typography variant="h6">Tarea Detalle</Typography>
-    <IconButton
-      aria-label="Cerrar"
-      onClick={e => {
-        e.stopPropagation();
-        closeDrawer();
-      }}
-    >
+    <IconButton aria-label="Cerrar" onClick={closeDrawer}>
       <CloseIcon />
     </IconButton>
   </Box>
