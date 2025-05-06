@@ -66,48 +66,45 @@ const MyTimeline = ({ tasks }) => {
     }), []);
 
     useEffect(() => {
-        const converted = filteredTasks.map(task => {
-            const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
-            const hasPattern = !task.Estimacion;
+        const converted = filteredTasks.map(item => {
+            const stateDef = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo'];
+            const hasPattern = !item.Estimacion;
 
             let start = defaultStart;
             let end = defaultEnd;
 
-            // Parse start
-            if (task.startDate) {
-                if (typeof task.startDate === 'string') {
-                    const [d, m, y] = task.startDate.split('/').map(Number);
+            if (item.startDate) {
+                if (typeof item.startDate === 'string') {
+                    const [d, m, y] = item.startDate.split('/').map(Number);
                     start = new Date(y, m - 1, d);
-                } else if (task.startDate instanceof Date) {
-                    start = task.startDate;
+                } else if (item.startDate instanceof Date) {
+                    start = item.startDate;
                 } else {
-                    start = moment(task.startDate).toDate();
+                    start = moment(item.startDate).toDate();
                 }
             }
-            // Parse end
-            if (task.endDate) {
-                if (typeof task.endDate === 'string') {
-                    const [d, m, y] = task.endDate.split('/').map(Number);
+            if (item.endDate) {
+                if (typeof item.endDate === 'string') {
+                    const [d, m, y] = item.endDate.split('/').map(Number);
                     end = new Date(y, m - 1, d, 23, 59, 59);
-                } else if (task.endDate instanceof Date) {
-                    end = task.endDate;
+                } else if (item.endDate instanceof Date) {
+                    end = item.endDate;
                 } else {
-                    end = moment(task.endDate).endOf('day').toDate();
+                    end = moment(item.endDate).endOf('day').toDate();
                 }
             }
-
             if (!isValidDate(start)) start = defaultStart;
             if (!isValidDate(end)) end = defaultEnd;
 
             return {
-                id: String(task.id),
-                name: task.title,
+                id: String(item.id),
+                name: item.title,
                 start,
                 end,
-                progress: Number(task.progress) || 0,
+                progress: Number(item.progress) || 0,
                 type: 'task',
                 project: '',
-                dependencies: task.dependencies?.map(String) || [],
+                dependencies: item.dependencies?.map(String) || [],
                 styles: {
                     progressColor: stateDef[1],
                     progressSelectedColor: stateDef[1],
@@ -117,32 +114,65 @@ const MyTimeline = ({ tasks }) => {
                 },
                 isDisabled: false,
                 isHidden: false,
-                custom_class: hasPattern ? 'task-no-estimation' : ''
+                custom_class: hasPattern ? 'task-no-estimation' : '',
+                // Datos originales para tooltip
+                _raw: item
             };
         });
-        console.log('Gantt tasks:', converted);
         setGanttTasks(converted);
-
-        const deps = filteredTasks.flatMap(task =>
-            Array.isArray(task.dependencies)
-                ? task.dependencies.map(dep => ({ source: String(task.id), target: String(dep), type: 'FinishToStart' }))
+        const deps = filteredTasks.flatMap(item =>
+            Array.isArray(item.dependencies)
+                ? item.dependencies.map(dep => ({ source: String(item.id), target: String(dep), type: 'FinishToStart' }))
                 : []
         );
         setDependencies(deps);
-        console.log('Dependencies:', deps);
         setMounted(true);
     }, [filteredTasks, defaultStart, defaultEnd]);
 
-    const taskRenderer = task => (
-        <div style={{
-            backgroundColor: task.styles.backgroundColor,
-            color: task.styles.fontColor,
-            borderRadius: '5px', padding: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', height: '100%', overflow: 'hidden', position: 'relative', fontSize: '13px'
-        }}>
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.name}</span>
-            {task.custom_class && <Chip label={task.custom_class} size="small" sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[task.custom_class] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }} />}
-        </div>
-    );
+    const taskRenderer = task => {
+        const raw = task._raw;
+        return (
+            <Tooltip
+                title={
+                    <Box sx={{ textAlign: 'left', fontSize: '0.85rem' }}>
+                        <div><strong>Estado:</strong> {raw.Estado}</div>
+                        <div><strong>Etapa:</strong> {raw.etapa}</div>
+                        <div><strong>Estimación:</strong> {raw.Estimacion || 'N/A'}</div>
+                        <div><strong>Inicio:</strong> {raw.startDate ? moment(raw.startDate).format('DD/MM/YYYY') : 'N/A'}</div>
+                        <div><strong>Fin:</strong> {raw.endDate ? moment(raw.endDate).format('DD/MM/YYYY') : 'N/A'}</div>
+                        <div><strong>Progreso:</strong> {raw.progress || 'N/A'}</div>
+                    </Box>
+                }
+                arrow
+                placement="top"
+                enterDelay={300}
+            >
+                <Box sx={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: task.styles.backgroundColor,
+                    color: task.styles.fontColor,
+                    borderRadius: '5px',
+                    padding: '8px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    position: 'relative',
+                    fontSize: '13px',
+                    ...(task.custom_class ? { backgroundImage: PATTERNS } : {})
+                }}>
+                    <Typography noWrap sx={{ flex: 1, textAlign: 'center', fontWeight: 500 }}>{task.name}</Typography>
+                    {task._raw.etapa && (
+                        <Chip
+                            label={task._raw.etapa}
+                            size="small"
+                            sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[task._raw.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }}
+                        />
+                    )}
+                </Box>
+            </Tooltip>
+        );
+    };
 
     return (
         <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -153,7 +183,7 @@ const MyTimeline = ({ tasks }) => {
                 <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
             </Box>
             <style jsx global>{`
-                .task-no-estimation { background-image: ${PATTERNS}; background-repeat: repeat; }
+                .task-no-estimation { background-repeat: repeat !important; }
                 .gantt_task_content { overflow: visible; }
             `}</style>
             {mounted && <Gantt
