@@ -4,6 +4,7 @@ import 'gantt-task-react/dist/index.css';
 import moment from 'moment';
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import PropTypes from 'prop-types'; // Importa PropTypes
 
 // Estilos para Etapas (Adaptados para Gantt-Task-React)
 const ETAPA_STYLES = {
