@@ -86,6 +86,8 @@ const MyTimeline = ({ tasks }) => {
         },
         custom_class: hasPattern ? 'task-no-estimation' : '',
         etapa: task.etapa, // Pass etapa for display in the drawer
+        startDate: task.startDate,
+        endDate: task.endDate
       });
       (task.dependencies || []).forEach(dep => deps.push({ source: String(task.id), target: String(dep), type: 'FinishToStart' }));
     });
@@ -107,11 +109,16 @@ const MyTimeline = ({ tasks }) => {
   }), []);
 
   // Task click handler opens drawer
-  const handleSelectTask = useCallback(task => {
-      // Find the full task object from the original 'tasks' array.
-      const fullTask = tasks.find(t => String(t.id) === String(task.id)); // Important fix: compare as strings
-      setSelectedTask(fullTask);
-  }, [tasks]);
+    const handleSelectTask = useCallback(
+    (ganttTask) => {
+      // Find the corresponding task from the original 'tasks' array
+      const selectedFullTask = tasks.find((task) => String(task.id) === String(ganttTask.id));
+      if (selectedFullTask) {
+        setSelectedTask(selectedFullTask);
+      }
+    },
+    [tasks]
+  );
 
   const closeDrawer = () => setSelectedTask(null);
 
