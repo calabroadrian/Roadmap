@@ -6,7 +6,6 @@ import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from 
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import PropTypes from 'prop-types';
 
-// Estilos para Etapas (Adaptados para Gantt-Task-React)
 const ETAPA_STYLES = {
     "Cambio de alcance": "#FF9800",
     "Impacto en inicio": "#F44336",
@@ -17,7 +16,6 @@ const ETAPA_STYLES = {
     "Inicio de desarrollo": "#4CAF50",
 };
 
-// Estilos para Estados (Adaptados para Gantt-Task-React)
 const STATE_STYLES = {
     "Nuevo": ["#ffcdd2", "#e57373"],
     "En curso": ["#fff9c4", "#ffeb3b"],
@@ -25,7 +23,6 @@ const STATE_STYLES = {
     "Hecho": ["#c8e6c9", "#4caf50"],
 };
 
-// Patrón para items sin estimación (Adaptado para Gantt-Task-React)
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
 const MyTimeline = ({ tasks }) => {
@@ -35,14 +32,14 @@ const MyTimeline = ({ tasks }) => {
 
     const [filter, setFilter] = useState("");
     const filteredTasks = useMemo(
-        () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
+        () => tasks.filter(t => t.title?.toLowerCase().includes(filter.toLowerCase())),
         [tasks, filter]
     );
 
-    const [ganttTasks, setGanttTasks] = useState([]);  // Estado para las tareas en el formato de Gantt-Task-React
+    const [ganttTasks, setGanttTasks] = useState([]);
     const [dependencies, setDependencies] = useState([]);
-    const [viewMode, setViewMode] = useState('Month'); // 'Day', 'Week', 'Month', 'Year'
-    const [locale, setLocale] = useState('es'); // Para la internacionalización
+    const [viewMode, setViewMode] = useState('Month');
+    const [locale, setLocale] = useState('es');
     const [mounted, setMounted] = useState(false);
 
     const timelineRef = useRef(null);
@@ -53,7 +50,7 @@ const MyTimeline = ({ tasks }) => {
                 case 'Year': return 'Month';
                 case 'Month': return 'Week';
                 case 'Week': return 'Day';
-                case 'Day': return 'Day'; // No hay más zoom in
+                case 'Day': return 'Day';
                 default: return prevMode;
             }
         });
@@ -65,27 +62,39 @@ const MyTimeline = ({ tasks }) => {
                 case 'Day': return 'Week';
                 case 'Week': return 'Month';
                 case 'Month': return 'Year';
-                case 'Year': return 'Year'; // No hay más zoom out
+                case 'Year': return 'Year';
                 default: return prevMode;
             }
         });
     }, []);
 
-    // Convierte tus datos al formato esperado por Gantt-Task-React
     useEffect(() => {
         const convertedTasks = filteredTasks.map(task => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
-            // Validación de fechas: Asegurarse de que startDate y endDate sean objetos Date válidos
-            const startDate = task.startDate ? moment(task.startDate).toDate() : defaultStart.toDate();
-            const endDate = task.endDate ? moment(task.endDate).toDate() : defaultEnd.toDate();
+            let startDate = defaultStart.toDate();
+            let endDate = defaultEnd.toDate();
+
+            if (task.startDate) {
+                const parsedStart = moment(task.startDate);
+                if (parsedStart.isValid()) {
+                    startDate = parsedStart.toDate();
+                }
+            }
+
+            if (task.endDate) {
+                const parsedEnd = moment(task.endDate);
+                if (parsedEnd.isValid()) {
+                    endDate = parsedEnd.toDate();
+                }
+            }
 
             return {
                 id: task.id.toString(),
-                name: task.title,
-                startDate: startDate,  // Usar fechas validadas
-                endDate: endDate,      // Usar fechas validadas
+                name: task.title || "Tarea sin título",
+                startDate,
+                endDate,
                 color: stateDef[0],
                 textColor: '#fff',
                 progress: task.progress || 0,
@@ -96,11 +105,12 @@ const MyTimeline = ({ tasks }) => {
                 estimacion: task.Estimacion
             };
         });
+
         setGanttTasks(convertedTasks);
 
         const deps = [];
         filteredTasks.forEach(task => {
-            if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
+            if (task.dependencies && Array.isArray(task.dependencies)) {
                 task.dependencies.forEach(depId => {
                     deps.push({
                         source: task.id.toString(),
@@ -110,15 +120,13 @@ const MyTimeline = ({ tasks }) => {
                 });
             }
         });
+
         setDependencies(deps);
         setMounted(true);
-    }, [filteredTasks, defaultStart, defaultEnd]);  // Agregadas dependencias defaultStart y defaultEnd
+    }, [filteredTasks, defaultStart, defaultEnd]);
 
-    // Función para personalizar el renderizado de la tarea
     const taskRenderer = (task) => {
         const etapa = task.etapa;
-        const estado = task.estado;
-        const estimacion = task.estimacion;
 
         return (
             <div style={{
@@ -202,24 +210,11 @@ const MyTimeline = ({ tasks }) => {
                     dependencies={dependencies}
                     viewMode={viewMode}
                     locale={locale}
-                    onDateChange={(task, start, end) => {
-                        // Manejar cambios de fecha (si es necesario)
-                        console.log('onDateChange', task, start, end);
-                    }}
-                    onTaskClick={(task) => {
-                        // Manejar clics en tareas (si es necesario)
-                        console.log('onTaskClick', task);
-                    }}
-                    onProgressChange={(task, progress) => {
-                        // Manejar cambios de progreso (si es necesario)
-                        console.log('onProgressChange', task, progress);
-                    }}
-                    onAddEmptyTask={(y, x) => {
-                        console.log("onAddEmptyTask", y, x);
-                    }}
-                    onRowClick={(task) => {
-                        console.log("onRowClick", task);
-                    }}
+                    onDateChange={(task, start, end) => console.log('onDateChange', task, start, end)}
+                    onTaskClick={(task) => console.log('onTaskClick', task)}
+                    onProgressChange={(task, progress) => console.log('onProgressChange', task, progress)}
+                    onAddEmptyTask={(y, x) => console.log("onAddEmptyTask", y, x)}
+                    onRowClick={(task) => console.log("onRowClick", task)}
                     taskContentRender={taskRenderer}
                     columnWidth={40}
                     rowHeight={40}
@@ -233,7 +228,7 @@ MyTimeline.propTypes = {
     tasks: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-            title: PropTypes.string.isRequired,
+            title: PropTypes.string,
             startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
             endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
             Estado: PropTypes.string,
