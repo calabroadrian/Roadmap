@@ -85,6 +85,7 @@ const MyTimeline = ({ tasks }) => {
           fontColor: '#fff',
         },
         custom_class: hasPattern ? 'task-no-estimation' : '',
+        etapa: task.etapa, // Pass etapa for display in the drawer
       });
       (task.dependencies || []).forEach(dep => deps.push({ source: String(task.id), target: String(dep), type: 'FinishToStart' }));
     });
@@ -106,7 +107,12 @@ const MyTimeline = ({ tasks }) => {
   }), []);
 
   // Task click handler opens drawer
-  const handleSelectTask = useCallback(task => setSelectedTask(task), []);
+  const handleSelectTask = useCallback(task => {
+      // Find the full task object from the original 'tasks' array.
+      const fullTask = tasks.find(t => String(t.id) === String(task.id)); // Important fix: compare as strings
+      setSelectedTask(fullTask);
+  }, [tasks]);
+
   const closeDrawer = () => setSelectedTask(null);
 
   // Custom task content
@@ -131,7 +137,7 @@ const MyTimeline = ({ tasks }) => {
       {task.etapa && (
         <Chip label={task.etapa} size="small" sx={{
           position: 'absolute', top: 4, right: 4, bgcolor: ETAPA_STYLES[task.etapa.replace(/\s+/g, '')] || '#757575', color: '#fff', fontSize: 10
-        }}/>
+        }} />
       )}
     </Box>
   ), []);
@@ -173,11 +179,14 @@ const MyTimeline = ({ tasks }) => {
         {selectedTask && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
-            <Typography><strong>Nombre:</strong> {selectedTask.name}</Typography>
-            <Typography><strong>Inicio:</strong> {moment(selectedTask.start).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Fin:</strong> {moment(selectedTask.end).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
+            <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
             <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-            {selectedTask.dependencies.length > 0 && <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(", ")}</Typography>}
+            {selectedTask.dependencies && selectedTask.dependencies.length > 0 && (
+              <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(", ")}</Typography>
+            )}
+            <Typography><strong>Etapa:</strong> {selectedTask.etapa}</Typography>
           </Box>
         )}
       </Drawer>
