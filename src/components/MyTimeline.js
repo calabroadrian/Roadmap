@@ -73,6 +73,9 @@ const MyTimeline = ({ tasks }) => {
 
     // Convierte tus datos al formato esperado por Gantt-Task-React
     useEffect(() => {
+        // Imprimimos el prop tasks para inspeccionar su contenido
+        console.log("Tasks prop in MyTimeline:", tasks);
+
         const convertedTasks = filteredTasks.map(task => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
