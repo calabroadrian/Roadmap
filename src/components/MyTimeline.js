@@ -77,14 +77,23 @@ const MyTimeline = ({ tasks }) => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
-            // Parsea las fechas usando el formato DD/MM/YYYY, y convierte a Date
-            const startDate = task.startDate
-                ? moment(task.startDate, "DD/MM/YYYY").toDate()
-                : defaultStart.toDate();
-            const endDate = task.endDate
-                ? moment(task.endDate, "DD/MM/YYYY").toDate()
-                : defaultEnd.toDate();
+            let startDate;
+            let endDate;
 
+            try {
+                // Intenta convertir la fecha, si falla, usa la fecha por defecto
+                startDate = task.startDate
+                    ? moment(task.startDate, "DD/MM/YYYY").toDate()
+                    : defaultStart.clone().toDate(); // Clona para evitar mutaciones
+                endDate = task.endDate
+                    ? moment(task.endDate, "DD/MM/YYYY").toDate()
+                    : defaultEnd.clone().toDate();   // Clona para evitar mutaciones
+            } catch (error) {
+                console.error("Error parsing date:", error, task);
+                // Si hay un error al parsear la fecha, usa la fecha por defecto
+                startDate = defaultStart.clone().toDate();
+                endDate = defaultEnd.clone().toDate();
+            }
             return {
                 id: task.id?.toString() || '',
                 name: task.title,
@@ -247,4 +256,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
