@@ -164,23 +164,42 @@ const MyTimeline = ({ tasks }) => {
         taskContent={taskContent}
         ganttHeight={600}
       />
-      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={closeDrawer} PaperProps={{ sx: { width: 350, p: 2 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6">Tarea Detalle</Typography>
-          <IconButton onClick={closeDrawer}><CloseIcon /></IconButton>
-        </Box>
-        <Divider sx={{ mb: 2 }} />
-        {selectedTask && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
-            <Typography><strong>Nombre:</strong> {selectedTask.name}</Typography>
-            <Typography><strong>Inicio:</strong> {moment(selectedTask.start).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Fin:</strong> {moment(selectedTask.end).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-            {selectedTask.dependencies.length > 0 && <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(", ")}</Typography>}
-          </Box>
-        )}
-      </Drawer>
+      <Drawer
+  anchor="right"
+  open={Boolean(selectedTask)}
+  onClose={closeDrawer}
+  PaperProps={{ sx: { width: 350, p: 3 } }} // Añadí más padding
+>
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+    <Typography variant="h6">Detalle de la Tarea</Typography>
+    <IconButton onClick={closeDrawer} aria-label="cerrar">
+      <CloseIcon />
+    </IconButton>
+  </Box>
+  <Divider sx={{ mb: 2 }} />
+  {selectedTask && (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography variant="subtitle1"><strong>{selectedTask.name}</strong></Typography>
+      <Typography variant="body2"><strong>ID:</strong> {selectedTask.id}</Typography>
+      <Typography variant="body2"><strong>Estado:</strong> {selectedTask.Estado}</Typography>
+      <Typography variant="body2"><strong>Etapa:</strong> {selectedTask.etapa}</Typography>
+      {selectedTask.Estimacion && <Typography variant="body2"><strong>Estimación:</strong> {selectedTask.Estimacion}</Typography>}
+      <Typography variant="body2">
+        <strong>Inicio:</strong> {moment(selectedTask.start).format('DD/MM/YYYY')}
+      </Typography>
+      <Typography variant="body2">
+        <strong>Fin:</strong> {moment(selectedTask.end).format('DD/MM/YYYY')}
+      </Typography>
+      <Typography variant="body2"><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
+      {selectedTask.dependencies && selectedTask.dependencies.length > 0 && (
+        <Typography variant="body2">
+          <strong>Depende de:</strong> {selectedTask.dependencies.join(", ")}
+        </Typography>
+      )}
+      {/* Puedes añadir más detalles aquí */}
+    </Box>
+  )}
+</Drawer>
     </Paper>
   );
 };
