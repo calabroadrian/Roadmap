@@ -79,33 +79,14 @@ const MyTimeline = ({ tasks }) => {
           fontColor: '#fff',
         },
         custom_class: hasPattern ? 'task-no-estimation' : '',
-        etapa: task.etapa,
-        startDate: task.startDate,
-        endDate: task.endDate
       });
       (task.dependencies || []).forEach(dep => deps.push({ source: String(task.id), target: String(dep), type: 'FinishToStart' }));
     });
     return { ganttTasks: gTasks, dependencies: deps };
   }, [filtered, defaultStart, defaultEnd]);
 
-  const zoomIn = useCallback(() => setViewMode(vm => {
-    if (vm === ViewMode.Year) return ViewMode.Month;
-    if (vm === ViewMode.Month) return ViewMode.Week;
-    if (vm === ViewMode.Week) return ViewMode.Day;
-    return vm;
-  }), []);
-  const zoomOut = useCallback(() => setViewMode(vm => {
-    if (vm === ViewMode.Day) return ViewMode.Week;
-    if (vm === ViewMode.Week) return ViewMode.Month;
-    if (vm === ViewMode.Month) return ViewMode.Year;
-    return vm;
-  }), []);
-
   const handleSelectTask = useCallback(
-    ganttTask => {
-      const selected = tasks.find(t => String(t.id) === ganttTask.id);
-      if (selected) setSelectedTask(selected);
-    },
+    ganttTask => setSelectedTask(tasks.find(t => String(t.id) === ganttTask.id)),
     [tasks]
   );
   const closeDrawer = () => setSelectedTask(null);
@@ -146,13 +127,13 @@ const MyTimeline = ({ tasks }) => {
       </Box>
       <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <TextField label="Buscar" size="small" value={filter} onChange={e => setFilter(e.target.value)} />
-        <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
-        <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
+        <Button variant="outlined" size="small" onClick={() => setViewMode(vm => (
+          vm === ViewMode.Day ? ViewMode.Week : vm === ViewMode.Week ? ViewMode.Month : vm === ViewMode.Month ? ViewMode.Year : vm
+        ))}>- Zoom</Button>
+        <Button variant="outlined" size="small" onClick={() => setViewMode(vm => (
+          vm === ViewMode.Year ? ViewMode.Month : vm === ViewMode.Month ? ViewMode.Week : vm === ViewMode.Week ? ViewMode.Day : vm
+        ))}>+ Zoom</Button>
       </Box>
-      <style jsx global>{`
-        .task-no-estimation { background-repeat: repeat; }
-        .gantt_task_content { overflow: visible; }
-      `}</style>
       <Gantt
         tasks={ganttTasks}
         dependencies={dependencies}
@@ -166,28 +147,35 @@ const MyTimeline = ({ tasks }) => {
         taskContent={taskContent}
         ganttHeight={600}
       />
+
       <Drawer
         anchor="right"
         open={Boolean(selectedTask)}
-        onClose={(_, reason) => {
-          if (reason === 'backdropClick' || reason === 'escapeKeyDown') closeDrawer();
-        }}
+        onClose={closeDrawer}
         ModalProps={{
           keepMounted: true,
           BackdropProps: {
-            onClick: e => { e.stopPropagation(); closeDrawer(); },
-            onTouchStart: e => { e.stopPropagation(); closeDrawer(); },
+            onClick: e => {
+              e.stopPropagation();
+              // cerramos en next tick para que no pase click al gantt
+              setTimeout(closeDrawer, 0);
+            },
           }
         }}
         PaperProps={{
           sx: { width: 350, p: 2 },
           onMouseDown: e => e.stopPropagation(),
-          onTouchStart: e => e.stopPropagation(),
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="h6">Tarea Detalle</Typography>
-          <IconButton aria-label="Cerrar" onClick={e => { e.stopPropagation(); closeDrawer(); }}>
+          <IconButton
+            aria-label="Cerrar"
+            onClick={e => {
+              e.stopPropagation();
+              setTimeout(closeDrawer, 0);
+            }}
+          >
             <CloseIcon />
           </IconButton>
         </Box>
@@ -199,9 +187,9 @@ const MyTimeline = ({ tasks }) => {
             <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
             <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
             <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-            {selectedTask.dependencies?.length > 0 && 
+            {selectedTask.dependencies?.length > 0 && (
               <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
-            }
+            )}
           </Box>
         )}
       </Drawer>
