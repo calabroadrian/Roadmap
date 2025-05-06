@@ -11,16 +11,14 @@ import {
   Typography,
   Chip,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
+  Drawer,
   IconButton,
   Divider
 } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Constants omitted for brevity
+// Your STATE_STYLES, ETAPA_STYLES, parseDate, DEFAULT_PATTERN constants here
 
 const MyTimeline = ({ tasks }) => {
   const now = useMemo(() => moment(), []);
@@ -121,7 +119,7 @@ const MyTimeline = ({ tasks }) => {
   );
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 2 }}>
+    <Paper sx={{ p: 3, borderRadius: 2, position: 'relative' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <ScheduleIcon fontSize="large" sx={{ mr: 1 }} />
         <Typography variant="h5">Roadmap Timeline</Typography>
@@ -134,38 +132,10 @@ const MyTimeline = ({ tasks }) => {
           value={filter}
           onChange={e => setFilter(e.target.value)}
         />
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() =>
-            setViewMode(vm =>
-              vm === ViewMode.Day
-                ? ViewMode.Week
-                : vm === ViewMode.Week
-                ? ViewMode.Month
-                : vm === ViewMode.Month
-                ? ViewMode.Year
-                : vm
-            )
-          }
-        >
+        <Button variant="outlined" size="small" onClick={() => setViewMode(ViewMode[(Object.keys(ViewMode)[Object.values(ViewMode).indexOf(viewMode) - 1] || 'Day')])}>
           - Zoom
         </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() =>
-            setViewMode(vm =>
-              vm === ViewMode.Year
-                ? ViewMode.Month
-                : vm === ViewMode.Month
-                ? ViewMode.Week
-                : vm === ViewMode.Week
-                ? ViewMode.Day
-                : vm
-            )
-          }
-        >
+        <Button variant="outlined" size="small" onClick={() => setViewMode(ViewMode[(Object.keys(ViewMode)[Object.values(ViewMode).indexOf(viewMode) + 1] || 'Year')])}>
           + Zoom
         </Button>
       </Box>
@@ -184,40 +154,33 @@ const MyTimeline = ({ tasks }) => {
         ganttHeight={600}
       />
 
-      <Dialog open={Boolean(selectedTask)} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ m: 0, p: 2 }}>
-          {selectedTask?.title}
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-          >
+      <Drawer
+        anchor="right"
+        open={Boolean(selectedTask)}
+        onClose={handleClose}
+        PaperProps={{ sx: { width: 360, p: 2 } }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6" sx={{ flex: 1 }}>
+            {selectedTask?.title}
+          </Typography>
+          <IconButton onClick={handleClose}>
             <CloseIcon />
           </IconButton>
-        </DialogTitle>
-        <Divider />
-        <DialogContent dividers>
-          <Typography gutterBottom>
-            <strong>ID:</strong> {selectedTask?.id}
-          </Typography>
-          <Typography gutterBottom>
-            <strong>Inicio:</strong>{' '}
-            {selectedTask && moment(selectedTask.startDate).format('DD/MM/YYYY')}
-          </Typography>
-          <Typography gutterBottom>
-            <strong>Fin:</strong>{' '}
-            {selectedTask && moment(selectedTask.endDate).format('DD/MM/YYYY')}
-          </Typography>
-          <Typography gutterBottom>
-            <strong>Progreso:</strong> {selectedTask?.progress}%
-          </Typography>
-          {selectedTask?.dependencies?.length > 0 && (
-            <Typography gutterBottom>
-              <strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}
-            </Typography>
-          )}
-        </DialogContent>
-      </Dialog>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
+        {selectedTask && (
+          <Box sx={{ spaceY: 1 }}>
+            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
+            <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
+            {selectedTask.dependencies?.length > 0 && (
+              <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
+            )}
+          </Box>
+        )}
+      </Drawer>
     </Paper>
   );
 };
