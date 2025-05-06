@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Gantt } from 'gantt-task-react';
-import 'gantt-task-react/dist/index.css';
+import 'gantt-task-react/dist/style.css';
 import moment from 'moment';
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
-import PropTypes from 'prop-types'; // Importa PropTypes
+import PropTypes from 'prop-types';
 
 // Estilos para Etapas (Adaptados para Gantt-Task-React)
 const ETAPA_STYLES = {
@@ -77,17 +77,21 @@ const MyTimeline = ({ tasks }) => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
+            // Validación de fechas: Asegurarse de que startDate y endDate sean objetos Date válidos
+            const startDate = task.startDate ? moment(task.startDate).toDate() : defaultStart.toDate();
+            const endDate = task.endDate ? moment(task.endDate).toDate() : defaultEnd.toDate();
+
             return {
-                id: task.id.toString(), // Gantt-Task-React usa IDs como strings
+                id: task.id.toString(),
                 name: task.title,
-                startDate: moment(task.startDate).toDate(),
-                endDate: moment(task.endDate).toDate(),
-                color: stateDef[0], // Usa el primer color del array para el fondo principal
+                startDate: startDate,  // Usar fechas validadas
+                endDate: endDate,      // Usar fechas validadas
+                color: stateDef[0],
                 textColor: '#fff',
                 progress: task.progress || 0,
                 dependencies: Array.isArray(task.dependencies) ? task.dependencies.map(d => d.toString()) : [],
-                custom_class: hasPattern ? 'task-no-estimation' : '', // Aplica la clase para el patrón
-                etapa: task.etapa, // Almacena la etapa para usarla en el renderizado personalizado si es necesario
+                custom_class: hasPattern ? 'task-no-estimation' : '',
+                etapa: task.etapa,
                 estado: task.Estado,
                 estimacion: task.Estimacion
             };
@@ -101,14 +105,14 @@ const MyTimeline = ({ tasks }) => {
                     deps.push({
                         source: task.id.toString(),
                         target: depId.toString(),
-                        type: 'finish-to-start' // o 'start-to-start', 'finish-to-finish', 'start-to-finish'
+                        type: 'finish-to-start'
                     });
                 });
             }
         });
         setDependencies(deps);
         setMounted(true);
-    }, [filteredTasks]);
+    }, [filteredTasks, defaultStart, defaultEnd]);  // Agregadas dependencias defaultStart y defaultEnd
 
     // Función para personalizar el renderizado de la tarea
     const taskRenderer = (task) => {
@@ -127,8 +131,8 @@ const MyTimeline = ({ tasks }) => {
                 alignItems: 'center',
                 width: '100%',
                 height: '100%',
-                overflow: 'hidden', // Para que el contenido no se desborde
-                position: 'relative', // Para posicionar el chip de etapa
+                overflow: 'hidden',
+                position: 'relative',
                 fontSize: '13px'
             }}>
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -243,4 +247,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
