@@ -28,6 +28,8 @@ const STATE_STYLES = {
 // Patrón para items sin estimación
 const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
 
+const isValidDate = date => date instanceof Date && !isNaN(date.getTime());
+
 const MyTimeline = ({ tasks }) => {
     const now = moment();
     const defaultStart = now.clone().subtract(2, 'months').toDate();
@@ -44,8 +46,6 @@ const MyTimeline = ({ tasks }) => {
     const [viewMode, setViewMode] = useState('Month');
     const [locale, setLocale] = useState('es');
     const [mounted, setMounted] = useState(false);
-
-    const timelineRef = useRef(null);
 
     const zoomIn = useCallback(() => setViewMode(vm => {
         switch (vm) {
@@ -65,7 +65,6 @@ const MyTimeline = ({ tasks }) => {
         }
     }), []);
 
-    // Convierte tus datos al formato esperado por Gantt-Task-React
     useEffect(() => {
         const convertedTasks = filteredTasks.map(task => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
@@ -74,27 +73,32 @@ const MyTimeline = ({ tasks }) => {
             let startDate = defaultStart;
             let endDate = defaultEnd;
 
-            // Manejar fechas que puedan venir como string o Date
+            // Parse startDate
             if (task.startDate) {
                 if (typeof task.startDate === 'string') {
-                    const parts = task.startDate.split('/').map(Number);
-                    startDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                    const [day, month, year] = task.startDate.split('/').map(Number);
+                    startDate = new Date(year, month - 1, day);
                 } else if (task.startDate instanceof Date) {
                     startDate = task.startDate;
                 } else {
                     startDate = moment(task.startDate).toDate();
                 }
             }
+            // Parse endDate
             if (task.endDate) {
                 if (typeof task.endDate === 'string') {
-                    const parts = task.endDate.split('/').map(Number);
-                    endDate = new Date(parts[2], parts[1] - 1, parts[0], 23, 59, 59);
+                    const [day, month, year] = task.endDate.split('/').map(Number);
+                    endDate = new Date(year, month - 1, day, 23, 59, 59);
                 } else if (task.endDate instanceof Date) {
                     endDate = task.endDate;
                 } else {
                     endDate = moment(task.endDate).endOf('day').toDate();
                 }
             }
+
+            // Fallback for invalid dates
+            if (!isValidDate(startDate)) startDate = defaultStart;
+            if (!isValidDate(endDate)) endDate = defaultEnd;
 
             return {
                 id: String(task.id || ''),
@@ -111,6 +115,7 @@ const MyTimeline = ({ tasks }) => {
                 estimacion: task.Estimacion
             };
         });
+        console.log('Converted Gantt Tasks:', convertedTasks);
         setGanttTasks(convertedTasks);
 
         const deps = filteredTasks.flatMap(task => (
