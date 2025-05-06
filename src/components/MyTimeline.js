@@ -82,13 +82,11 @@ const MyTimeline = ({ tasks }) => {
 
             try {
                 // Analizar la cadena de fecha y crear objetos Date
-                const [startDay, startMonth, startYear] = task.startDate.split('/').map(Number);
-                startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0); // Establecer la hora a 00:00:00
+                const dateParts = task.startDate.split('/').map(Number);
+                startDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], 0, 0, 0);
 
-
-                const [endDay, endMonth, endYear] = task.endDate.split('/').map(Number);
-                endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);  // Establecer la hora a 23:59:59
-
+                const endDateParts = task.endDate.split('/').map(Number);
+                endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[0], 23, 59, 59);
 
 
             } catch (error) {
@@ -262,4 +260,3 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
-
