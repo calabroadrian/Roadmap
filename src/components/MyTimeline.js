@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Gantt } from 'gantt-task-react';
-import 'gantt-task-react/dist/index.css';
+import 'gantt-task-react/dist/style.css';
 import moment from 'moment';
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -82,12 +82,14 @@ const MyTimeline = ({ tasks }) => {
 
             try {
                 // Intenta convertir la fecha, si falla, usa la fecha por defecto
-                startDate = task.startDate
-                    ? moment(task.startDate, "DD/MM/YYYY").toDate()
-                    : defaultStart.clone().toDate(); // Clona para evitar mutaciones
-                endDate = task.endDate
-                    ? moment(task.endDate, "DD/MM/YYYY").toDate()
-                    : defaultEnd.clone().toDate();   // Clona para evitar mutaciones
+                const momentStart = task.startDate ? moment(task.startDate, "DD/MM/YYYY") : defaultStart.clone();
+                const momentEnd = task.endDate ? moment(task.endDate, "DD/MM/YYYY") : defaultEnd.clone();
+
+                console.log(`Task: ${task.title}, Moment Start: ${momentStart}, Moment End: ${momentEnd}`);
+
+                startDate = momentStart.toDate();
+                endDate = momentEnd.toDate();
+
             } catch (error) {
                 console.error("Error parsing date:", error, task);
                 // Si hay un error al parsear la fecha, usa la fecha por defecto
