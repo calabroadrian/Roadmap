@@ -94,6 +94,15 @@ const MyTimeline = ({ tasks }) => {
                 startDate = defaultStart.clone().toDate();
                 endDate = defaultEnd.clone().toDate();
             }
+             if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
+                console.error("Invalid startDate detected:", startDate, "for task:", task);
+                startDate = defaultStart.clone().toDate(); // Fallback to default start
+              }
+
+              if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+                console.error("Invalid endDate detected:", endDate, "for task:", task);
+                endDate = defaultEnd.clone().toDate();     // Fallback to default end
+              }
             return {
                 id: task.id?.toString() || '',
                 name: task.title,
