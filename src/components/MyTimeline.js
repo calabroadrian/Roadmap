@@ -3,22 +3,11 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Gantt, ViewMode } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
-import { 
-  Box, 
-  Button, 
-  TextField, 
-  Paper, 
-  Typography, 
-  Chip, 
-  Tooltip, 
-  Drawer, 
-  IconButton, 
-  Divider 
-} from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Chip, Tooltip, Drawer, IconButton, Divider } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Constants de estilos y utilidades
+// Constants
 const ETAPA_STYLES = {
   CambioDeAlcance: '#FF9800',
   ImpactoEnInicio: '#F44336',
@@ -27,22 +16,15 @@ const ETAPA_STYLES = {
   SinEstimar: '#EEEEEE',
   EnPausa: '#FFEB3B',
   InicioDeDesarrollo: '#4CAF50',
-  EntregaFinal: '#e57373',
 };
-
 const STATE_STYLES = {
   Nuevo: ['#ffcdd2', '#e57373'],
   EnCurso: ['#fff9c4', '#ffeb3b'],
   EnProgreso: ['#fff9c4', '#ffeb3b'],
   Hecho: ['#c8e6c9', '#4caf50'],
 };
-
 const DEFAULT_PATTERN = 'repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)';
 
-/**
- * Parsea fechas en diferentes formatos: string 'DD/MM/YYYY', Date o timestamp,
- * devolviendo date o fallback. endOfDay ajusta a fin de día.
- */
 const parseDate = (val, fallback, endOfDay = false) => {
   let date;
   if (!val) return fallback;
@@ -51,11 +33,9 @@ const parseDate = (val, fallback, endOfDay = false) => {
     const [d, m, y] = val.split('/').map(Number);
     date = new Date(y, m - 1, d);
   } else {
-    date = moment(val).toDate();
+    date = moment(val)[endOfDay ? 'endOf' : 'toDate']('day');
   }
-  if (isNaN(date?.getTime())) return fallback;
-  if (endOfDay) date = moment(date).endOf('day').toDate();
-  return date;
+  return isNaN(date?.getTime()) ? fallback : (endOfDay ? moment(date).endOf('day').toDate() : date);
 };
 
 const MyTimeline = ({ tasks }) => {
@@ -77,12 +57,12 @@ const MyTimeline = ({ tasks }) => {
     const deps = [];
     filtered.forEach(task => {
       const [bgColor, progressColor] = STATE_STYLES[task.Estado] || STATE_STYLES.Nuevo;
-      const etapaKey = task.etapa?.replace(/\s+/g, '') || 'SinEstimar';
+      const etapaKey = task.etapa.replace(/\s+/g, '');
       const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
       const start = parseDate(task.startDate, defaultStart);
       const end = parseDate(task.endDate, defaultEnd, true);
       const hasPattern = !task.Estimacion;
-      const isMilestone = etapaKey === 'EntregaFinal';
+      const isMilestone = task.etapa === 'Entrega final';
       gTasks.push({
         id: String(task.id),
         name: task.title,
@@ -99,7 +79,6 @@ const MyTimeline = ({ tasks }) => {
           fontColor: '#fff',
         },
         custom_class: hasPattern ? 'task-no-estimation' : '',
-        etapa: task.etapa,
       });
       (task.dependencies || []).forEach(dep => deps.push({ source: String(task.id), target: String(dep), type: 'FinishToStart' }));
     });
@@ -107,9 +86,13 @@ const MyTimeline = ({ tasks }) => {
   }, [filtered, defaultStart, defaultEnd]);
 
   const handleSelectTask = useCallback(
-    ganttTask => setSelectedTask(tasks.find(t => String(t.id) === ganttTask.id)),
-    [tasks]
-  );
+    ganttTask => {
+      if (selectedTask) return;          // ← Esto evita reabrir
+      const t = tasks.find(t => String(t.id) === ganttTask.id);
+      setSelectedTask(t);
+    },
+    [tasks, selectedTask]
+  );  
   const closeDrawer = () => setSelectedTask(null);
 
   const taskContent = useCallback(task => (
@@ -134,8 +117,8 @@ const MyTimeline = ({ tasks }) => {
         <Chip label={task.etapa} size="small" sx={{
           position: 'absolute', top: 4, right: 4,
           bgcolor: ETAPA_STYLES[task.etapa.replace(/\s+/g, '')] || '#757575',
-          color: '#fff', fontSize: 10,
-        }}/>
+          color: '#fff', fontSize: 10
+        }} />
       )}
     </Box>
   ), []);
@@ -169,53 +152,69 @@ const MyTimeline = ({ tasks }) => {
         ganttHeight={600}
       />
 
-      <Drawer
-        anchor="right"
-        open={Boolean(selectedTask)}
-        onClose={closeDrawer}
-        ModalProps={{ keepMounted: true, BackdropProps: { onClick: e => { e.stopPropagation(); setTimeout(closeDrawer, 0); } } }}
-        PaperProps={{ sx: { width: 350, p: 2 }, onMouseDown: e => e.stopPropagation() }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6">Tarea Detalle</Typography>
-          <IconButton onClick={e => { e.stopPropagation(); setTimeout(closeDrawer, 0); }}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Divider sx={{ mb: 2 }} />
-        {selectedTask && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
-            <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
-            <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-            {selectedTask.dependencies?.length > 0 && (
-              <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
-            )}
-          </Box>
-        )}
-      </Drawer>
+<Drawer
+  anchor="right"
+  open={Boolean(selectedTask)}
+  onClose={(e, reason) => {
+    // Evita que el clic de backdrop o ESC burbujee al Gantt
+    e.stopPropagation();
+    closeDrawer();
+  }}
+  ModalProps={{
+    keepMounted: true,
+    BackdropProps: {
+      // Ya no necesitamos onClick aquí
+    }
+  }}
+  PaperProps={{
+    sx: { width: 350, p: 2 },
+    // Evita que el drag o clic dentro del panel cierre el Drawer
+    onMouseDown: e => e.stopPropagation(),
+  }}
+>
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+    <Typography variant="h6">Tarea Detalle</Typography>
+    <IconButton
+      aria-label="Cerrar"
+      onClick={e => {
+        e.stopPropagation();
+        closeDrawer();
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </Box>
+  <Divider sx={{ mb: 2 }} />
+  {selectedTask && (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
+      <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
+      <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
+      <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
+      <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
+      {selectedTask.dependencies?.length > 0 && (
+        <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
+      )}
+    </Box>
+  )}
+</Drawer>
+
     </Paper>
   );
 };
 
 MyTimeline.propTypes = {
-  tasks: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      title: PropTypes.string.isRequired,
-      startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      Estado: PropTypes.string,
-      etapa: PropTypes.string,
-      Estimacion: PropTypes.any,
-      progress: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      dependencies: PropTypes.arrayOf(
-        PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-      ),
-    })
-  ).isRequired,
+  tasks: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string.isRequired,
+    startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    Estado: PropTypes.string,
+    etapa: PropTypes.string,
+    Estimacion: PropTypes.any,
+    progress: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number]))
+  })).isRequired,
 };
 
 export default MyTimeline;
