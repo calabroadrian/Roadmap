@@ -26,12 +26,11 @@ const STATE_STYLES = {
 };
 
 // Patrón para items sin estimación
-const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)";
-
+const PATTERNS = "repeating-linear-gradient(-45deg,#eee,#eee 10px,#ddd 10px,#ddd 20px)";
 const isValidDate = date => date instanceof Date && !isNaN(date.getTime());
 
 // Tooltip personalizado
-const CustomTooltip = ({ task }) => {
+const CustomTooltip = ({ task }: TooltipContentProps) => {
   const raw = task._raw;
   const start = moment(task.start);
   const end = moment(task.end);
@@ -53,49 +52,40 @@ const MyTimeline = ({ tasks }) => {
   const now = moment();
   const defaultStart = now.clone().subtract(2, 'months').toDate();
   const defaultEnd = now.clone().add(2, 'months').toDate();
-
   const [filter, setFilter] = useState('');
   const filteredTasks = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
-
   const [ganttTasks, setGanttTasks] = useState([]);
   const [dependencies, setDependencies] = useState([]);
   const [viewMode, setViewMode] = useState(ViewMode.Month);
   const [locale] = useState('es');
   const [mounted, setMounted] = useState(false);
 
-  const zoomIn = useCallback(
-    () => setViewMode(vm => {
-      switch (vm) {
-        case ViewMode.Year: return ViewMode.Month;
-        case ViewMode.Month: return ViewMode.Week;
-        case ViewMode.Week: return ViewMode.Day;
-        default: return vm;
-      }
-    }),
-    []
-  );
-  const zoomOut = useCallback(
-    () => setViewMode(vm => {
-      switch (vm) {
-        case ViewMode.Day: return ViewMode.Week;
-        case ViewMode.Week: return ViewMode.Month;
-        case ViewMode.Month: return ViewMode.Year;
-        default: return vm;
-      }
-    }),
-    []
-  );
+  const zoomIn = useCallback(() => setViewMode(vm => {
+    switch (vm) {
+      case ViewMode.Year: return ViewMode.Month;
+      case ViewMode.Month: return ViewMode.Week;
+      case ViewMode.Week: return ViewMode.Day;
+      default: return vm;
+    }
+  }), []);
+  const zoomOut = useCallback(() => setViewMode(vm => {
+    switch (vm) {
+      case ViewMode.Day: return ViewMode.Week;
+      case ViewMode.Week: return ViewMode.Month;
+      case ViewMode.Month: return ViewMode.Year;
+      default: return vm;
+    }
+  }), []);
 
   useEffect(() => {
-    const converted = filteredTasks.map(item => {
+    const conv = filteredTasks.map(item => {
       const stateDef = STATE_STYLES[item.Estado] || STATE_STYLES['Nuevo'];
       const hasPattern = !item.Estimacion;
       let start = defaultStart;
       let end = defaultEnd;
-
       if (item.startDate) {
         if (typeof item.startDate === 'string') {
           const [d, m, y] = item.startDate.split('/').map(Number);
@@ -118,14 +108,14 @@ const MyTimeline = ({ tasks }) => {
       }
       if (!isValidDate(start)) start = defaultStart;
       if (!isValidDate(end)) end = defaultEnd;
-
+      const isMilestone = item.isMilestone;
       return {
         id: String(item.id),
         name: item.title,
         start,
         end,
         progress: Number(item.progress) || 0,
-        type: 'task',
+        type: isMilestone ? 'milestone' : 'task',
         project: '',
         dependencies: item.dependencies?.map(String) || [],
         styles: {
@@ -135,13 +125,11 @@ const MyTimeline = ({ tasks }) => {
           backgroundSelectedColor: stateDef[0],
           fontColor: '#fff'
         },
-        isDisabled: false,
-        isHidden: false,
         custom_class: hasPattern ? 'task-no-estimation' : '',
         _raw: item
       };
     });
-    setGanttTasks(converted);
+    setGanttTasks(conv);
     setDependencies(
       filteredTasks.flatMap(item =>
         Array.isArray(item.dependencies)
@@ -154,77 +142,47 @@ const MyTimeline = ({ tasks }) => {
 
   const taskRenderer = task => {
     const raw = task._raw;
-    const isNoEstimation = !raw.Estimacion;
+    const noEst = !raw.Estimacion;
     return (
-      <Box
-        sx={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: task.styles.backgroundColor,
-          color: task.styles.fontColor,
-          borderRadius: '5px',
-          padding: '8px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          fontSize: '13px',
-          ...(isNoEstimation ? { backgroundImage: PATTERNS } : {})
-        }}
-      >
+      <Box sx={{
+        width: '100%',
+        height: '100%',
+        borderRadius: 3,
+        p: 1,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: 13,
+        position: 'relative',
+        backgroundColor: task.styles.backgroundColor,
+        color: task.styles.fontColor,
+        ...(noEst ? { backgroundImage: PATTERNS } : {}),
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}>
         <Typography noWrap sx={{ flex: 1, textAlign: 'center', fontWeight: 500 }}>{task.name}</Typography>
-        {/* Chip de etapa */}
-        {raw.etapa && (
-          <Chip
-            label={raw.etapa}
-            size="small"
-            sx={{
-              position: 'absolute',
-              top: 2,
-              left: 2,
-              bgcolor: ETAPA_STYLES[raw.etapa] || '#757575',
-              color: '#fff',
-              fontSize: '10px',
-              height: '18px'
-            }}
-          />
-        )}
-        {/* Chip de estimación */}
-        <Chip
-          label={raw.Estimacion ? `${raw.Estimacion}` : 'Sin estimar'}
-          size="small"
-          sx={{
-            position: 'absolute',
-            top: 2,
-            right: 2,
-            bgcolor: isNoEstimation ? '#BDBDBD' : '#2196F3',
-            color: '#fff',
-            fontSize: '10px',
-            height: '18px'
-          }}
-        />
+        {raw.etapa && <Chip label={raw.etapa} size="small" sx={{ position: 'absolute', top: 4, left: 4, bgcolor: ETAPA_STYLES[raw.etapa], color: '#fff', fontSize: 10, height: 18 }} />}
+        <Chip label={raw.Estimacion ? raw.Estimacion : 'Sin estimar'} size="small" sx={{ position: 'absolute', top: 4, right: 4, bgcolor: noEst ? '#BDBDBD' : '#2196F3', color: '#fff', fontSize: 10, height: 18 }} />
       </Box>
     );
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ScheduleIcon /> Roadmap Timeline
+    <Paper elevation={3} sx={{ p: 2, background: '#fff', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#444' }}>
+        <ScheduleIcon fontSize="small" /> Roadmap Timeline
       </Typography>
-      <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-        <TextField
-          label="Buscar…"
-          size="small"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        />
-        <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
-        <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
+      <Box sx={{ mb: 1, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        <TextField label="Buscar…" size="small" value={filter} onChange={e => setFilter(e.target.value)} sx={{ width: 200 }} />
+        <Button variant="outlined" size="small" onClick={zoomOut} sx={{ minWidth: 36 }}>–</Button>
+        <Button variant="outlined" size="small" onClick={zoomIn} sx={{ minWidth: 36 }}>+</Button>
       </Box>
+      {/* estilos globales */}
       <style jsx global>{`
         .task-no-estimation { background-repeat: repeat !important; }
-        .gantt_task_content { overflow: visible; }
+        .gantt_task_content { overflow: visible !important; }
+        ._3_ygE { border-color: #e6e4e4 !important; }
+        ._34SS0:nth-of-type(even) { background-color: #fafafa !important; }
+        ._1eT-t::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
       `}</style>
       {mounted && (
         <Gantt
@@ -233,13 +191,24 @@ const MyTimeline = ({ tasks }) => {
           viewMode={viewMode}
           locale={locale}
           tooltipContent={CustomTooltip}
-          onDateChange={(task, start, end) => console.log('onDateChange', task, start, end)}
-          onTaskClick={task => console.log('onTaskClick', task)}
-          onProgressChange={(task, progress) => console.log('onProgressChange', task, progress)}
-          onAddTask={() => console.log('onAddTask')}
-          onSelectTask={task => console.log('onSelectTask', task)}
-          onViewChange={mode => console.log('onViewChange', mode)}
-          ganttHeight={700}
+          today={new Date()}
+          todayLineColor="#2196F3"
+          weekends={false}
+          columnWidth={30}
+          barHeight={20}
+          barCornerRadius={3}
+          listCellWidth={150}
+          headerHeight={30}
+          rowHeight={36}
+          scrollOffset={5}
+          onExpanderClick={task => console.log('onExpanderClick', task)}
+          onRowDoubleClick={task => console.log('onRowDoubleClick', task)}
+          onSelectDate={date => console.log('onSelectDate', date)}
+          onDateChange={(t, s, e) => console.log('onDateChange', t, s, e)}
+          onTaskClick={t => console.log('onTaskClick', t)}
+          onProgressChange={(t, p) => console.log('onProgressChange', t, p)}
+          onViewChange={m => console.log('onViewChange', m)}
+          ganttHeight={600}
         />
       )}
     </Paper>
