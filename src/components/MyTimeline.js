@@ -177,30 +177,42 @@ const MyTimeline = ({ tasks }) => {
         taskContent={taskContent}
         ganttHeight={600}
       />
-      <Drawer
+  <Drawer
   anchor="right"
   open={Boolean(selectedTask)}
-  // Sólo respondemos al backdropClick y escapeKeyDown
   onClose={(_, reason) => {
+    // sigue respondiendo sólo a backdropClick y escapeKeyDown
     if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
       closeDrawer();
     }
   }}
   ModalProps={{
-    // Interceptamos el click en el fondo para evitar burbujear al Gantt
-    onBackdropClick: e => {
-      e.stopPropagation();
-      closeDrawer();
+    keepMounted: true,  // evita desmontar el Drawer y que pierdas estado
+    BackdropProps: {
+      // interceptamos click/touch en la capa oscura
+      onClick: e => {
+        e.stopPropagation();
+        closeDrawer();
+      },
+      onTouchStart: e => {
+        e.stopPropagation();
+        closeDrawer();
+      },
     }
   }}
-  PaperProps={{ sx: { width: 350, p: 2 } }}
+  PaperProps={{
+    sx: { width: 350, p: 2 },
+    // evitamos que un clic dentro del Drawer burbujee al fondo
+    onMouseDown: e => e.stopPropagation(),
+    onTouchStart:  e => e.stopPropagation(),
+  }}
 >
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
     <Typography variant="h6">Tarea Detalle</Typography>
     <IconButton
       aria-label="Cerrar"
       onClick={e => {
-        e.stopPropagation();  // que no suba al Gantt
+        e.stopPropagation();
         closeDrawer();
       }}
     >
@@ -211,18 +223,17 @@ const MyTimeline = ({ tasks }) => {
   {selectedTask && (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
-      <Typography><strong>Nombre:</strong> {selectedTask.name}</Typography>
-      <Typography><strong>Inicio:</strong> {moment(selectedTask.start).format('DD/MM/YYYY')}</Typography>
-      <Typography><strong>Fin:</strong> {moment(selectedTask.end).format('DD/MM/YYYY')}</Typography>
+      <Typography><strong>Nombre:</strong> {selectedTask.title || selectedTask.name}</Typography>
+      <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate || selectedTask.start).format('DD/MM/YYYY')}</Typography>
+      <Typography><strong>Fin:</strong> {moment(selectedTask.endDate || selectedTask.end).format('DD/MM/YYYY')}</Typography>
       <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-      {selectedTask.dependencies.length > 0 && (
-        <Typography>
-          <strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}
-        </Typography>
+      {selectedTask.dependencies?.length > 0 && (
+        <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
       )}
     </Box>
   )}
 </Drawer>
+
     </Paper>
   );
 };
