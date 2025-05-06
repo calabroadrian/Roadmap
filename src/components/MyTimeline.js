@@ -85,10 +85,8 @@ const MyTimeline = ({ tasks }) => {
                 const momentStart = task.startDate ? moment(task.startDate, "DD/MM/YYYY") : defaultStart.clone();
                 const momentEnd = task.endDate ? moment(task.endDate, "DD/MM/YYYY") : defaultEnd.clone();
 
-                console.log(`Task: ${task.title}, Moment Start: ${momentStart}, Moment End: ${momentEnd}`);
-
-                startDate = momentStart.toDate();
-                endDate = momentEnd.toDate();
+                startDate = momentStart.toDate();  // Convertir a Date
+                endDate = momentEnd.toDate();      // Convertir a Date
 
             } catch (error) {
                 console.error("Error parsing date:", error, task);
