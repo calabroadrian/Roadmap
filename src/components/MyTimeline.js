@@ -36,8 +36,8 @@ const MyTimeline = ({ tasks }) => {
     const defaultEnd = now.clone().add(2, 'months').toDate();
 
     const [filter, setFilter] = useState("");
-    const filteredTasks = useMemo(
-        () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
+    const filteredTasks = useMemo(() =>
+        tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
         [tasks, filter]
     );
 
@@ -66,98 +66,87 @@ const MyTimeline = ({ tasks }) => {
     }), []);
 
     useEffect(() => {
-        const convertedTasks = filteredTasks.map(task => {
+        const converted = filteredTasks.map(task => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
-            let startDate = defaultStart;
-            let endDate = defaultEnd;
+            let start = defaultStart;
+            let end = defaultEnd;
 
-            // Parse startDate
+            // Parse start
             if (task.startDate) {
                 if (typeof task.startDate === 'string') {
-                    const [day, month, year] = task.startDate.split('/').map(Number);
-                    startDate = new Date(year, month - 1, day);
+                    const [d, m, y] = task.startDate.split('/').map(Number);
+                    start = new Date(y, m - 1, d);
                 } else if (task.startDate instanceof Date) {
-                    startDate = task.startDate;
+                    start = task.startDate;
                 } else {
-                    startDate = moment(task.startDate).toDate();
+                    start = moment(task.startDate).toDate();
                 }
             }
-            // Parse endDate
+            // Parse end
             if (task.endDate) {
                 if (typeof task.endDate === 'string') {
-                    const [day, month, year] = task.endDate.split('/').map(Number);
-                    endDate = new Date(year, month - 1, day, 23, 59, 59);
+                    const [d, m, y] = task.endDate.split('/').map(Number);
+                    end = new Date(y, m - 1, d, 23, 59, 59);
                 } else if (task.endDate instanceof Date) {
-                    endDate = task.endDate;
+                    end = task.endDate;
                 } else {
-                    endDate = moment(task.endDate).endOf('day').toDate();
+                    end = moment(task.endDate).endOf('day').toDate();
                 }
             }
 
-            // Fallback for invalid dates
-            if (!isValidDate(startDate)) startDate = defaultStart;
-            if (!isValidDate(endDate)) endDate = defaultEnd;
+            if (!isValidDate(start)) start = defaultStart;
+            if (!isValidDate(end)) end = defaultEnd;
 
             return {
-                id: String(task.id || ''),
+                id: String(task.id),
                 name: task.title,
-                startDate,
-                endDate,
-                color: stateDef[0],
-                textColor: '#fff',
-                progress: task.progress || 0,
+                start,
+                end,
+                progress: Number(task.progress) || 0,
+                type: 'task',
+                project: '',
                 dependencies: task.dependencies?.map(String) || [],
-                custom_class: hasPattern ? 'task-no-estimation' : '',
-                etapa: task.etapa,
-                estado: task.Estado,
-                estimacion: task.Estimacion
+                styles: {
+                    progressColor: stateDef[1],
+                    progressSelectedColor: stateDef[1],
+                    backgroundColor: stateDef[0],
+                    backgroundSelectedColor: stateDef[0],
+                    fontColor: '#fff'
+                },
+                isDisabled: false,
+                isHidden: false,
+                custom_class: hasPattern ? 'task-no-estimation' : ''
             };
         });
-        console.log('Converted Gantt Tasks:', convertedTasks);
-        setGanttTasks(convertedTasks);
+        console.log('Gantt tasks:', converted);
+        setGanttTasks(converted);
 
-        const deps = filteredTasks.flatMap(task => (
+        const deps = filteredTasks.flatMap(task =>
             Array.isArray(task.dependencies)
-                ? task.dependencies.map(depId => ({ source: String(task.id), target: String(depId), type: 'finish-to-start' }))
+                ? task.dependencies.map(dep => ({ source: String(task.id), target: String(dep), type: 'FinishToStart' }))
                 : []
-        ));
+        );
         setDependencies(deps);
+        console.log('Dependencies:', deps);
         setMounted(true);
     }, [filteredTasks, defaultStart, defaultEnd]);
 
     const taskRenderer = task => (
         <div style={{
-            backgroundColor: task.color,
-            color: task.textColor,
-            borderRadius: '5px',
-            padding: '8px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
-            height: '100%',
-            overflow: 'hidden',
-            position: 'relative',
-            fontSize: '13px'
+            backgroundColor: task.styles.backgroundColor,
+            color: task.styles.fontColor,
+            borderRadius: '5px', padding: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', height: '100%', overflow: 'hidden', position: 'relative', fontSize: '13px'
         }}>
             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.name}</span>
-            {task.etapa && <Chip label={task.etapa} size="small" sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[task.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }} />}
+            {task.custom_class && <Chip label={task.custom_class} size="small" sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[task.custom_class] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }} />}
         </div>
     );
 
     return (
         <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ScheduleIcon /> Roadmap Timeline
-            </Typography>
-            <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
-                {Object.entries(STATE_STYLES).map(([status, grad]) => <Chip key={status} label={status} size="small" sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color: '#fff' }} />)}
-            </Stack>
-            <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
-                {Object.entries(ETAPA_STYLES).map(([etapa, color]) => <Chip key={etapa} label={etapa} size="small" sx={{ backgroundColor: color, color: '#fff' }} />)}
-            </Stack>
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><ScheduleIcon /> Roadmap Timeline</Typography>
             <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                 <TextField label="Buscar…" size="small" value={filter} onChange={e => setFilter(e.target.value)} />
                 <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
@@ -167,13 +156,20 @@ const MyTimeline = ({ tasks }) => {
                 .task-no-estimation { background-image: ${PATTERNS}; background-repeat: repeat; }
                 .gantt_task_content { overflow: visible; }
             `}</style>
-            {mounted && <Gantt tasks={ganttTasks} dependencies={dependencies} viewMode={viewMode} locale={locale}
+            {mounted && <Gantt
+                tasks={ganttTasks}
+                dependencies={dependencies}
+                viewMode={viewMode}
+                locale={locale}
                 onDateChange={(task, start, end) => console.log('onDateChange', task, start, end)}
                 onTaskClick={task => console.log('onTaskClick', task)}
                 onProgressChange={(task, progress) => console.log('onProgressChange', task, progress)}
-                onAddEmptyTask={(y, x) => console.log('onAddEmptyTask', y, x)}
-                onRowClick={task => console.log('onRowClick', task)}
-                taskContentRender={taskRenderer} columnWidth={40} rowHeight={40} />}
+                onAddTask={() => console.log('onAddTask')}
+                onSelectTask={task => console.log('onSelectTask', task)}
+                onViewChange={mode => console.log('onViewChange', mode)}
+                ganttHeight={700}
+                taskContent={taskRenderer}
+            />}
         </Paper>
     );
 };
@@ -188,9 +184,8 @@ MyTimeline.propTypes = {
             Estado: PropTypes.string,
             etapa: PropTypes.string,
             Estimacion: PropTypes.any,
-            progress: PropTypes.any,
-            dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
-            Bloqueos: PropTypes.arrayOf(PropTypes.string),
+            progress: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+            dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number]))
         })
     ).isRequired,
 };
