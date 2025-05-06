@@ -47,29 +47,23 @@ const MyTimeline = ({ tasks }) => {
 
     const timelineRef = useRef(null);
 
-    const zoomIn = useCallback(() => {
-        setViewMode(prevMode => {
-            switch (prevMode) {
-                case 'Year': return 'Month';
-                case 'Month': return 'Week';
-                case 'Week': return 'Day';
-                case 'Day': return 'Day';
-                default: return prevMode;
-            }
-        });
-    }, []);
+    const zoomIn = useCallback(() => setViewMode(vm => {
+        switch (vm) {
+            case 'Year': return 'Month';
+            case 'Month': return 'Week';
+            case 'Week': return 'Day';
+            default: return 'Day';
+        }
+    }), []);
 
-    const zoomOut = useCallback(() => {
-        setViewMode(prevMode => {
-            switch (prevMode) {
-                case 'Day': return 'Week';
-                case 'Week': return 'Month';
-                case 'Month': return 'Year';
-                case 'Year': return 'Year';
-                default: return prevMode;
-            }
-        });
-    }, []);
+    const zoomOut = useCallback(() => setViewMode(vm => {
+        switch (vm) {
+            case 'Day': return 'Week';
+            case 'Week': return 'Month';
+            case 'Month': return 'Year';
+            default: return 'Year';
+        }
+    }), []);
 
     // Convierte tus datos al formato esperado por Gantt-Task-React
     useEffect(() => {
@@ -77,36 +71,40 @@ const MyTimeline = ({ tasks }) => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
-            let startDate = defaultStart; // Valores por defecto
+            let startDate = defaultStart;
             let endDate = defaultEnd;
 
-            try {
-                // Analizar la cadena de fecha y crear objetos Date
-                const dateParts = task.startDate.split('/').map(Number);
-                startDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], 0, 0, 0);
-
-                const endDateParts = task.endDate.split('/').map(Number);
-                endDate = new Date(endDateParts[2], endDateParts[1] - 1, endDateParts[0], 23, 59, 59);
-
-
-            } catch (error) {
-                // Capturar cualquier error al analizar la fecha
-                console.error("Error al analizar la fecha. Se usarán los valores por defecto", error, task);
-                startDate = defaultStart;
-                endDate = defaultEnd;
+            // Manejar fechas que puedan venir como string o Date
+            if (task.startDate) {
+                if (typeof task.startDate === 'string') {
+                    const parts = task.startDate.split('/').map(Number);
+                    startDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                } else if (task.startDate instanceof Date) {
+                    startDate = task.startDate;
+                } else {
+                    startDate = moment(task.startDate).toDate();
+                }
+            }
+            if (task.endDate) {
+                if (typeof task.endDate === 'string') {
+                    const parts = task.endDate.split('/').map(Number);
+                    endDate = new Date(parts[2], parts[1] - 1, parts[0], 23, 59, 59);
+                } else if (task.endDate instanceof Date) {
+                    endDate = task.endDate;
+                } else {
+                    endDate = moment(task.endDate).endOf('day').toDate();
+                }
             }
 
-
-
             return {
-                id: task.id?.toString() || '',
+                id: String(task.id || ''),
                 name: task.title,
-                startDate: startDate,
-                endDate: endDate,
+                startDate,
+                endDate,
                 color: stateDef[0],
                 textColor: '#fff',
                 progress: task.progress || 0,
-                dependencies: task.dependencies || [],
+                dependencies: task.dependencies?.map(String) || [],
                 custom_class: hasPattern ? 'task-no-estimation' : '',
                 etapa: task.etapa,
                 estado: task.Estado,
@@ -115,58 +113,34 @@ const MyTimeline = ({ tasks }) => {
         });
         setGanttTasks(convertedTasks);
 
-        const deps = [];
-        filteredTasks.forEach(task => {
-            if (task.dependencies && Array.isArray(task.dependencies) && task.dependencies.length > 0) {
-                task.dependencies.forEach(depId => {
-                    deps.push({
-                        source: task.id?.toString() || '',
-                        target: depId.toString(),
-                        type: 'finish-to-start'
-                    });
-                });
-            }
-        });
+        const deps = filteredTasks.flatMap(task => (
+            Array.isArray(task.dependencies)
+                ? task.dependencies.map(depId => ({ source: String(task.id), target: String(depId), type: 'finish-to-start' }))
+                : []
+        ));
         setDependencies(deps);
         setMounted(true);
     }, [filteredTasks, defaultStart, defaultEnd]);
 
-    const taskRenderer = (task) => {
-        const etapa = task.etapa;
-        const estado = task.estado;
-        const estimacion = task.estimacion;
-
-        return (
-            <div style={{
-                backgroundColor: task.color,
-                color: task.textColor || '#fff',
-                borderRadius: '5px',
-                padding: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                height: '100%',
-                overflow: 'hidden',
-                position: 'relative',
-                fontSize: '13px'
-            }}>
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {task.name}
-                </span>
-                {etapa && (
-                    <Chip
-                        label={etapa}
-                        size="small"
-                        sx={{
-                            position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[etapa] || '#757575',
-                            color: '#fff', fontSize: '10px', height: '18px'
-                        }}
-                    />
-                )}
-            </div>
-        );
-    };
+    const taskRenderer = task => (
+        <div style={{
+            backgroundColor: task.color,
+            color: task.textColor,
+            borderRadius: '5px',
+            padding: '8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+            position: 'relative',
+            fontSize: '13px'
+        }}>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{task.name}</span>
+            {task.etapa && <Chip label={task.etapa} size="small" sx={{ position: 'absolute', top: 2, right: 2, bgcolor: ETAPA_STYLES[task.etapa] || '#757575', color: '#fff', fontSize: '10px', height: '18px' }} />}
+        </div>
+    );
 
     return (
         <Paper elevation={3} sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
@@ -174,70 +148,27 @@ const MyTimeline = ({ tasks }) => {
                 <ScheduleIcon /> Roadmap Timeline
             </Typography>
             <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
-                {Object.entries(STATE_STYLES).map(([status, grad]) => (
-                    <Chip
-                        key={status}
-                        label={status}
-                        size="small"
-                        sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color: '#fff' }}
-                    />
-                ))}
+                {Object.entries(STATE_STYLES).map(([status, grad]) => <Chip key={status} label={status} size="small" sx={{ background: `linear-gradient(120deg, ${grad[0]}, ${grad[1]})`, color: '#fff' }} />)}
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
-                {Object.entries(ETAPA_STYLES).map(([etapa, color]) => (
-                    <Chip
-                        key={etapa}
-                        label={etapa}
-                        size="small"
-                        sx={{ backgroundColor: color, color: '#fff' }}
-                    />
-                ))}
+                {Object.entries(ETAPA_STYLES).map(([etapa, color]) => <Chip key={etapa} label={etapa} size="small" sx={{ backgroundColor: color, color: '#fff' }} />)}
             </Stack>
             <Box sx={{ mb: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                <TextField
-                    label="Buscar…"
-                    size="small"
-                    value={filter}
-                    onChange={e => setFilter(e.target.value)}
-                />
+                <TextField label="Buscar…" size="small" value={filter} onChange={e => setFilter(e.target.value)} />
                 <Button size="small" variant="outlined" onClick={zoomOut}>- Zoom</Button>
                 <Button size="small" variant="outlined" onClick={zoomIn}>+ Zoom</Button>
             </Box>
             <style jsx global>{`
-                .task-no-estimation {
-                    background-image: ${PATTERNS};
-                    background-repeat: repeat;
-                }
-                .gantt_task_content {
-                  overflow: visible;
-                }
+                .task-no-estimation { background-image: ${PATTERNS}; background-repeat: repeat; }
+                .gantt_task_content { overflow: visible; }
             `}</style>
-            {mounted &&
-                <Gantt
-                    tasks={ganttTasks}
-                    dependencies={dependencies}
-                    viewMode={viewMode}
-                    locale={locale}
-                    onDateChange={(task, start, end) => {
-                        console.log('onDateChange', task, start, end);
-                    }}
-                    onTaskClick={(task) => {
-                        console.log('onTaskClick', task);
-                    }}
-                    onProgressChange={(task, progress) => {
-                        console.log('onProgressChange', task, progress);
-                    }}
-                    onAddEmptyTask={(y, x) => {
-                        console.log("onAddEmptyTask", y, x);
-                    }}
-                    onRowClick={(task) => {
-                        console.log("onRowClick", task);
-                    }}
-                    taskContentRender={taskRenderer}
-                    columnWidth={40}
-                    rowHeight={40}
-                />
-            }
+            {mounted && <Gantt tasks={ganttTasks} dependencies={dependencies} viewMode={viewMode} locale={locale}
+                onDateChange={(task, start, end) => console.log('onDateChange', task, start, end)}
+                onTaskClick={task => console.log('onTaskClick', task)}
+                onProgressChange={(task, progress) => console.log('onProgressChange', task, progress)}
+                onAddEmptyTask={(y, x) => console.log('onAddEmptyTask', y, x)}
+                onRowClick={task => console.log('onRowClick', task)}
+                taskContentRender={taskRenderer} columnWidth={40} rowHeight={40} />}
         </Paper>
     );
 };
