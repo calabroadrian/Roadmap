@@ -73,42 +73,32 @@ const MyTimeline = ({ tasks }) => {
 
     // Convierte tus datos al formato esperado por Gantt-Task-React
     useEffect(() => {
-        // Imprimimos el prop tasks para inspeccionar su contenido
-        console.log("Tasks prop in MyTimeline:", tasks);
-
         const convertedTasks = filteredTasks.map(task => {
             const stateDef = STATE_STYLES[task.Estado] || STATE_STYLES['Nuevo'];
             const hasPattern = !task.Estimacion;
 
-            let startDate;
-            let endDate;
+            let startDate = defaultStart; // Valores por defecto
+            let endDate = defaultEnd;
 
             try {
                 // Analizar la cadena de fecha y crear objetos Date
                 const [startDay, startMonth, startYear] = task.startDate.split('/').map(Number);
-                startDate = new Date(startYear, startMonth - 1, startDay);
+                startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0); // Establecer la hora a 00:00:00
+
 
                 const [endDay, endMonth, endYear] = task.endDate.split('/').map(Number);
-                endDate = new Date(endYear, endMonth - 1, endDay);
+                endDate = new Date(endYear, endMonth - 1, endDay, 23, 59, 59);  // Establecer la hora a 23:59:59
+
 
 
             } catch (error) {
-                console.error("Error parsing date:", error, task);
-                // Si hay un error al parsear la fecha, usa la fecha por defecto
+                // Capturar cualquier error al analizar la fecha
+                console.error("Error al analizar la fecha. Se usarán los valores por defecto", error, task);
                 startDate = defaultStart;
                 endDate = defaultEnd;
             }
-            if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
-                console.error("Invalid startDate detected:", startDate, "for task:", task);
-                startDate = defaultStart; // Fallback to default start
-            }
 
-            if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
-                console.error("Invalid endDate detected:", endDate, "for task:", task);
-                endDate = defaultEnd;     // Fallback to default end
-            }
-            // Imprime el tipo de dato de startDate y endDate
-            console.log(`Task: ${task.title}, Start Date Type: ${typeof startDate}, End Date Type: ${typeof endDate}`);
+
 
             return {
                 id: task.id?.toString() || '',
@@ -272,3 +262,4 @@ MyTimeline.propTypes = {
 };
 
 export default MyTimeline;
+
