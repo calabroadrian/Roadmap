@@ -7,7 +7,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import PropTypes from 'prop-types';
 
 // Estilos para Etapas
-toggle const ETAPA_STYLES = {
+const ETAPA_STYLES = {
   "Cambio de alcance": "#FF9800",
   "Impacto en inicio": "#F44336",
   "Ajustes": "#2196F3",
