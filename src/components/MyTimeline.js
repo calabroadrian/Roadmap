@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Gantt } from 'gantt-task-react';
-import 'gantt-task-react/dist/index.css';
+import 'gantt-task-react/dist/style.css';
 import moment from 'moment';
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -30,8 +30,8 @@ const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, 
 
 const MyTimeline = ({ tasks }) => {
     const now = moment();
-    const defaultStart = now.clone().subtract(2, 'months');
-    const defaultEnd = now.clone().add(2, 'months');
+    const defaultStart = now.clone().subtract(2, 'months').toDate(); // Ya son Date
+    const defaultEnd = now.clone().add(2, 'months').toDate();   // Ya son Date
 
     const [filter, setFilter] = useState("");
     const filteredTasks = useMemo(
@@ -80,28 +80,48 @@ const MyTimeline = ({ tasks }) => {
             let startDate;
             let endDate;
 
-            try {
-                // Intenta convertir la fecha, si falla, usa la fecha por defecto
-                const momentStart = task.startDate ? moment(task.startDate, "DD/MM/YYYY") : defaultStart.clone();
-                const momentEnd = task.endDate ? moment(task.endDate, "DD/MM/YYYY") : defaultEnd.clone();
+            // Función para verificar el formato de la fecha
+            const isValidDateString = (dateString) => {
+                return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString);
+            };
 
-                startDate = momentStart.toDate();  // Convertir a Date
-                endDate = momentEnd.toDate();      // Convertir a Date
+            try {
+                // Intenta crear objetos Date directamente
+                if (task.startDate && isValidDateString(task.startDate)) {
+                    const [startDay, startMonth, startYear] = task.startDate.split('/').map(Number);
+                    startDate = new Date(startYear, startMonth - 1, startDay); // Meses en JS son 0-11
+                } else {
+                    startDate = defaultStart;
+                    if (task.startDate) {
+                        console.warn(`Invalid start date format: ${task.startDate}. Using default.`);
+                    }
+                }
+
+                if (task.endDate && isValidDateString(task.endDate)) {
+                    const [endDay, endMonth, endYear] = task.endDate.split('/').map(Number);
+                    endDate = new Date(endYear, endMonth - 1, endDay);
+                } else {
+                    endDate = defaultEnd;
+                    if (task.endDate) {
+                         console.warn(`Invalid end date format: ${task.endDate}. Using default.`);
+                    }
+                }
+
 
             } catch (error) {
                 console.error("Error parsing date:", error, task);
                 // Si hay un error al parsear la fecha, usa la fecha por defecto
-                startDate = defaultStart.clone().toDate();
-                endDate = defaultEnd.clone().toDate();
+                startDate = defaultStart;
+                endDate = defaultEnd;
             }
             if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
                 console.error("Invalid startDate detected:", startDate, "for task:", task);
-                startDate = defaultStart.clone().toDate(); // Fallback to default start
+                startDate = defaultStart; // Fallback to default start
             }
 
             if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
                 console.error("Invalid endDate detected:", endDate, "for task:", task);
-                endDate = defaultEnd.clone().toDate();     // Fallback to default end
+                endDate = defaultEnd;     // Fallback to default end
             }
             // Imprime el tipo de dato de startDate y endDate
             console.log(`Task: ${task.title}, Start Date Type: ${typeof startDate}, End Date Type: ${typeof endDate}`);
