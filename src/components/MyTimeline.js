@@ -30,8 +30,8 @@ const PATTERNS = "repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, 
 
 const MyTimeline = ({ tasks }) => {
     const now = moment();
-    const defaultStart = now.clone().subtract(2, 'months').toDate(); // Ya son Date
-    const defaultEnd = now.clone().add(2, 'months').toDate();   // Ya son Date
+    const defaultStart = now.clone().subtract(2, 'months').toDate();
+    const defaultEnd = now.clone().add(2, 'months').toDate();
 
     const [filter, setFilter] = useState("");
     const filteredTasks = useMemo(
@@ -83,32 +83,13 @@ const MyTimeline = ({ tasks }) => {
             let startDate;
             let endDate;
 
-            // Función para verificar el formato de la fecha
-            const isValidDateString = (dateString) => {
-                return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateString);
-            };
-
             try {
-                // Intenta crear objetos Date directamente
-                if (task.startDate && isValidDateString(task.startDate)) {
-                    const [startDay, startMonth, startYear] = task.startDate.split('/').map(Number);
-                    startDate = new Date(startYear, startMonth - 1, startDay); // Meses en JS son 0-11
-                } else {
-                    startDate = defaultStart;
-                    if (task.startDate) {
-                        console.warn(`Invalid start date format: ${task.startDate}. Using default.`);
-                    }
-                }
+                // Analizar la cadena de fecha y crear objetos Date
+                const [startDay, startMonth, startYear] = task.startDate.split('/').map(Number);
+                startDate = new Date(startYear, startMonth - 1, startDay);
 
-                if (task.endDate && isValidDateString(task.endDate)) {
-                    const [endDay, endMonth, endYear] = task.endDate.split('/').map(Number);
-                    endDate = new Date(endYear, endMonth - 1, endDay);
-                } else {
-                    endDate = defaultEnd;
-                    if (task.endDate) {
-                         console.warn(`Invalid end date format: ${task.endDate}. Using default.`);
-                    }
-                }
+                const [endDay, endMonth, endYear] = task.endDate.split('/').map(Number);
+                endDate = new Date(endYear, endMonth - 1, endDay);
 
 
             } catch (error) {
