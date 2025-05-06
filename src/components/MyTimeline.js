@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Gantt } from 'gantt-task-react';
-import 'gantt-task-react/dist/index.css';
+import 'gantt-task-react/dist/style.css';
 import moment from 'moment';
 import { Tooltip, Chip, Box, Button, TextField, Paper, Stack, Typography } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -94,15 +94,18 @@ const MyTimeline = ({ tasks }) => {
                 startDate = defaultStart.clone().toDate();
                 endDate = defaultEnd.clone().toDate();
             }
-             if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
+            if (!(startDate instanceof Date) || isNaN(startDate.getTime())) {
                 console.error("Invalid startDate detected:", startDate, "for task:", task);
                 startDate = defaultStart.clone().toDate(); // Fallback to default start
-              }
+            }
 
-              if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
+            if (!(endDate instanceof Date) || isNaN(endDate.getTime())) {
                 console.error("Invalid endDate detected:", endDate, "for task:", task);
                 endDate = defaultEnd.clone().toDate();     // Fallback to default end
-              }
+            }
+            // Imprime el tipo de dato de startDate y endDate
+            console.log(`Task: ${task.title}, Start Date Type: ${typeof startDate}, End Date Type: ${typeof endDate}`);
+
             return {
                 id: task.id?.toString() || '',
                 name: task.title,
