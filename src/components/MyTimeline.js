@@ -1,4 +1,3 @@
-// Improved MyTimeline component with Gantt select and modal details
 import React, { useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
@@ -38,26 +37,21 @@ const parseDate = (val, fallback, endOfDay = false) => {
   }
   return isNaN(date?.getTime()) ? fallback : (endOfDay ? moment(date).endOf('day').toDate() : date);
 };
-const isValidDate = d => d && !isNaN(d.getTime());
 
 const MyTimeline = ({ tasks }) => {
-  // Timeline range
   const now = useMemo(() => moment(), []);
   const defaultStart = now.clone().subtract(2, 'months').toDate();
   const defaultEnd = now.clone().add(2, 'months').endOf('day').toDate();
 
-  // States
   const [filter, setFilter] = useState('');
   const [viewMode, setViewMode] = useState(ViewMode.Month);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  // Filter tasks
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Prepare Gantt data
   const { ganttTasks, dependencies } = useMemo(() => {
     const gTasks = [];
     const deps = [];
@@ -85,7 +79,7 @@ const MyTimeline = ({ tasks }) => {
           fontColor: '#fff',
         },
         custom_class: hasPattern ? 'task-no-estimation' : '',
-        etapa: task.etapa, // Pass etapa for display in the drawer
+        etapa: task.etapa,
         startDate: task.startDate,
         endDate: task.endDate
       });
@@ -94,7 +88,6 @@ const MyTimeline = ({ tasks }) => {
     return { ganttTasks: gTasks, dependencies: deps };
   }, [filtered, defaultStart, defaultEnd]);
 
-  // Zoom handlers
   const zoomIn = useCallback(() => setViewMode(vm => {
     if (vm === ViewMode.Year) return ViewMode.Month;
     if (vm === ViewMode.Month) return ViewMode.Week;
@@ -108,21 +101,15 @@ const MyTimeline = ({ tasks }) => {
     return vm;
   }), []);
 
-  // Task click handler opens drawer
-    const handleSelectTask = useCallback(
-    (ganttTask) => {
-      // Find the corresponding task from the original 'tasks' array
-      const selectedFullTask = tasks.find((task) => String(task.id) === String(ganttTask.id));
-      if (selectedFullTask) {
-        setSelectedTask(selectedFullTask);
-      }
+  const handleSelectTask = useCallback(
+    ganttTask => {
+      const selected = tasks.find(t => String(t.id) === ganttTask.id);
+      if (selected) setSelectedTask(selected);
     },
     [tasks]
   );
-
   const closeDrawer = () => setSelectedTask(null);
 
-  // Custom task content
   const taskContent = useCallback(task => (
     <Box sx={{
       ...task.styles,
@@ -143,7 +130,9 @@ const MyTimeline = ({ tasks }) => {
       </Box>
       {task.etapa && (
         <Chip label={task.etapa} size="small" sx={{
-          position: 'absolute', top: 4, right: 4, bgcolor: ETAPA_STYLES[task.etapa.replace(/\s+/g, '')] || '#757575', color: '#fff', fontSize: 10
+          position: 'absolute', top: 4, right: 4,
+          bgcolor: ETAPA_STYLES[task.etapa.replace(/\s+/g, '')] || '#757575',
+          color: '#fff', fontSize: 10
         }} />
       )}
     </Box>
@@ -177,63 +166,45 @@ const MyTimeline = ({ tasks }) => {
         taskContent={taskContent}
         ganttHeight={600}
       />
-  <Drawer
-  anchor="right"
-  open={Boolean(selectedTask)}
-  onClose={(_, reason) => {
-    // sigue respondiendo sólo a backdropClick y escapeKeyDown
-    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
-      closeDrawer();
-    }
-  }}
-  ModalProps={{
-    keepMounted: true,  // evita desmontar el Drawer y que pierdas estado
-    BackdropProps: {
-      // interceptamos click/touch en la capa oscura
-      onClick: e => {
-        e.stopPropagation();
-        closeDrawer();
-      },
-      onTouchStart: e => {
-        e.stopPropagation();
-        closeDrawer();
-      },
-    }
-  }}
-  PaperProps={{
-    sx: { width: 350, p: 2 },
-    // evitamos que un clic dentro del Drawer burbujee al fondo
-    onMouseDown: e => e.stopPropagation(),
-    onTouchStart:  e => e.stopPropagation(),
-  }}
->
-  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-    <Typography variant="h6">Tarea Detalle</Typography>
-    <IconButton
-      aria-label="Cerrar"
-      onClick={e => {
-        e.stopPropagation();
-        closeDrawer();
-      }}
-    >
-      <CloseIcon />
-    </IconButton>
-  </Box>
-  <Divider sx={{ mb: 2 }} />
-  {selectedTask && (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
-      <Typography><strong>Nombre:</strong> {selectedTask.title || selectedTask.name}</Typography>
-      <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate || selectedTask.start).format('DD/MM/YYYY')}</Typography>
-      <Typography><strong>Fin:</strong> {moment(selectedTask.endDate || selectedTask.end).format('DD/MM/YYYY')}</Typography>
-      <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-      {selectedTask.dependencies?.length > 0 && (
-        <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
-      )}
-    </Box>
-  )}
-</Drawer>
-
+      <Drawer
+        anchor="right"
+        open={Boolean(selectedTask)}
+        onClose={(_, reason) => {
+          if (reason === 'backdropClick' || reason === 'escapeKeyDown') closeDrawer();
+        }}
+        ModalProps={{
+          keepMounted: true,
+          BackdropProps: {
+            onClick: e => { e.stopPropagation(); closeDrawer(); },
+            onTouchStart: e => { e.stopPropagation(); closeDrawer(); },
+          }
+        }}
+        PaperProps={{
+          sx: { width: 350, p: 2 },
+          onMouseDown: e => e.stopPropagation(),
+          onTouchStart: e => e.stopPropagation(),
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6">Tarea Detalle</Typography>
+          <IconButton aria-label="Cerrar" onClick={e => { e.stopPropagation(); closeDrawer(); }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
+        {selectedTask && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
+            <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
+            <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
+            {selectedTask.dependencies?.length > 0 && 
+              <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
+            }
+          </Box>
+        )}
+      </Drawer>
     </Paper>
   );
 };
@@ -248,7 +219,7 @@ MyTimeline.propTypes = {
     etapa: PropTypes.string,
     Estimacion: PropTypes.any,
     progress: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
+    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number]))
   })).isRequired,
 };
 
