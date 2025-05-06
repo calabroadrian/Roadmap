@@ -1,11 +1,12 @@
-// Improved MyTimeline component with refactoring and performance optimizations
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+// Improved MyTimeline component with Gantt select and modal details
+import React, { useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Gantt, ViewMode } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
-import { Box, Button, TextField, Paper, Typography, Chip, Tooltip } from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Chip, Tooltip, Drawer, IconButton, Divider } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import CloseIcon from '@mui/icons-material/Close';
 
 // Constants
 const ETAPA_STYLES = {
@@ -25,7 +26,6 @@ const STATE_STYLES = {
 };
 const DEFAULT_PATTERN = 'repeating-linear-gradient(-45deg, #eee, #eee 10px, #ddd 10px, #ddd 20px)';
 
-// Helper: safe date parsing
 const parseDate = (val, fallback, endOfDay = false) => {
   let date;
   if (!val) return fallback;
@@ -41,30 +41,34 @@ const parseDate = (val, fallback, endOfDay = false) => {
 const isValidDate = d => d && !isNaN(d.getTime());
 
 const MyTimeline = ({ tasks }) => {
+  // Timeline range
   const now = useMemo(() => moment(), []);
   const defaultStart = now.clone().subtract(2, 'months').toDate();
   const defaultEnd = now.clone().add(2, 'months').endOf('day').toDate();
 
+  // States
   const [filter, setFilter] = useState('');
   const [viewMode, setViewMode] = useState(ViewMode.Month);
+  const [selectedTask, setSelectedTask] = useState(null);
 
+  // Filter tasks
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
+  // Prepare Gantt data
   const { ganttTasks, dependencies } = useMemo(() => {
     const gTasks = [];
     const deps = [];
-
     filtered.forEach(task => {
       const [bgColor, progressColor] = STATE_STYLES[task.Estado] || STATE_STYLES.Nuevo;
-      const etapaColor = ETAPA_STYLES[task.etapa.replace(/\s+/g, '')] || bgColor;
+      const etapaKey = task.etapa.replace(/\s+/g, '');
+      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
       const start = parseDate(task.startDate, defaultStart);
       const end = parseDate(task.endDate, defaultEnd, true);
       const hasPattern = !task.Estimacion;
       const isMilestone = task.etapa === 'Entrega final';
-
       gTasks.push({
         id: String(task.id),
         name: task.title,
@@ -82,19 +86,18 @@ const MyTimeline = ({ tasks }) => {
         },
         custom_class: hasPattern ? 'task-no-estimation' : '',
       });
-
       (task.dependencies || []).forEach(dep => deps.push({ source: String(task.id), target: String(dep), type: 'FinishToStart' }));
     });
     return { ganttTasks: gTasks, dependencies: deps };
   }, [filtered, defaultStart, defaultEnd]);
 
+  // Zoom handlers
   const zoomIn = useCallback(() => setViewMode(vm => {
     if (vm === ViewMode.Year) return ViewMode.Month;
     if (vm === ViewMode.Month) return ViewMode.Week;
     if (vm === ViewMode.Week) return ViewMode.Day;
     return vm;
   }), []);
-
   const zoomOut = useCallback(() => setViewMode(vm => {
     if (vm === ViewMode.Day) return ViewMode.Week;
     if (vm === ViewMode.Week) return ViewMode.Month;
@@ -102,6 +105,11 @@ const MyTimeline = ({ tasks }) => {
     return vm;
   }), []);
 
+  // Task click handler opens drawer
+  const handleSelectTask = useCallback(task => setSelectedTask(task), []);
+  const closeDrawer = () => setSelectedTask(null);
+
+  // Custom task content
   const taskContent = useCallback(task => (
     <Box sx={{
       ...task.styles,
@@ -135,12 +143,7 @@ const MyTimeline = ({ tasks }) => {
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
       <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-        <TextField
-          label="Buscar"
-          size="small"
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-        />
+        <TextField label="Buscar" size="small" value={filter} onChange={e => setFilter(e.target.value)} />
         <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
         <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
@@ -157,12 +160,27 @@ const MyTimeline = ({ tasks }) => {
         todayLineColor="#2196F3"
         weekends={false}
         scrollOffset={5}
-        onSelect={console.log}
-        onDateChange={console.log}
-        onProgressChange={console.log}
+        onSelect={handleSelectTask}
         taskContent={taskContent}
         ganttHeight={600}
       />
+      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={closeDrawer} PaperProps={{ sx: { width: 350, p: 2 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="h6">Tarea Detalle</Typography>
+          <IconButton onClick={closeDrawer}><CloseIcon /></IconButton>
+        </Box>
+        <Divider sx={{ mb: 2 }} />
+        {selectedTask && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
+            <Typography><strong>Nombre:</strong> {selectedTask.name}</Typography>
+            <Typography><strong>Inicio:</strong> {moment(selectedTask.start).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Fin:</strong> {moment(selectedTask.end).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
+            {selectedTask.dependencies.length > 0 && <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(", ")}</Typography>}
+          </Box>
+        )}
+      </Drawer>
     </Paper>
   );
 };
