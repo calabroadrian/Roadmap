@@ -37,10 +37,10 @@ function parseDate(val, fallback) {
 
 export default function MyTimeline({ tasks }) {
   const [filter, setFilter] = useState('');
-  const [viewModeIdx, setViewModeIdx] = useState(2); // Month by default
+  const [viewModeIdx, setViewModeIdx] = useState(2); // Month default
   const [selectedTask, setSelectedTask] = useState(null);
   const ganttEl = useRef(null);
-  const ganttInstance = useRef(null);
+  const ganttRef = useRef(null);
 
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
@@ -65,8 +65,8 @@ export default function MyTimeline({ tasks }) {
     [filtered]
   );
 
+  // Inject CSS vars for bars once
   useEffect(() => {
-    // inject CSS var-based bar colors
     const style = document.createElement('style');
     style.innerHTML = `
       .bar-rect { fill: var(--bar-background) !important; }
@@ -76,15 +76,19 @@ export default function MyTimeline({ tasks }) {
     return () => document.head.removeChild(style);
   }, []);
 
+  // Initialize or re-render Gantt when tasks change
   useEffect(() => {
-    if (!ganttEl.current) return;
-    ganttInstance.current = new Gantt(ganttEl.current, ganttTasks, {
+    const container = ganttEl.current;
+    if (!container) return;
+    // Clear previous render
+    container.innerHTML = '';
+    // Create new instance
+    ganttRef.current = new Gantt(container, ganttTasks, {
       on_click: task => setSelectedTask(tasks.find(x => String(x.id) === task.id)),
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es'
     });
-    return () => ganttInstance.current && ganttInstance.current.refresh(ganttEl.current, []);
-  }, [ganttTasks, tasks, viewModeIdx]);
+  }, [ganttTasks, viewModeIdx, tasks]);
 
   const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
   const zoomIn = () => setViewModeIdx(i => Math.max(i - 1, 0));
@@ -97,11 +101,16 @@ export default function MyTimeline({ tasks }) {
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
       <Box sx={{ display:'flex', gap:2, mb:2, flexWrap:'wrap' }}>
-        <TextField label="Buscar" size="small" value={filter} onChange={e=>setFilter(e.target.value)} />
+        <TextField
+          label="Buscar"
+          size="small"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+        />
         <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
         <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-      <div ref={ganttEl} style={{ overflowX: 'auto' }} />
+      <div ref={ganttEl} style={{ overflowX: 'auto', width: '100%' }} />
 
       <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
@@ -120,7 +129,12 @@ export default function MyTimeline({ tasks }) {
               <Chip
                 label={selectedTask.etapa}
                 size="small"
-                sx={{ bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575', color: '#fff', fontSize: 10 }}
+                sx={{
+                  position: 'relative',
+                  bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575',
+                  color: '#fff',
+                  fontSize: 10
+                }}
               />
             )}
           </Box>
@@ -132,14 +146,14 @@ export default function MyTimeline({ tasks }) {
 
 MyTimeline.propTypes = {
   tasks: PropTypes.arrayOf(PropTypes.shape({
-    id       : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title    : PropTypes.string.isRequired,
-    startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    endDate  : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    Estado   : PropTypes.string,
-    etapa    : PropTypes.string,
+    id        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title     : PropTypes.string.isRequired,
+    startDate : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    endDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    Estado    : PropTypes.string,
+    etapa     : PropTypes.string,
     Estimacion: PropTypes.any,
-    progress : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    progress  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   })).isRequired,
 };
