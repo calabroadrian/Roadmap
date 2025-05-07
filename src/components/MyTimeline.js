@@ -2,13 +2,11 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
-// Para usar la versión local: copia `node_modules/frappe-gantt/dist/frappe-gantt.css` a `src/styles/frappe-gantt.css`
-import '../../src/styles/frappe-gantt.css';
+import '../styles/frappe-gantt.css';
 import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Usamos Frappe Gantt (MIT) como alternativa gratuita
 const ETAPA_STYLES = {
   CambioDeAlcance: '#FF9800',
   ImpactoEnInicio: '#F44336',
@@ -24,6 +22,7 @@ const STATE_STYLES = {
   EnProgreso: ['#fff9c4', '#ffeb3b'],
   Hecho: ['#c8e6c9', '#4caf50'],
 };
+const VIEW_MODES = ['Day', 'Week', 'Month', 'Year'];
 
 function parseDate(val, fallback) {
   if (!val) return fallback;
@@ -38,6 +37,7 @@ function parseDate(val, fallback) {
 
 export default function MyTimeline({ tasks }) {
   const [filter, setFilter] = useState('');
+  const [viewModeIdx, setViewModeIdx] = useState(2); // Month by default
   const [selectedTask, setSelectedTask] = useState(null);
   const ganttEl = useRef(null);
   const ganttInstance = useRef(null);
@@ -47,39 +47,47 @@ export default function MyTimeline({ tasks }) {
     [tasks, filter]
   );
 
-  // Crear datos para Frappe Gantt
   const ganttTasks = useMemo(
     () => filtered.map(t => {
       const [bg, prog] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
       return {
-        id       : String(t.id),
-        name     : t.title,
-        start    : moment(parseDate(t.startDate, new Date())).format('YYYY-MM-DD'),
-        end      : moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
-        progress : Number(t.progress) || 0,
+        id: String(t.id),
+        name: t.title,
+        start: moment(parseDate(t.startDate, new Date())).format('YYYY-MM-DD'),
+        end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
+        progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
         custom_class: t.Estimacion ? '' : 'bar--no-estimation',
-        styles   : { '--bar-background': ETAPA_STYLES[etapaKey] || bg, '--bar-progress': prog }
+        styles: { '--bar-background': ETAPA_STYLES[etapaKey] || bg, '--bar-progress': prog }
       };
     }),
     [filtered]
   );
 
-  // Inicializar Gantt
+  useEffect(() => {
+    // inject CSS var-based bar colors
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .bar-rect { fill: var(--bar-background) !important; }
+      .bar-progress { fill: var(--bar-progress) !important; }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   useEffect(() => {
     if (!ganttEl.current) return;
-    // limpiar antiguo
     ganttInstance.current = new Gantt(ganttEl.current, ganttTasks, {
       on_click: task => setSelectedTask(tasks.find(x => String(x.id) === task.id)),
-      on_date_change: () => {},
-      on_progress_change: () => {},
-      view_mode: 'Month', // puedes cambiar a Day, Week, Year
+      view_mode: VIEW_MODES[viewModeIdx],
       language: 'es'
     });
     return () => ganttInstance.current && ganttInstance.current.refresh(ganttEl.current, []);
-  }, [ganttTasks, tasks]);
+  }, [ganttTasks, tasks, viewModeIdx]);
 
+  const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
+  const zoomIn = () => setViewModeIdx(i => Math.max(i - 1, 0));
   const close = () => setSelectedTask(null);
 
   return (
@@ -90,8 +98,10 @@ export default function MyTimeline({ tasks }) {
       </Box>
       <Box sx={{ display:'flex', gap:2, mb:2, flexWrap:'wrap' }}>
         <TextField label="Buscar" size="small" value={filter} onChange={e=>setFilter(e.target.value)} />
+        <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
+        <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-      <div ref={ganttEl} />
+      <div ref={ganttEl} style={{ overflowX: 'auto' }} />
 
       <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
@@ -106,8 +116,12 @@ export default function MyTimeline({ tasks }) {
             <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
             <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
             <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-            {selectedTask.dependencies?.length > 0 && (
-              <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
+            {selectedTask.etapa && (
+              <Chip
+                label={selectedTask.etapa}
+                size="small"
+                sx={{ bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575', color: '#fff', fontSize: 10 }}
+              />
             )}
           </Box>
         )}
