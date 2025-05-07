@@ -1,4 +1,3 @@
-// File: MyTimeline.jsx
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
@@ -8,6 +7,21 @@ import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider,
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
+const ETAPA_STYLES = {
+  CambioDeAlcance: '#FF9800',
+  ImpactoEnInicio: '#F44336',
+  Ajustes: '#2196F3',
+  SinRequerimiento: '#9E9E9E',
+  SinEstimar: '#EEEEEE',
+  EnPausa: '#FFEB3B',
+  InicioDeDesarrollo: '#4CAF50',
+};
+const STATE_STYLES = {
+  Nuevo: ['#ffcdd2', '#e57373'],
+  EnCurso: ['#fff9c4', '#ffeb3b'],
+  EnProgreso: ['#fff9c4', '#ffeb3b'],
+  Hecho: ['#c8e6c9', '#4caf50'],
+};
 const VIEW_MODES = ['Day', 'Week', 'Month', 'Year'];
 
 function parseDate(val, fallback) {
@@ -28,19 +42,18 @@ export default function MyTimeline({ tasks }) {
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
 
-  // Filtrado por búsqueda
+  // Filtered tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Construye las tareas para Gantt con clases de estado y etapa
+  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
+      const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
-      const statusClass = `status-${t.Estado}`;
-      const etapaClass  = `etapa-${etapaKey}`;
-
+      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
       return {
         id: String(t.id),
         name: t.title,
@@ -48,17 +61,22 @@ export default function MyTimeline({ tasks }) {
         end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        custom_class: `${statusClass} ${etapaClass}`
+        custom_class: t.Estimacion ? '' : 'bar--no-estimation',
+        // Direct color props
+        barColor: etapaColor,
+        barProgressColor: progressColor
       };
     }),
     [filtered]
   );
 
-  // Inicializa / re-renderiza Gantt
+  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Clear
     el.innerHTML = '';
+    // Create new
     ganttRef.current = new Gantt(el, ganttTasks, {
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
@@ -109,7 +127,7 @@ export default function MyTimeline({ tasks }) {
                 label={selectedTask.etapa}
                 size="small"
                 sx={{
-                  bgcolor: `var(--etapa-${selectedTask.etapa.replace(/\s+/g, '')}-stroke)`,
+                  bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575',
                   color: '#fff',
                   fontSize: 10
                 }}
@@ -130,12 +148,8 @@ MyTimeline.propTypes = {
     endDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
     Estado    : PropTypes.string,
     etapa     : PropTypes.string,
+    Estimacion: PropTypes.any,
     progress  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),  
+    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   })).isRequired,
 };
-
-
-/*
-File: timeline-overrides.css
-*/

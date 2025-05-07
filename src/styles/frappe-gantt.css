@@ -21,6 +21,29 @@
     --g-weekend-highlight-color: #f7f7f7
 }
 
+/* Estados */
+.status-Nuevo .bar { fill: #ffcdd2; }
+.status-Nuevo .bar-progress { fill: #e57373; }
+
+.status-EnCurso .bar { fill: #fff9c4; }
+.status-EnCurso .bar-progress { fill: #ffeb3b; }
+
+.status-EnProgreso .bar { fill: #fff9c4; }
+.status-EnProgreso .bar-progress { fill: #ffeb3b; }
+
+.status-Hecho .bar { fill: #c8e6c9; }
+.status-Hecho .bar-progress { fill: #4caf50; }
+
+/* Etapas */
+.etapa-CambioDeAlcance .bar { stroke: #FF9800; }
+.etapa-ImpactoEnInicio .bar { stroke: #F44336; }
+.etapa-Ajustes .bar { stroke: #2196F3; }
+.etapa-SinRequerimiento .bar { stroke: #9E9E9E; }
+.etapa-SinEstimar .bar { stroke: #EEEEEE; }
+.etapa-EnPausa .bar { stroke: #FFEB3B; }
+.etapa-InicioDeDesarrollo .bar { stroke: #4CAF50; }
+
+
 /* 1. Primero tu override de colores: */
 
 :root {
