@@ -63,8 +63,8 @@ export default function MyTimeline({ tasks }) {
         dependencies: (t.dependencies || []).join(','),
         custom_class: t.Estimacion ? '' : 'bar--no-estimation',
         // Direct color props
-        barColor: etapaColor,
-        barProgressColor: progressColor
+        bar_color: etapaColor,
+        bar_progress_color: progressColor,        
       };
     }),
     [filtered]
