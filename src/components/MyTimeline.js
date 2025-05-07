@@ -75,17 +75,27 @@ export default function MyTimeline({ tasks }) {
     if (!el) return;
     el.innerHTML = '';
 
+    // Instantiate Gantt
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      popup_trigger: 'hover',        // ← Tooltip al hacer hover
+      // popup_trigger option may not work; use manual handlers below
+      popup_trigger: 'hover',
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
       },
     });
 
-    return () => ganttRef.current && ganttRef.current.clear();
+    // Add hover handlers to show/hide popup manually
+    ganttRef.current.bars.forEach(bar => {
+      bar.bar.addEventListener('mouseenter', () => ganttRef.current.show_popup(bar.task));
+      bar.bar.addEventListener('mouseleave', () => ganttRef.current.hide_popup());
+    });
+
+    return () => {
+      ganttRef.current && ganttRef.current.clear();
+    };
   }, [ganttTasks, viewModeIdx, tasks]);
 
   const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
