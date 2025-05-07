@@ -1,75 +1,33 @@
-/* En el archivo './components/Login/Login.css' */
+/* ./components/Login/Login.css */
 
+/* 1) Variables de tema (sincronízalas con tu theme de MUI) */
+:root {
+  --bg-default: #f5f5f5;
+  --text-primary: #222222;
+  --primary-main: #1976d2;
+  --blur-bg-light: rgba(255, 255, 255, 0.7);
+  --blur-bg-dark: rgba(255, 255, 255, 0.05);
+}
+
+/* 2) Reset / base para esta pantalla (si no lo haces en global) */
+.login-root,
 .login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f1f1f1;
-  }
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-default);
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-primary);
+}
 
-  .messageContainerStyle  {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f1f1f1;
+/* 3) Override para el Backdrop (si usas MUI Backdrop en otros componentes) */
+.MuiBackdrop-root {
+  backdrop-filter: blur(4px);
+}
+
+/* 4) Imagen de fondo sólo en móvil (opcional) */
+@media (max-width: 600px) {
+  .login-root {
+    background: url('/assets/bg-pattern-mobile.svg') center/cover no-repeat;
   }
-  
-  .login-logo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 20px;
-  }
-  
-  .login-logo img {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 10px;
-  }
-  
-  .login-form {
-    max-width: 400px;
-    width: 100%;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .login-form h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  .login-form form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .login-form input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-  }
-  
-  .login-form button {
-    padding: 10px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .login-form button:hover {
-    background-color: #45a049;
-  }
-  
-  /* Agrega estilos adicionales según tus preferencias */
-  
+}
