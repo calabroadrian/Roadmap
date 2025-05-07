@@ -1,6 +1,6 @@
 :root {
     --g-arrow-color: #1f2937;
-    --g-bar-color: #e0e0e0; /* Default bar color */
+    --g-bar-color: #fff;
     --g-bar-border: #fff;
     --g-tick-color-thick: #ededed;
     --g-tick-color: #f3f3f3;
@@ -18,27 +18,30 @@
     --g-row-border-color: #c7c7c7;
     --g-today-highlight: #37352f;
     --g-popup-actions: #ebeff2;
-    --g-weekend-highlight-color: #f7f7f7;
-
-    /* Estados */
-    --estado-nuevo-bar: #ffcdd2;
-    --estado-nuevo-progress: #e57373;
-    --estado-en-curso-bar: #fff9c4;
-    --estado-en-curso-progress: #ffeb3b;
-    --estado-en-progreso-bar: #fff9c4;
-    --estado-en-progreso-progress: #ffeb3b;
-    --estado-hecho-bar: #c8e6c9;
-    --estado-hecho-progress: #4caf50;
-
-    /* Etapas */
-    --etapa-cambio-de-alcance: #FF9800;
-    --etapa-impacto-en-inicio: #F44336;
-    --etapa-ajustes: #2196F3;
-    --etapa-sin-requerimiento: #9E9E9E;
-    --etapa-sin-estimar: #EEEEEE;
-    --etapa-en-pausa: #FFEB3B;
-    --etapa-inicio-de-desarrollo: #4CAF50;
+    --g-weekend-highlight-color: #f7f7f7
 }
+
+/* 1. Primero tu override de colores: */
+
+:root {
+    --status-Nuevo-bar:        #ffcdd2;
+    --status-Nuevo-progress:   #e57373;
+  
+    --status-EnCurso-bar:      #fff9c4;
+    --status-EnCurso-progress: #ffeb3b;
+  
+    --status-EnProgreso-bar:      #fff9c4;
+    --status-EnProgreso-progress: #ffeb3b;
+  
+    --status-Hecho-bar:        #c8e6c9;
+    --status-Hecho-progress:   #4caf50;
+  
+    /* Etapas */
+    --etapa-CambioDeAlcance-stroke:   #FF9800;
+    --etapa-ImpactoEnInicio-stroke:   #F44336;
+    --etapa-Ajustes-stroke:           #2196F3;
+    /* …etc */
+  }
   
   /* 2. Ahora las clases que crea Frappe Gantt: */
   .gantt .bar-wrapper.status-Nuevo .bar {
