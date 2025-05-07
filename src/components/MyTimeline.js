@@ -2,10 +2,10 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Gantt } from 'frappe-gantt';
-import 'frappe-gantt/dist/frappe-gantt.css';
-import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import CloseIcon from '@mui/icons-material/Close';
+// Para usar la versión local: copia `node_modules/frappe-gantt/dist/frappe-gantt.css`
+// a `src/styles/frappe-gantt.css` y luego importa así:
+import 'src/styles/frappe-gantt.css';
+import { Gantt } CloseIcon from '@mui/icons-material/Close';
 
 // Usamos Frappe Gantt (MIT) como alternativa gratuita
 const ETAPA_STYLES = {
