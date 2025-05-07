@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
-import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -14,13 +14,13 @@ const ETAPA_STYLES = {
   SinRequerimiento: '#9E9E9E',
   SinEstimar: '#EEEEEE',
   EnPausa: '#FFEB3B',
-  InicioDeDesarrollo: '#4CAF50',
+  InicioDeDesarrollo: '#4CAF50'
 };
 const STATE_STYLES = {
   Nuevo: ['#ffcdd2', '#e57373'],
   EnCurso: ['#fff9c4', '#ffeb3b'],
   EnProgreso: ['#fff9c4', '#ffeb3b'],
-  Hecho: ['#c8e6c9', '#4caf50'],
+  Hecho: ['#c8e6c9', '#4caf50']
 };
 const VIEW_MODES = ['Day', 'Week', 'Month', 'Year'];
 
@@ -40,17 +40,14 @@ export default function MyTimeline({ tasks }) {
   const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
   const containerRef = useRef(null);
-  const ganttRef = useRef(null);
 
-  // Filtered tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Build Gantt-compatible tasks with colors
-  const ganttTasks = useMemo(
-    () => filtered.map(t => {
+  const ganttTasks = useMemo(() => {
+    return filtered.map(t => {
       const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
       const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
@@ -61,23 +58,16 @@ export default function MyTimeline({ tasks }) {
         end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        // Assign custom classes for styling based on estado and etapa
         custom_class: `status-${t.Estado} etapa-${etapaKey}`
       };
-    }),: progressColor
-      };
-    }),
-    [filtered]
-  );
+    });
+  }, [filtered]);
 
-  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // Clear
     el.innerHTML = '';
-    // Create new
-    ganttRef.current = new Gantt(el, ganttTasks, {
+    new Gantt(el, ganttTasks, {
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
@@ -92,12 +82,12 @@ export default function MyTimeline({ tasks }) {
   const close = () => setSelectedTask(null);
 
   return (
-    <Paper sx={{ p:3, borderRadius:2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb:2 }}>
-        <ScheduleIcon fontSize="large" sx={{ mr:1 }} />
+    <Paper sx={{ p: 3, borderRadius: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <ScheduleIcon fontSize="large" sx={{ mr: 1 }} />
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
-      <Box sx={{ display:'flex', gap:2, mb:2, flexWrap:'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <TextField
           label="Buscar"
           size="small"
@@ -109,14 +99,14 @@ export default function MyTimeline({ tasks }) {
       </Box>
       <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
 
-      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
-        <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
+      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx: { width: 350, p: 2 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="h6">Tarea Detalle</Typography>
           <IconButton onClick={close}><CloseIcon /></IconButton>
         </Box>
-        <Divider sx={{ mb:2 }} />
+        <Divider sx={{ mb: 2 }} />
         {selectedTask && (
-          <Box sx={{ display:'flex', flexDirection:'column', gap:1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
             <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
             <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
             <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
@@ -141,15 +131,19 @@ export default function MyTimeline({ tasks }) {
 }
 
 MyTimeline.propTypes = {
-  tasks: PropTypes.arrayOf(PropTypes.shape({
-    id        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title     : PropTypes.string.isRequired,
-    startDate : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    endDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    Estado    : PropTypes.string,
-    etapa     : PropTypes.string,
-    Estimacion: PropTypes.any,
-    progress  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
-  })).isRequired,
+  tasks: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      title: PropTypes.string.isRequired,
+      startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      Estado: PropTypes.string,
+      etapa: PropTypes.string,
+      Estimacion: PropTypes.any,
+      progress: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      dependencies: PropTypes.arrayOf(
+        PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+      )
+    })
+  ).isRequired
 };
