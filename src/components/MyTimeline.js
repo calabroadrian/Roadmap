@@ -37,7 +37,7 @@ function parseDate(val, fallback) {
 
 export default function MyTimeline({ tasks }) {
   const [filter, setFilter] = useState('');
-  const [viewModeIdx, setViewModeIdx] = useState(2);
+  const [viewModeIdx, setViewModeIdx] = useState(3);
   const [selectedTask, setSelectedTask] = useState(null);
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
