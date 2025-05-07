@@ -1,67 +1,54 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
-import {
-  Box,
-  Button,
-  TextField,
-  Paper,
-  Typography,
-  Drawer,
-  IconButton,
-  Divider,
-  Chip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  FormControlLabel,
-  Switch
-} from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
-// Color maps
-const ETAPA_STYLES = { /* ... mismo mapa de colores ... */ };
-const STATE_STYLES = { /* ... mismo mapa de colores ... */ };
+const ETAPA_STYLES = {
+  CambioDeAlcance: '#FF9800',
+  ImpactoEnInicio: '#F44336',
+  Ajustes: '#2196F3',
+  SinRequerimiento: '#9E9E9E',
+  SinEstimar: '#EEEEEE',
+  EnPausa: '#FFEB3B',
+  InicioDeDesarrollo: '#4CAF50',
+};
+const STATE_STYLES = {
+  Nuevo: ['#ffcdd2', '#e57373'],
+  EnCurso: ['#fff9c4', '#ffeb3b'],
+  EnProgreso: ['#fff9c4', '#ffeb3b'],
+  Hecho: ['#c8e6c9', '#4caf50'],
+};
 const VIEW_MODES = ['Day', 'Week', 'Month', 'Year'];
 
-// Utility
 function parseDate(val, fallback) {
-  // ... implementación existente ...
+  if (!val) return fallback;
+  let d;
+  if (val instanceof Date) d = val;
+  else if (typeof val === 'string') {
+    const [dd, mm, yy] = val.split('/').map(Number);
+    d = new Date(yy, mm - 1, dd);
+  } else d = moment(val).toDate();
+  return isNaN(d.getTime()) ? fallback : d;
 }
 
-// Debounce util
-function debounce(fn, wait) {
-  let timeout;
-  return (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), wait);
-  };
-}
-
-export default function MyTimeline({ tasks, onTaskChange }) {
+export default function MyTimeline({ tasks }) {
   const [filter, setFilter] = useState('');
-  const [viewMode, setViewMode] = useState('Month');
+  const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [groupByEtapa, setGroupByEtapa] = useState(false);
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
 
-  // Debounce filter input
-  const handleFilterChange = useCallback(
-    debounce(val => setFilter(val), 300), []
+  // Filtered tasks by search
+  const filtered = useMemo(
+    () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
+    [tasks, filter]
   );
 
-  const filtered = useMemo(() => {
-    let arr = tasks;
-    if (filter) arr = arr.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()));
-    if (groupByEtapa) arr = arr.sort((a, b) => (a.etapa || '').localeCompare(b.etapa || ''));
-    return arr;
-  }, [tasks, filter, groupByEtapa]);
-
+  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
       const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
@@ -78,36 +65,32 @@ export default function MyTimeline({ tasks, onTaskChange }) {
         barColor: etapaColor,
         barProgressColor: progressColor
       };
-    }), [filtered]
+    }),
+    [filtered]
   );
 
+  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     el.innerHTML = '';
+
     ganttRef.current = new Gantt(el, ganttTasks, {
-      view_mode: viewMode,
+      view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      popup_trigger: 'hover',            // <-- Tooltip on hover
-      // Descomenta y personaliza si quieres HTML propio
-      // custom_popup_html: task => `<div class="gantt_popup">...${task.name}</div>`,
+      popup_trigger: 'hover',        // ← Tooltip al hacer hover
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
       },
-      on_date_change: (task, start, end) => {
-        onTaskChange({ ...tasks.find(t => String(t.id) === task.id), startDate: start, endDate: end });
-      },
-      on_progress_change: (task, progress) => {
-        onTaskChange({ ...tasks.find(t => String(t.id) === task.id), progress });
-      }
     });
-    return () => ganttRef.current && ganttRef.current.clear();
-  }, [ganttTasks, viewMode, tasks, onTaskChange]);
 
-  const exportPNG = () => {
-    if (ganttRef.current) ganttRef.current.download('png');
-  };
+    return () => ganttRef.current && ganttRef.current.clear();
+  }, [ganttTasks, viewModeIdx, tasks]);
+
+  const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
+  const zoomIn = () => setViewModeIdx(i => Math.max(i - 1, 0));
+  const close = () => setSelectedTask(null);
 
   return (
     <Paper sx={{ p:3, borderRadius:2 }}>
@@ -115,74 +98,40 @@ export default function MyTimeline({ tasks, onTaskChange }) {
         <ScheduleIcon fontSize="large" sx={{ mr:1 }} />
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
-
-      {/* Controles */}
       <Box sx={{ display:'flex', gap:2, mb:2, flexWrap:'wrap' }}>
-        <TextField label="Buscar" size="small" onChange={e => handleFilterChange(e.target.value)} />
-
-        <FormControl size="small">
-          <InputLabel>Vista</InputLabel>
-          <Select
-            value={viewMode}
-            label="Vista"
-            onChange={e => setViewMode(e.target.value)}
-          >
-            {VIEW_MODES.map(mode => <MenuItem key={mode} value={mode}>{mode}</MenuItem>)}
-          </Select>
-        </FormControl>
-
-        <FormControlLabel
-          control={<Switch checked={groupByEtapa} onChange={e => setGroupByEtapa(e.target.checked)} />}
-          label="Agrupar por Etapa"
+        <TextField
+          label="Buscar"
+          size="small"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
         />
-
-        <Button variant="outlined" size="small" onClick={exportPNG}>Exportar PNG</Button>
+        <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
+        <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-
-      {/* Contenedor Gantt */}
       <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
 
-      {/* Drawer de detalle */}
-      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={() => setSelectedTask(null)}
-        PaperProps={{ sx:{ width:350, p:2 } }}>
+      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
-          <Typography variant="h6">Detalle de Tarea</Typography>
-          <IconButton onClick={() => setSelectedTask(null)}><CloseIcon /></IconButton>
+          <Typography variant="h6">Tarea Detalle</Typography>
+          <IconButton onClick={close}><CloseIcon /></IconButton>
         </Box>
         <Divider sx={{ mb:2 }} />
-
         {selectedTask && (
-          <Box component="form" sx={{ display:'flex', flexDirection:'column', gap:1 }} onSubmit={e => e.preventDefault()}>
-            <TextField
-              label="Nombre"
-              value={selectedTask.title}
-              onChange={e => onTaskChange({ ...selectedTask, title: e.target.value })}
-            />
-            <TextField
-              label="Inicio"
-              type="date"
-              value={moment(selectedTask.startDate).format('YYYY-MM-DD')}
-              onChange={e => onTaskChange({ ...selectedTask, startDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Fin"
-              type="date"
-              value={moment(selectedTask.endDate).format('YYYY-MM-DD')}
-              onChange={e => onTaskChange({ ...selectedTask, endDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              label="Progreso"
-              type="number"
-              inputProps={{ min:0, max:100 }}
-              value={selectedTask.progress}
-              onChange={e => onTaskChange({ ...selectedTask, progress: e.target.value })}
-            />
+          <Box sx={{ display:'flex', flexDirection:'column', gap:1 }}>
+            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
+            <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
+            <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
+            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
             {selectedTask.etapa && (
               <Chip
                 label={selectedTask.etapa}
-                sx={{ bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] }}
+                size="small"
+                sx={{
+                  bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575',
+                  color: '#fff',
+                  fontSize: 10
+                }}
               />
             )}
           </Box>
@@ -193,6 +142,15 @@ export default function MyTimeline({ tasks, onTaskChange }) {
 }
 
 MyTimeline.propTypes = {
-  tasks: PropTypes.arrayOf(PropTypes.shape({ /* ... shape existente ... */ })).isRequired,
-  onTaskChange: PropTypes.func
+  tasks: PropTypes.arrayOf(PropTypes.shape({
+    id          : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title       : PropTypes.string.isRequired,
+    startDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    endDate     : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    Estado      : PropTypes.string,
+    etapa       : PropTypes.string,
+    Estimacion  : PropTypes.any,
+    progress    : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
+  })).isRequired,
 };
