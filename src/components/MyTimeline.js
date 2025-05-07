@@ -3,10 +3,25 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
-import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip } from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
+const ETAPA_STYLES = {
+  CambioDeAlcance: '#FF9800',
+  ImpactoEnInicio: '#F44336',
+  Ajustes: '#2196F3',
+  SinRequerimiento: '#9E9E9E',
+  SinEstimar: '#EEEEEE',
+  EnPausa: '#FFEB3B',
+  InicioDeDesarrollo: '#4CAF50',
+};
+const STATE_STYLES = {
+  Nuevo: ['#ffcdd2', '#e57373'],
+  EnCurso: ['#fff9c4', '#ffeb3b'],
+  EnProgreso: ['#fff9c4', '#ffeb3b'],
+  Hecho: ['#c8e6c9', '#4caf50'],
+};
 const VIEW_MODES = ['Day', 'Week', 'Month', 'Year'];
 
 function parseDate(val, fallback) {
@@ -25,18 +40,20 @@ export default function MyTimeline({ tasks }) {
   const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
   const containerRef = useRef(null);
+  const ganttRef = useRef(null);
 
+  // Filtered tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
+  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
-      // sanitize Estado and etapa for CSS class names
-      const estadoClass = `status-${t.Estado.replace(/\s+/g, '')}`;
+      const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
-      const etapaClass = `etapa-${etapaKey}`;
+      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
       return {
         id: String(t.id),
         name: t.title,
@@ -44,18 +61,27 @@ export default function MyTimeline({ tasks }) {
         end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        custom_class: `${estadoClass} ${etapaClass}`
+        custom_class: t.Estimacion ? '' : 'bar--no-estimation',
+        // Direct color props
+        barColor: etapaColor,
+        barProgressColor: progressColor
       };
     }),
     [filtered]
   );
 
+  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Clear
     el.innerHTML = '';
-    new Gantt(el, ganttTasks, {
-      on_click: task => setSelectedTask(tasks.find(x => String(x.id) === task.id)),
+    // Create new
+    ganttRef.current = new Gantt(el, ganttTasks, {
+      on_click: task => {
+        const orig = tasks.find(x => String(x.id) === task.id);
+        setSelectedTask(orig);
+      },
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es'
     });
@@ -101,7 +127,7 @@ export default function MyTimeline({ tasks }) {
                 label={selectedTask.etapa}
                 size="small"
                 sx={{
-                  bgcolor: 'primary.main', // badge color independent
+                  bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575',
                   color: '#fff',
                   fontSize: 10
                 }}
