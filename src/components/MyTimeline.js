@@ -61,10 +61,10 @@ export default function MyTimeline({ tasks }) {
         end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        custom_class: t.Estimacion ? '' : 'bar--no-estimation',
-        // Direct color props
-        barColor: etapaColor,
-        barProgressColor: progressColor
+        // Assign custom classes for styling based on estado and etapa
+        custom_class: `status-${t.Estado} etapa-${etapaKey}`
+      };
+    }),: progressColor
       };
     }),
     [filtered]
