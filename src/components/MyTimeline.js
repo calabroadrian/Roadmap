@@ -1,9 +1,10 @@
+// src/components/MyTimeline.jsx
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
-import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -42,41 +43,40 @@ export default function MyTimeline({ tasks }) {
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
 
-  // Filtered tasks by search
+  // Filtrado por texto
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Build Gantt-compatible tasks with colors
+  // Build tasks con clases CSS
   const ganttTasks = useMemo(
     () => filtered.map(t => {
-      const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
-      const etapaKey = (t.etapa || '').replace(/\s+/g, '');
-      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
+      const estadoKey = (t.Estado || 'Nuevo').replace(/\s+/g, '');
+      const etapaKey  = (t.etapa  || 'SinEstimar').replace(/\s+/g, '');
+
       return {
         id: String(t.id),
         name: t.title,
         start: moment(parseDate(t.startDate, new Date())).format('YYYY-MM-DD'),
-        end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
+        end:   moment(parseDate(t.endDate,   new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        custom_class: t.Estimacion ? '' : 'bar--no-estimation',
-        // Direct color props
-        bar_color: etapaColor,
-        bar_progress_color: progressColor,        
+        custom_class: [
+          !t.Estimacion && 'bar--no-estimation',
+          `status-${estadoKey}`,
+          `etapa-${etapaKey}`
+        ].filter(Boolean).join(' ')
       };
     }),
     [filtered]
   );
 
-  // Initialize/re-render Gantt
+  // Render/actualiza Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // Clear
     el.innerHTML = '';
-    // Create new
     ganttRef.current = new Gantt(el, ganttTasks, {
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
@@ -87,16 +87,14 @@ export default function MyTimeline({ tasks }) {
     });
   }, [ganttTasks, viewModeIdx, tasks]);
 
-  const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
-  const zoomIn = () => setViewModeIdx(i => Math.max(i - 1, 0));
-  const close = () => setSelectedTask(null);
-
   return (
     <Paper sx={{ p:3, borderRadius:2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb:2 }}>
         <ScheduleIcon fontSize="large" sx={{ mr:1 }} />
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
+
+      {/* Controles */}
       <Box sx={{ display:'flex', gap:2, mb:2, flexWrap:'wrap' }}>
         <TextField
           label="Buscar"
@@ -104,15 +102,18 @@ export default function MyTimeline({ tasks }) {
           value={filter}
           onChange={e => setFilter(e.target.value)}
         />
-        <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
-        <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
+        <Button variant="outlined" size="small" onClick={() => setViewModeIdx(i => Math.min(i+1, VIEW_MODES.length-1))}>- Zoom</Button>
+        <Button variant="outlined" size="small" onClick={() => setViewModeIdx(i => Math.max(i-1, 0))}>+ Zoom</Button>
       </Box>
+
+      {/* Gantt */}
       <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
 
-      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
+      {/* Drawer detalle */}
+      <Drawer anchor="right" open={!!selectedTask} onClose={() => setSelectedTask(null)} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
           <Typography variant="h6">Tarea Detalle</Typography>
-          <IconButton onClick={close}><CloseIcon /></IconButton>
+          <IconButton onClick={() => setSelectedTask(null)}><CloseIcon /></IconButton>
         </Box>
         <Divider sx={{ mb:2 }} />
         {selectedTask && (
@@ -137,19 +138,18 @@ export default function MyTimeline({ tasks }) {
         )}
       </Drawer>
     </Paper>
-  );
 }
 
 MyTimeline.propTypes = {
   tasks: PropTypes.arrayOf(PropTypes.shape({
-    id        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    title     : PropTypes.string.isRequired,
-    startDate : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    endDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-    Estado    : PropTypes.string,
-    etapa     : PropTypes.string,
-    Estimacion: PropTypes.any,
-    progress  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    id         : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title      : PropTypes.string.isRequired,
+    startDate  : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    endDate    : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    Estado     : PropTypes.string,
+    etapa      : PropTypes.string,
+    Estimacion : PropTypes.any,
+    progress   : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   })).isRequired,
 };

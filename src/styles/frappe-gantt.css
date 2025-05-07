@@ -21,6 +21,54 @@
     --g-weekend-highlight-color: #f7f7f7
 }
 
+/* 1. Primero tu override de colores: */
+
+:root {
+    --status-Nuevo-bar:        #ffcdd2;
+    --status-Nuevo-progress:   #e57373;
+  
+    --status-EnCurso-bar:      #fff9c4;
+    --status-EnCurso-progress: #ffeb3b;
+  
+    --status-EnProgreso-bar:      #fff9c4;
+    --status-EnProgreso-progress: #ffeb3b;
+  
+    --status-Hecho-bar:        #c8e6c9;
+    --status-Hecho-progress:   #4caf50;
+  
+    /* Etapas */
+    --etapa-CambioDeAlcance-stroke:   #FF9800;
+    --etapa-ImpactoEnInicio-stroke:   #F44336;
+    --etapa-Ajustes-stroke:           #2196F3;
+    /* …etc */
+  }
+  
+  /* 2. Ahora las clases que crea Frappe Gantt: */
+  .gantt .bar-wrapper.status-Nuevo .bar {
+    fill: var(--status-Nuevo-bar) !important;
+  }
+  .gantt .bar-wrapper.status-Nuevo .bar-progress {
+    fill: var(--status-Nuevo-progress) !important;
+  }
+  
+  .gantt .bar-wrapper.status-EnCurso .bar {
+    fill: var(--status-EnCurso-bar) !important;
+  }
+  .gantt .bar-wrapper.status-EnCurso .bar-progress {
+    fill: var(--status-EnCurso-progress) !important;
+  }
+  
+  /* …y lo mismo para EnProgreso, Hecho… */
+  
+  .gantt .bar-wrapper.etapa-CambioDeAlcance .bar {
+    stroke: var(--etapa-CambioDeAlcance-stroke) !important;
+  }
+  .gantt .bar-wrapper.etapa-ImpactoEnInicio .bar {
+    stroke: var(--etapa-ImpactoEnInicio-stroke) !important;
+  }
+  /* …etc */
+  
+
 .gantt-container {
     line-height: 14.5px;
     position: relative;
