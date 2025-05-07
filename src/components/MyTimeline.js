@@ -37,20 +37,23 @@ function parseDate(val, fallback) {
 
 export default function MyTimeline({ tasks }) {
   const [filter, setFilter] = useState('');
-  const [viewModeIdx, setViewModeIdx] = useState(2); // Month default
+  const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
-  const ganttEl = useRef(null);
+  const containerRef = useRef(null);
   const ganttRef = useRef(null);
 
+  // Filtered tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
+  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
-      const [bg, prog] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
+      const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
+      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
       return {
         id: String(t.id),
         name: t.title,
@@ -59,32 +62,26 @@ export default function MyTimeline({ tasks }) {
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
         custom_class: t.Estimacion ? '' : 'bar--no-estimation',
-        styles: { '--bar-background': ETAPA_STYLES[etapaKey] || bg, '--bar-progress': prog }
+        // Direct color props
+        barColor: etapaColor,
+        barProgressColor: progressColor
       };
     }),
     [filtered]
   );
 
-  // Inject CSS vars for bars once
+  // Initialize/re-render Gantt
   useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      .bar-rect { fill: var(--bar-background) !important; }
-      .bar-progress { fill: var(--bar-progress) !important; }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
-
-  // Initialize or re-render Gantt when tasks change
-  useEffect(() => {
-    const container = ganttEl.current;
-    if (!container) return;
-    // Clear previous render
-    container.innerHTML = '';
-    // Create new instance
-    ganttRef.current = new Gantt(container, ganttTasks, {
-      on_click: task => setSelectedTask(tasks.find(x => String(x.id) === task.id)),
+    const el = containerRef.current;
+    if (!el) return;
+    // Clear
+    el.innerHTML = '';
+    // Create new
+    ganttRef.current = new Gantt(el, ganttTasks, {
+      on_click: task => {
+        const orig = tasks.find(x => String(x.id) === task.id);
+        setSelectedTask(orig);
+      },
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es'
     });
@@ -96,7 +93,7 @@ export default function MyTimeline({ tasks }) {
 
   return (
     <Paper sx={{ p:3, borderRadius:2 }}>
-      <Box sx={{ display:'flex', alignItems:'center', mb:2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb:2 }}>
         <ScheduleIcon fontSize="large" sx={{ mr:1 }} />
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
@@ -110,12 +107,12 @@ export default function MyTimeline({ tasks }) {
         <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
         <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-      <div ref={ganttEl} style={{ overflowX: 'auto', width: '100%' }} />
+      <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
 
       <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
           <Typography variant="h6">Tarea Detalle</Typography>
-          <IconButton onClick={close}><CloseIcon/></IconButton>
+          <IconButton onClick={close}><CloseIcon /></IconButton>
         </Box>
         <Divider sx={{ mb:2 }} />
         {selectedTask && (
@@ -130,7 +127,6 @@ export default function MyTimeline({ tasks }) {
                 label={selectedTask.etapa}
                 size="small"
                 sx={{
-                  position: 'relative',
                   bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575',
                   color: '#fff',
                   fontSize: 10
