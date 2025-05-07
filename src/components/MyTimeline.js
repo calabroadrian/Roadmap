@@ -42,13 +42,13 @@ export default function MyTimeline({ tasks }) {
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
 
-  // Filter tasks by search
+  // Filtered tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Map to Gantt tasks
+  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
       const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
@@ -69,54 +69,23 @@ export default function MyTimeline({ tasks }) {
     [filtered]
   );
 
+  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     el.innerHTML = '';
 
-    // Initialize Gantt
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      popup_trigger: 'hover',     // show popup on hover
-      // optional: ensure popup HTML is rendered
-      custom_popup_html: task => `
-        <div class="gantt-popup-content">
-          <div class="title">${task.name}</div>
-          <div class="subtitle">${task.start.toLocaleDateString()} - ${task.end.toLocaleDateString()}</div>
-        </div>
-      `,
+      popup_trigger: 'hover',        // ← Tooltip al hacer hover
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
-      }
+      },
     });
 
-    // Delay attachment so bars are rendered
-    setTimeout(() => {
-      const wrappers = el.querySelectorAll('.bar-wrapper');
-      wrappers.forEach(wrapper => {
-        wrapper.removeEventListener('mouseenter', handleMouseEnter);
-        wrapper.removeEventListener('mouseleave', handleMouseLeave);
-        wrapper.addEventListener('mouseenter', handleMouseEnter);
-        wrapper.addEventListener('mouseleave', handleMouseLeave);
-      });
-    }, 0);
-
-    function handleMouseEnter(e) {
-      const id = e.currentTarget.getAttribute('data-id');
-      const task = ganttRef.current.tasks.find(t => t.id === id);
-      if (task) ganttRef.current.show_popup(task);
-    }
-
-    function handleMouseLeave() {
-      ganttRef.current.hide_popup();
-    }
-
-    return () => {
-      // Clean up gantt
-      ganttRef.current.clear();
-    };
+    return () => ganttRef.current && ganttRef.current.clear();
   }, [ganttTasks, viewModeIdx, tasks]);
 
   const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
@@ -139,7 +108,7 @@ export default function MyTimeline({ tasks }) {
         <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
         <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-      <div ref={containerRef} className="gantt-container" style={{ width: '100%', overflowX: 'auto' }} />
+      <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
 
       <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
