@@ -72,32 +72,43 @@ export default function MyTimeline({ tasks }) {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    // Clear previous
     el.innerHTML = '';
 
-    // Init Gantt
+    // Initialize Gantt
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      // ensure default click behavior
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
-      },
+      }
     });
 
-    // Attach hover handlers to wrapper elements
-    const wrappers = el.querySelectorAll('.bar-wrapper');
-    wrappers.forEach(wrapper => {
-      wrapper.addEventListener('mouseenter', () => {
-        const taskId = wrapper.getAttribute('data-id');
-        const task = ganttRef.current.tasks.find(t => t.id === taskId);
-        if (task) ganttRef.current.show_popup(task);
+    // Delay attachment so bars are rendered
+    setTimeout(() => {
+      const wrappers = el.querySelectorAll('.bar-wrapper');
+      wrappers.forEach(wrapper => {
+        wrapper.removeEventListener('mouseenter', handleMouseEnter);
+        wrapper.removeEventListener('mouseleave', handleMouseLeave);
+        wrapper.addEventListener('mouseenter', handleMouseEnter);
+        wrapper.addEventListener('mouseleave', handleMouseLeave);
       });
-      wrapper.addEventListener('mouseleave', () => ganttRef.current.hide_popup());
-    });
+    }, 0);
 
-    return () => ganttRef.current && ganttRef.current.clear();
+    function handleMouseEnter(e) {
+      const id = e.currentTarget.getAttribute('data-id');
+      const task = ganttRef.current.tasks.find(t => t.id === id);
+      if (task) ganttRef.current.show_popup(task);
+    }
+
+    function handleMouseLeave() {
+      ganttRef.current.hide_popup();
+    }
+
+    return () => {
+      // Clean up gantt
+      ganttRef.current.clear();
+    };
   }, [ganttTasks, viewModeIdx, tasks]);
 
   const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
