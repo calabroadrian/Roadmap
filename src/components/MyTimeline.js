@@ -1,10 +1,9 @@
-// File: MyTimeline.jsx
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
-import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip } from '@mui/material';
+import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -49,17 +48,12 @@ export default function MyTimeline({ tasks }) {
     [tasks, filter]
   );
 
-  // Build Gantt-compatible tasks with normalized estado and etapa classes
+  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
-      // Normalize estado key: remove spaces
-      const estadoKey = (t.Estado || '').replace(/\s+/g, '');
-      const [bgColor, progressColor] = STATE_STYLES[estadoKey] || STATE_STYLES.Nuevo;
-      
-      // Normalize etapa key: remove spaces
+      const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
       const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
-
       return {
         id: String(t.id),
         name: t.title,
@@ -67,8 +61,8 @@ export default function MyTimeline({ tasks }) {
         end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        custom_class: `status-${estadoKey} etapa-${etapaKey}`,
-        // Direct colors still allowed if needed
+        custom_class: t.Estimacion ? '' : 'bar--no-estimation',
+        // Direct color props
         barColor: etapaColor,
         barProgressColor: progressColor
       };
@@ -80,7 +74,9 @@ export default function MyTimeline({ tasks }) {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Clear
     el.innerHTML = '';
+    // Create new
     ganttRef.current = new Gantt(el, ganttTasks, {
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
@@ -152,9 +148,8 @@ MyTimeline.propTypes = {
     endDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
     Estado    : PropTypes.string,
     etapa     : PropTypes.string,
+    Estimacion: PropTypes.any,
     progress  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),  
+    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   })).isRequired,
 };
-
-/* File: timeline-overrides.css */
