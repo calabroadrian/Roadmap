@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import Gantt from 'frappe-gantt';
 import '../styles/frappe-gantt.css';
-import './timeline-overrides.css';  // Import CSS overrides
 import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
