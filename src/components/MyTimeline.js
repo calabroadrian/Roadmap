@@ -138,6 +138,7 @@ export default function MyTimeline({ tasks }) {
         )}
       </Drawer>
     </Paper>
+  );
 }
 
 MyTimeline.propTypes = {
