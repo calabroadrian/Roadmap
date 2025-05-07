@@ -40,6 +40,7 @@ export default function MyTimeline({ tasks }) {
   const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
   const containerRef = useRef(null);
+  const ganttRef = useRef(null);
 
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
