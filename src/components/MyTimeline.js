@@ -42,13 +42,13 @@ export default function MyTimeline({ tasks }) {
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
 
-  // Filtered tasks by search
+  // Filter tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Build Gantt-compatible tasks with colors
+  // Map to Gantt tasks
   const ganttTasks = useMemo(
     () => filtered.map(t => {
       const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
@@ -69,33 +69,35 @@ export default function MyTimeline({ tasks }) {
     [filtered]
   );
 
-  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Clear previous
     el.innerHTML = '';
 
-    // Instantiate Gantt
+    // Init Gantt
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      // popup_trigger option may not work; use manual handlers below
-      popup_trigger: 'hover',
+      // ensure default click behavior
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
       },
     });
 
-    // Add hover handlers to show/hide popup manually
-    ganttRef.current.bars.forEach(bar => {
-      bar.bar.addEventListener('mouseenter', () => ganttRef.current.show_popup(bar.task));
-      bar.bar.addEventListener('mouseleave', () => ganttRef.current.hide_popup());
+    // Attach hover handlers to wrapper elements
+    const wrappers = el.querySelectorAll('.bar-wrapper');
+    wrappers.forEach(wrapper => {
+      wrapper.addEventListener('mouseenter', () => {
+        const taskId = wrapper.getAttribute('data-id');
+        const task = ganttRef.current.tasks.find(t => t.id === taskId);
+        if (task) ganttRef.current.show_popup(task);
+      });
+      wrapper.addEventListener('mouseleave', () => ganttRef.current.hide_popup());
     });
 
-    return () => {
-      ganttRef.current && ganttRef.current.clear();
-    };
+    return () => ganttRef.current && ganttRef.current.clear();
   }, [ganttTasks, viewModeIdx, tasks]);
 
   const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
