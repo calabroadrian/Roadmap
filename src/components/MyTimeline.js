@@ -211,39 +211,31 @@ const MyTimeline = ({ tasks }) => {
 
       {/* Drawer de detalles */}
       <Drawer
-        anchor="right"
-        open={Boolean(selectedTask)}
-        onClose={closeDrawer}
-        TransitionComponent={Slide}
-        SlideProps={{ direction: 'left', timeout: 300 }}
-        PaperProps={{ sx: { width: 360, p: 2 } }}
-        ModalProps={{
-          keepMounted: true,
-          BackdropProps: {
-            invisible: false,
-            onClick: closeDrawer,
-          },
-          onEscapeKeyDown: closeDrawer,
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6">Detalle de Tarea</Typography>
-          <IconButton onClick={closeDrawer}><CloseIcon /></IconButton>
-        </Box>
-        <Divider sx={{ mb: 2 }} />
-        {selectedTask && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
-            <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
-            <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Fin:</strong> {moment(selectedTask.endDate).format('DD/MM/YYYY')}</Typography>
-            <Typography><strong>Progreso:</strong> {selectedTask.progress}%</Typography>
-            {selectedTask.dependencies?.length > 0 && (
-              <Typography><strong>Depende de:</strong> {selectedTask.dependencies.join(', ')}</Typography>
-            )}
-          </Box>
-        )}
-      </Drawer>
+  anchor="right"
+  variant="temporary"               // modal temporal (default)
+  open={Boolean(selectedTask)}
+  onClose={(event, reason) => {
+    // solo cerramos si es backdropClick o escapeKeyDown
+    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+      closeDrawer();
+    }
+  }}
+>
+  {/* Tu contenido de Drawer sin PaperProps ni ModalProps extras */}
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+    <Typography variant="h6">Detalle de Tarea</Typography>
+    <IconButton onClick={closeDrawer}>
+      <CloseIcon />
+    </IconButton>
+  </Box>
+  <Divider sx={{ mb: 2 }} />
+  {selectedTask && (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      {/* ...detalles de selectedTask */}
+    </Box>
+  )}
+</Drawer>
+
     </Paper>
   );
 };
