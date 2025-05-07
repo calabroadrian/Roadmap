@@ -7,21 +7,6 @@ import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider,
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
 
-const ETAPA_STYLES = {
-  CambioDeAlcance: '#FF9800',
-  ImpactoEnInicio: '#F44336',
-  Ajustes: '#2196F3',
-  SinRequerimiento: '#9E9E9E',
-  SinEstimar: '#EEEEEE',
-  EnPausa: '#FFEB3B',
-  InicioDeDesarrollo: '#4CAF50'
-};
-const STATE_STYLES = {
-  Nuevo: ['#ffcdd2', '#e57373'],
-  EnCurso: ['#fff9c4', '#ffeb3b'],
-  EnProgreso: ['#fff9c4', '#ffeb3b'],
-  Hecho: ['#c8e6c9', '#4caf50']
-};
 const VIEW_MODES = ['Day', 'Week', 'Month', 'Year'];
 
 function parseDate(val, fallback) {
@@ -46,11 +31,12 @@ export default function MyTimeline({ tasks }) {
     [tasks, filter]
   );
 
-  const ganttTasks = useMemo(() => {
-    return filtered.map(t => {
-      const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
+  const ganttTasks = useMemo(
+    () => filtered.map(t => {
+      // sanitize Estado and etapa for CSS class names
+      const estadoClass = `status-${t.Estado.replace(/\s+/g, '')}`;
       const etapaKey = (t.etapa || '').replace(/\s+/g, '');
-      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
+      const etapaClass = `etapa-${etapaKey}`;
       return {
         id: String(t.id),
         name: t.title,
@@ -58,20 +44,18 @@ export default function MyTimeline({ tasks }) {
         end: moment(parseDate(t.endDate, new Date())).format('YYYY-MM-DD'),
         progress: Number(t.progress) || 0,
         dependencies: (t.dependencies || []).join(','),
-        custom_class: `status-${t.Estado} etapa-${etapaKey}`
+        custom_class: `${estadoClass} ${etapaClass}`
       };
-    });
-  }, [filtered]);
+    }),
+    [filtered]
+  );
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     el.innerHTML = '';
     new Gantt(el, ganttTasks, {
-      on_click: task => {
-        const orig = tasks.find(x => String(x.id) === task.id);
-        setSelectedTask(orig);
-      },
+      on_click: task => setSelectedTask(tasks.find(x => String(x.id) === task.id)),
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es'
     });
@@ -82,12 +66,12 @@ export default function MyTimeline({ tasks }) {
   const close = () => setSelectedTask(null);
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <ScheduleIcon fontSize="large" sx={{ mr: 1 }} />
+    <Paper sx={{ p:3, borderRadius:2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb:2 }}>
+        <ScheduleIcon fontSize="large" sx={{ mr:1 }} />
         <Typography variant="h5">Roadmap Timeline</Typography>
       </Box>
-      <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ display:'flex', gap:2, mb:2, flexWrap:'wrap' }}>
         <TextField
           label="Buscar"
           size="small"
@@ -99,14 +83,14 @@ export default function MyTimeline({ tasks }) {
       </Box>
       <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
 
-      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx: { width: 350, p: 2 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+      <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
+        <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
           <Typography variant="h6">Tarea Detalle</Typography>
           <IconButton onClick={close}><CloseIcon /></IconButton>
         </Box>
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb:2 }} />
         {selectedTask && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display:'flex', flexDirection:'column', gap:1 }}>
             <Typography><strong>ID:</strong> {selectedTask.id}</Typography>
             <Typography><strong>Nombre:</strong> {selectedTask.title}</Typography>
             <Typography><strong>Inicio:</strong> {moment(selectedTask.startDate).format('DD/MM/YYYY')}</Typography>
@@ -117,7 +101,7 @@ export default function MyTimeline({ tasks }) {
                 label={selectedTask.etapa}
                 size="small"
                 sx={{
-                  bgcolor: ETAPA_STYLES[selectedTask.etapa.replace(/\s+/g, '')] || '#757575',
+                  bgcolor: 'primary.main', // badge color independent
                   color: '#fff',
                   fontSize: 10
                 }}
@@ -131,19 +115,15 @@ export default function MyTimeline({ tasks }) {
 }
 
 MyTimeline.propTypes = {
-  tasks: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      title: PropTypes.string.isRequired,
-      startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
-      Estado: PropTypes.string,
-      etapa: PropTypes.string,
-      Estimacion: PropTypes.any,
-      progress: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      dependencies: PropTypes.arrayOf(
-        PropTypes.oneOfType([PropTypes.string, PropTypes.number])
-      )
-    })
-  ).isRequired
+  tasks: PropTypes.arrayOf(PropTypes.shape({
+    id        : PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title     : PropTypes.string.isRequired,
+    startDate : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    endDate   : PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    Estado    : PropTypes.string,
+    etapa     : PropTypes.string,
+    Estimacion: PropTypes.any,
+    progress  : PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    dependencies: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
+  })).isRequired,
 };

@@ -396,3 +396,22 @@
   }
   /* …y así con cada clave de ETAPA_STYLES */
   
+  /* Estados */
+.status-Nuevo .bar {
+    fill: #ffcdd2;
+  }
+  .status-Nuevo .bar-progress {
+    fill: #e57373;
+  }
+  
+  /* Etc. para EnCurso, EnProgreso, Hecho… */
+  
+  /* Etapas */
+  .etapa-CambioDeAlcance .bar {
+    stroke: #FF9800;
+  }
+  .etapa-ImpactoEnInicio .bar {
+    stroke: #F44336;
+  }
+  /* …y así con cada clave de ETAPA_STYLES */
+  
