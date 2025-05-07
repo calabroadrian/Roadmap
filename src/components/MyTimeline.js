@@ -40,15 +40,12 @@ export default function MyTimeline({ tasks }) {
   const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
   const containerRef = useRef(null);
-  const ganttRef = useRef(null);
 
-  // Filtered tasks by search
   const filtered = useMemo(
     () => tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())),
     [tasks, filter]
   );
 
-  // Build Gantt-compatible tasks with colors
   const ganttTasks = useMemo(
     () => filtered.map(t => {
       const [bgColor, progressColor] = STATE_STYLES[t.Estado] || STATE_STYLES.Nuevo;
@@ -69,7 +66,6 @@ export default function MyTimeline({ tasks }) {
     [filtered]
   );
 
-  // Initialize/re-render Gantt
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -78,11 +74,11 @@ export default function MyTimeline({ tasks }) {
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      popup_trigger: 'hover',        // ← Tooltip al hacer hover
+      popup_trigger: 'hover',
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
-      },
+      }
     });
 
     return () => ganttRef.current && ganttRef.current.clear();
