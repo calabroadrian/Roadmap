@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import moment from 'moment';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button, TextField, Paper, Typography, Box, Drawer, IconButton, Divider } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import CloseIcon from '@mui/icons-material/Close';
-// Import Bryntum Gantt (asume que los archivos están enlazados en tu proyecto)
-import 'bryntum-gantt/gantt.umd.js';
+import PropTypes from 'prop-types';
+import moment from 'moment';
+
+// Import Bryntum Gantt CSS
 import 'bryntum-gantt/gantt.stockholm.css';
+// Import Bryntum Gantt JS
+import 'bryntum-gantt/gantt.umd.js';
 
 // Constants (Adaptados para Bryntum)
 const ETAPA_STYLES = {
@@ -37,121 +39,114 @@ const MyTimeline = ({ tasks }) => {
   const ganttInstance = useRef(null);
 
   // Función para parsear fechas (adaptada para Bryntum)
-    const parseBryntumDate = (val, fallback, endOfDay = false) => {
-        if (!val) return fallback;
+  const parseBryntumDate = (val, fallback, endOfDay = false) => {
+    if (!val) return fallback;
 
-        let date;
-        if (val instanceof Date) {
-            date = val;
-        } else if (typeof val === 'string') {
-          const [d, m, y] = val.split('/').map(Number);
-          date = new Date(y, m - 1, d);
-        } else {
-            date = new Date(val); // Trata de usar el constructor Date directamente
-        }
+    let date;
+    if (val instanceof Date) {
+      date = val;
+    } else if (typeof val === 'string') {
+      const [d, m, y] = val.split('/').map(Number);
+      date = new Date(y, m - 1, d);
+    } else {
+      date = new Date(val); // Trata de usar el constructor Date directamente
+    }
 
-        if (isNaN(date.getTime())) {
-            return fallback;
-        }
+    if (isNaN(date.getTime())) {
+      return fallback;
+    }
 
-        return endOfDay ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59) : date;
-    };
+    return endOfDay ? new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59) : date;
+  };
 
   // Prepara los datos para Bryntum Gantt
-  const bryntumTasks = useMemo(() => {
-        return tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())).map(task => {
-            const [bgColor, progressColor] = STATE_STYLES[task.Estado] || STATE_STYLES.Nuevo;
-            const etapaKey = task.etapa.replace(/\s+/g, '');
-            const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
-            const start = parseBryntumDate(task.startDate, new Date());
-            const end = parseBryntumDate(task.endDate, new Date(), true);
-            const hasPattern = !task.Estimacion;
-            const isMilestone = task.etapa === 'Entrega final';
+  const bryntumTasks = React.useMemo(() => {
+    return tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase())).map(task => {
+      const [bgColor, progressColor] = STATE_STYLES[task.Estado] || STATE_STYLES.Nuevo;
+      const etapaKey = task.etapa.replace(/\s+/g, '');
+      const etapaColor = ETAPA_STYLES[etapaKey] || bgColor;
+      const start = parseBryntumDate(task.startDate, new Date());
+      const end = parseBryntumDate(task.endDate, new Date(), true);
+      const hasPattern = !task.Estimacion;
+      const isMilestone = task.etapa === 'Entrega final';
 
-            return {
-                id: String(task.id),
-                name: task.title,
-                startDate: start,
-                endDate: end,
-                percentDone: Number(task.progress) || 0,
-                // type: isMilestone ? 'milestone' : 'task', // Bryntum usa 'milestone: true'
-                milestone: isMilestone,
-                // Agrega estilos directamente como propiedades.  Bryntum maneja los estilos de forma diferente.
-                barColor: etapaColor,
-                //barCls: hasPattern ? 'task-no-estimation' : '', // Esto requeriría CSS personalizado en Bryntum
-                // Usa un approach de CSS Class, no inline styles.
-                cls: hasPattern ? 'task-no-estimation' : '',
-                progressColor: progressColor,
+      return {
+        id: String(task.id),
+        name: task.title,
+        startDate: start,
+        endDate: end,
+        percentDone: Number(task.progress) || 0,
+        milestone: isMilestone,
+        barColor: etapaColor,
+        cls: hasPattern ? 'task-no-estimation' : '',
+        progressColor: progressColor,
 
-            };
+      };
+    });
+  }, [tasks, filter]);
+
+  const bryntumDependencies = React.useMemo(() => {
+    const deps = [];
+    tasks.forEach(task => {
+      (task.dependencies || []).forEach(depId => {
+        deps.push({
+          from: String(task.id),
+          to: String(depId),
+          type: 'finish-to-start'
         });
-    }, [tasks, filter]);
-
-    const bryntumDependencies = useMemo(() => {
-        const deps = [];
-        tasks.forEach(task => {
-            (task.dependencies || []).forEach(depId => {
-                deps.push({
-                    from: String(task.id),
-                    to: String(depId),
-                    type: 'finish-to-start' // Bryntum usa 'finish-to-start'
-                });
-            });
-        });
-        return deps;
-    }, [tasks]);
+      });
+    });
+    return deps;
+  }, [tasks]);
 
 
   // Inicializa el Gantt de Bryntum
   useEffect(() => {
     if (ganttRef.current && !ganttInstance.current) {
-      ganttInstance.current = new window.bryntum.gantt.Gantt({ // Usa window para acceder a Bryntum
-        appendTo: ganttRef.current,
-        // height: 600, // Dejamos que el contenedor Paper controle el alto
-        project: {
-          tasks: bryntumTasks,
-          dependencies: bryntumDependencies,
-        },
-        viewPreset: viewMode, // Usa el estado viewMode
-        // locale: 'es', //TODO Bryntum tiene su propio sistema de locale
-        // Configuración de columnas (adaptado)
-        columns: [
-          { type: 'name', width: 250, field: 'name' }, // El campo 'name' contiene el título
-          {
-            type: 'date',
-            field: 'startDate',
-            text: 'Inicio',
-            format: 'DD/MM/YYYY',
-            width: 120
+      try {
+        ganttInstance.current = new window.bryntum.gantt.Gantt({ // Usa window para acceder a Bryntum
+          appendTo: ganttRef.current,
+          project: {
+            tasks: bryntumTasks,
+            dependencies: bryntumDependencies,
           },
-          {
-            type: 'date',
-            field: 'endDate',
-            text: 'Fin',
-            format: 'DD/MM/YYYY',
-            width: 120
-          },
-          {
-            type: 'number',
-            field: 'percentDone',
-            text: 'Progreso',
-            width: 100,
-            renderer: ({ record }) => `${record.percentDone}%`
-          },
-          {
-            type: 'dependency',
-            text: 'Dependencias',
-            width: 120
-          }
-        ],
-        taskRenderer: ({ taskRecord }) => {
-          // Devuelve el contenido personalizado de la tarea.
-          let pattern = '';
-          if (taskRecord.cls.includes('task-no-estimation')) {
-            pattern = `background-image: ${DEFAULT_PATTERN};`;
-          }
-          const [bgColor] = STATE_STYLES[taskRecord.raw.Estado] || STATE_STYLES.Nuevo; // Accede a Estado desde raw
-          return `<div style="
+          viewPreset: viewMode,
+          columns: [
+            { type: 'name', width: 250, field: 'name' },
+            {
+              type: 'date',
+              field: 'startDate',
+              text: 'Inicio',
+              format: 'DD/MM/YYYY',
+              width: 120
+            },
+            {
+              type: 'date',
+              field: 'endDate',
+              text: 'Fin',
+              format: 'DD/MM/YYYY',
+              width: 120
+            },
+            {
+              type: 'number',
+              field: 'percentDone',
+              text: 'Progreso',
+              width: 100,
+              renderer: ({ record }) => `${record.percentDone}%`
+            },
+            {
+              type: 'dependency',
+              text: 'Dependencias',
+              width: 120
+            }
+          ],
+          taskRenderer: ({ taskRecord }) => {
+            let pattern = '';
+            if (taskRecord.cls.includes('task-no-estimation')) {
+              pattern = `background-image: ${DEFAULT_PATTERN};`;
+            }
+            const [bgColor] = STATE_STYLES[taskRecord.raw.Estado] || STATE_STYLES.Nuevo;
+            return `<div style="
                         border-radius: 2px;
                         padding: 5px 10px;
                         display: flex;
@@ -167,9 +162,9 @@ const MyTimeline = ({ tasks }) => {
                         <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                               title="${taskRecord.name}">${taskRecord.name}</span>
                     </div>`;
-        },
-        eventRenderer : ({ eventRecord }) => {
-          return `<div style="
+          },
+          eventRenderer: ({ eventRecord }) => {
+            return `<div style="
                         border-radius: 2px;
                         padding: 5px 10px;
                         display: flex;
@@ -185,24 +180,28 @@ const MyTimeline = ({ tasks }) => {
                         <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                               title="${eventRecord.name}">${eventRecord.name}</span>
                     </div>`;
-        },
-        listeners: {
-          taskClick: (gantt, event) => {
-            const clickedTask = event.record.data; // Obtén los datos de la tarea clickeada
-            const fullTaskData = tasks.find(t => String(t.id) === clickedTask.id);
-            setSelectedTask(fullTaskData);
           },
-        },
-      });
+          listeners: {
+            taskClick: (gantt, event) => {
+              const clickedTask = event.record.data;
+              const fullTaskData = tasks.find(t => String(t.id) === clickedTask.id);
+              setSelectedTask(fullTaskData);
+            },
+          },
+        });
+      } catch (error) {
+        console.error("Failed to initialize Bryntum Gantt:", error);
+        return; // Importante: No continuar si la inicialización falla
+      }
     }
 
     // Actualiza el Gantt cuando cambian las tasks o el viewMode
     if (ganttInstance.current) {
-        ganttInstance.current.project.loadData({
-            tasks: bryntumTasks,
-            dependencies: bryntumDependencies
-        });
-        ganttInstance.current.setViewPreset(viewMode);
+      ganttInstance.current.project.loadData({
+        tasks: bryntumTasks,
+        dependencies: bryntumDependencies
+      });
+      ganttInstance.current.setViewPreset(viewMode);
     }
 
     // Limpieza al desmontar el componente
@@ -214,37 +213,37 @@ const MyTimeline = ({ tasks }) => {
     };
   }, [bryntumTasks, bryntumDependencies, viewMode, tasks]);
 
-  const handleSelectTask = useCallback((taskId) => {
+  const handleSelectTask = React.useCallback((taskId) => {
     const task = tasks.find(t => String(t.id) === taskId);
     setSelectedTask(task);
   }, [tasks]);
 
   const closeDrawer = () => setSelectedTask(null);
 
-    const handleZoomChange = (zoomIn) => {
-        if (!ganttInstance.current) return;
+  const handleZoomChange = (zoomIn) => {
+    if (!ganttInstance.current) return;
 
-        const currentViewMode = ganttInstance.current.getViewPreset().name;
+    const currentViewMode = ganttInstance.current.getViewPreset().name;
 
-        let newViewMode = currentViewMode;
+    let newViewMode = currentViewMode;
 
-        if (zoomIn) {
-            switch (currentViewMode) {
-                case 'year': newViewMode = 'month'; break;
-                case 'month': newViewMode = 'week'; break;
-                case 'week': newViewMode = 'day'; break;
-                default: newViewMode = 'day';
-            }
-        } else {
-            switch (currentViewMode) {
-                case 'day': newViewMode = 'week'; break;
-                case 'week': newViewMode = 'month'; break;
-                case 'month': newViewMode = 'year'; break;
-                default: newViewMode = 'year';
-            }
-        }
-        setViewMode(newViewMode);
-    };
+    if (zoomIn) {
+      switch (currentViewMode) {
+        case 'year': newViewMode = 'month'; break;
+        case 'month': newViewMode = 'week'; break;
+        case 'week': newViewMode = 'day'; break;
+        default: newViewMode = 'day';
+      }
+    } else {
+      switch (currentViewMode) {
+        case 'day': newViewMode = 'week'; break;
+        case 'week': newViewMode = 'month'; break;
+        case 'month': newViewMode = 'year'; break;
+        default: newViewMode = 'year';
+      }
+    }
+    setViewMode(newViewMode);
+  };
 
   return (
     <Paper sx={{ p: 3, borderRadius: 2 }}>
@@ -254,8 +253,8 @@ const MyTimeline = ({ tasks }) => {
       </Box>
       <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <TextField label="Buscar" size="small" value={filter} onChange={(e) => setFilter(e.target.value)} />
-                <Button variant="outlined" size="small" onClick={() => handleZoomChange(false)}>- Zoom</Button>
-                <Button variant="outlined" size="small" onClick={() => handleZoomChange(true)}>+ Zoom</Button>
+        <Button variant="outlined" size="small" onClick={() => handleZoomChange(false)}>- Zoom</Button>
+        <Button variant="outlined" size="small" onClick={() => handleZoomChange(true)}>+ Zoom</Button>
       </Box>
       <div ref={ganttRef} className="gantt-container" style={{ width: '100%' }} />
 
