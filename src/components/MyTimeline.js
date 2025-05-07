@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { Gantt } from 'frappe-gantt';
+import Gantt from 'frappe-gantt';
 // Para usar la versión local: copia `node_modules/frappe-gantt/dist/frappe-gantt.css` a `src/styles/frappe-gantt.css`
 import '../../src/styles/frappe-gantt.css';
 import { Box, Button, TextField, Paper, Typography, Drawer, IconButton, Divider, Chip, Tooltip } from '@mui/material';
