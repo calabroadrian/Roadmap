@@ -78,6 +78,14 @@ export default function MyTimeline({ tasks }) {
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
+      popup_trigger: 'hover',     // show popup on hover
+      // optional: ensure popup HTML is rendered
+      custom_popup_html: task => `
+        <div class="gantt-popup-content">
+          <div class="title">${task.name}</div>
+          <div class="subtitle">${task.start.toLocaleDateString()} - ${task.end.toLocaleDateString()}</div>
+        </div>
+      `,
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
@@ -131,7 +139,7 @@ export default function MyTimeline({ tasks }) {
         <Button variant="outlined" size="small" onClick={zoomOut}>- Zoom</Button>
         <Button variant="outlined" size="small" onClick={zoomIn}>+ Zoom</Button>
       </Box>
-      <div ref={containerRef} style={{ width: '100%', overflowX: 'auto' }} />
+      <div ref={containerRef} className="gantt-container" style={{ width: '100%', overflowX: 'auto' }} />
 
       <Drawer anchor="right" open={Boolean(selectedTask)} onClose={close} PaperProps={{ sx:{ width:350, p:2 } }}>
         <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:1 }}>
