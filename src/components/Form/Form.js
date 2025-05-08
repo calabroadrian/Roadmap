@@ -33,7 +33,7 @@ const TAB_TESTING = 'Testing';
 const TAB_DESIGN = 'Diseño';
 const TAB_DEVELOPER = 'Desarrollador';
 
-function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDeselectItem, onCloseModal, onRefresh }) {
+function Form({ item, onAddItem, onUpdateItem, onDeleteItem, onCloseModal, onRefresh }) {
   const theme = useTheme();
   const [Id, setId] = useState('');
   const [Descripcion, setDescripcion] = useState('');
@@ -52,15 +52,14 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
   const [isIdEditable, setIsIdEditable] = useState(true);
   const [activeTab, setActiveTab] = useState(TAB_GENERAL);
 
+  // Fetch dropdown data
   useEffect(() => {
     const fetchLists = async () => {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
       await doc.loadInfo();
-      const usersSheet = doc.sheetsByIndex[1];
-      const sprintsSheet = doc.sheetsByIndex[2];
-      const usersRows = await usersSheet.getRows();
-      const sprintsRows = await sprintsSheet.getRows();
+      const usersRows = await doc.sheetsByIndex[1].getRows();
+      const sprintsRows = await doc.sheetsByIndex[2].getRows();
       setUserList(usersRows.map(r => r.NombreUsuario));
       setPriorityList(usersRows.map(r => r.Prioridad));
       setSprintList(sprintsRows.map(r => r.Nombre));
@@ -68,6 +67,7 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
     fetchLists();
   }, []);
 
+  // Load existing item
   useEffect(() => {
     if (item) {
       setId(item.Id);
@@ -81,37 +81,29 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
       setIsNewItem(false);
       setIsIdEditable(false);
     } else {
-      setId('');
-      setDescripcion('');
-      setEstado('');
-      setTitulo('');
-      setUsuarioAsignado('');
-      setTags([]);
-      setPrioridad('');
-      setSprint('');
-      setIsNewItem(true);
-      setIsIdEditable(true);
+      setId(''); setDescripcion(''); setEstado(''); setTitulo(''); setUsuarioAsignado(''); setTags([]);
+      setPrioridad(''); setSprint(''); setIsNewItem(true); setIsIdEditable(true);
     }
   }, [item]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) {
-      console.error('Faltan campos obligatorios.');
-      return;
-    }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) return;
+
     const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
     await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
     await doc.loadInfo();
     const sheet = doc.sheetsByIndex[0];
+
     if (isNewItem) {
       const rows = await sheet.getRows();
-      const exists = rows.some(row => row.Id === Id);
-      if (exists) {
+      if (rows.some(row => row.Id === Id)) {
         setShowIdExistsError(true);
         return;
       }
       setShowIdExistsError(false);
+
+      // Add new row
       const newRow = await sheet.addRow({
         Id,
         Descripcion,
@@ -122,15 +114,24 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
         Prioridad,
         Sprint,
       });
+
       onAddItem({
-        ...newRow._rawData.reduce((o, v, i) => ({ ...o, [newRow._sheet.headerValues[i]]: v }), {}),
-        id: Date.now()
+        id: Date.now(),
+        Id: newRow.Id,
+        Descripcion: newRow.Descripcion,
+        Estado: newRow.Estado,
+        Titulo: newRow.Titulo,
+        Tags: newRow.Tags,
+        UsuarioAsignado: newRow.UsuarioAsignado,
+        Prioridad: newRow.Prioridad,
+        Sprint: newRow.Sprint,
       });
     } else {
       const rows = await sheet.getRows();
       const rowToUpdate = rows.find(row => row.Id === item.Id);
       if (!rowToUpdate) return;
-      rowToUpdate.Id = Id;
+
+      // Update fields
       rowToUpdate.Descripcion = Descripcion;
       rowToUpdate.Estado = Estado;
       rowToUpdate.Titulo = Titulo;
@@ -139,8 +140,9 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
       rowToUpdate.Prioridad = Prioridad;
       rowToUpdate.Sprint = Sprint;
       await rowToUpdate.save();
+
       onUpdateItem({
-        ...item,
+        id: item.id,
         Id,
         Descripcion,
         Estado,
@@ -151,6 +153,7 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
         Sprint,
       });
     }
+
     onCloseModal();
     onRefresh();
   };
@@ -170,11 +173,13 @@ function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDes
           <Typography variant='h6'>{isNewItem ? 'Agregar tarea' : 'Editar tarea'}</Typography>
           <IconButton onClick={onCloseModal}><CloseIcon /></IconButton>
         </Box>
+
         <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} variant='fullWidth' textColor='primary' indicatorColor='primary' sx={{ mb: 3 }}>
           {[TAB_GENERAL, TAB_DESIGN, TAB_DEVELOPER, TAB_TESTING].map(tab => (
             <Tab key={tab} label={tab} value={tab} sx={{ fontWeight: 600 }} />
           ))}
         </Tabs>
+
         {activeTab === TAB_GENERAL && (
           <Box component='form' onSubmit={handleSubmit} sx={{ p: 1 }}>
             <Grid container spacing={2}>
