@@ -159,9 +159,13 @@ function Form({ item, onAddItem, onUpdateItem, onDeleteItem, onCloseModal, onRef
   };
 
   const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (tagInput.trim()) {
+        setTags([...tags, tagInput.trim()]);
+        setTagInput('');
+      }
     }
   };
   const removeTag = idx => setTags(tags.filter((_, i) => i !== idx));
