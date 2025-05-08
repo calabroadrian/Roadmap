@@ -257,7 +257,7 @@
 }
 
 .gantt-container .date-range-highlight {
-    background-color: var(--g-progress-color);
+    background-color: var(--g-row-border-color);
     border-radius: 4px;
     height: calc(var(--gv-lower-header-height) - 6px);
     top: calc(var(--gv-upper-header-height) + 5px);
@@ -426,7 +426,7 @@
     display: block
 }
 
-.bar-wrapper:hover .popup-wrapper {
+.gantt .bar-wrapper:hover .popup-wrapper {
     display: block;
   }
 
