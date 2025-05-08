@@ -258,7 +258,7 @@
 
 .gantt-container .date-range-highlight {
     background-color: var(--g-progress-color);
-    border-radius: 12px;
+    border-radius: 4px;
     height: calc(var(--gv-lower-header-height) - 6px);
     top: calc(var(--gv-upper-header-height) + 5px);
     position: absolute
