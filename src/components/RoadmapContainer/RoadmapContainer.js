@@ -1,10 +1,12 @@
 // src/components/RoadmapContainer.js
-import { useState } from "react";
-import RoadmapDataSheet from "../Roadmap/RoadmapDataSheet";
-import Modal from "../Modal/Modal";
-import Form from "../Form/Form";
+import React, { useState } from 'react';
+import RoadmapDataSheet from '../Roadmap/RoadmapDataSheet';
+import Modal from '../Modal/Modal';
+import Form from '../Form/Form';
+import { Slide, Fab, Box, Tooltip } from '@mui/material';
+import { Assignment, Add } from '@mui/icons-material';
 
-function RoadmapContainer() {
+function RoadmapContainer({ onAddSprint }) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,7 +14,7 @@ function RoadmapContainer() {
   const [items, setItems] = useState([]);
 
   const refreshRoadmap = () => {
-    setRefreshTrigger(prev => prev + 1);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleAddItem = () => {
@@ -32,24 +34,15 @@ function RoadmapContainer() {
   };
 
   const handleUpdateItem = (updatedItem) => {
-    const updatedItems = items.map(item =>
-      item.id === updatedItem.id ? updatedItem : item
-    );
-    setItems(updatedItems);
+    setItems((prev) => prev.map((i) => (i.id === updatedItem.id ? updatedItem : i)));
   };
 
   const handleDeleteItem = (itemToDelete) => {
-    const updatedItems = items.filter(item => item.id !== itemToDelete.id);
-    setItems(updatedItems);
+    setItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
   };
 
   return (
-    <div>
-      <div className="functions-container">
-        <button className="app-add-button" onClick={handleAddItem}>
-          Agregar
-        </button>
-      </div>
+    <>
       <RoadmapDataSheet
         refreshTrigger={refreshTrigger}
         items={items}
@@ -57,6 +50,7 @@ function RoadmapContainer() {
         onDeselectItem={handleDeselectItem}
         onEditItem={handleSelectItem}
       />
+
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Form
           item={selectedItem}
@@ -69,7 +63,33 @@ function RoadmapContainer() {
           onRefresh={refreshRoadmap}
         />
       </Modal>
-    </div>
+
+      {/* Botones flotantes: Crear tarea y Crear sprint */}
+      <Slide direction="up" in mountOnEnter unmountOnExit>
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <Tooltip title="Crear tarea">
+            <Fab color="secondary" aria-label="add task" onClick={handleAddItem}>
+              <Assignment />
+            </Fab>
+          </Tooltip>
+
+          <Tooltip title="Crear sprint">
+            <Fab color="primary" aria-label="add sprint" onClick={onAddSprint}>
+              <Add />
+            </Fab>
+          </Tooltip>
+        </Box>
+      </Slide>
+    </>
   );
 }
 

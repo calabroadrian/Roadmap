@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import {
@@ -6,13 +7,11 @@ import {
   Typography,
   IconButton,
   Box,
-  Fab,
   Container,
   useTheme,
   Avatar,
-  Slide
 } from '@mui/material';
-import { Add, Logout } from '@mui/icons-material';
+import { Logout } from '@mui/icons-material';
 import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
@@ -71,20 +70,11 @@ function App() {
       </AppBar>
 
       <Container sx={{ flexGrow: 1, py: 3, overflow: 'auto' }}>
-        <RoadmapContainer />
+        {/* Pasamos el disparador para abrir Sprint desde App */}
+        <RoadmapContainer onAddSprint={() => setIsSprintFormOpen(true)} />
       </Container>
 
-      <Slide direction="up" in mountOnEnter unmountOnExit>
-        <Fab
-          color="primary"
-          aria-label="add sprint"
-          onClick={() => setIsSprintFormOpen(true)}
-          sx={{ position: 'fixed', bottom: 24, right: 24 }}
-        >
-          <Add />
-        </Fab>
-      </Slide>
-
+      {/* Modal de Sprint gestionado desde App */}
       <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
         <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
       </Modal>
