@@ -103,7 +103,7 @@
 }
 
 .gantt-container .popup-wrapper {
-    position: absolute;
+    position: none;
     top: 0;
     left: 0;
     background: #fff;
@@ -425,8 +425,7 @@
 .gantt .bar-wrapper:hover .date-range-highlight {
     display: block
 }
-
-.gantt .bar-wrapper:hover .popup-wrapper {
+.gantt-container .bar-wrapper:hover .popup-wrapper {
     display: block;
   }
 
