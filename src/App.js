@@ -8,9 +8,11 @@ import {
   Box,
   Fab,
   Container,
-  useTheme
+  useTheme,
+  Avatar,
+  Slide
 } from '@mui/material';
-import { Add, Brightness4, Brightness7, Logout } from '@mui/icons-material';
+import { Add, Logout } from '@mui/icons-material';
 import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
@@ -47,31 +49,41 @@ function App() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <AppBar position="static" color="transparent" elevation={0} sx={{ backdropFilter: 'blur(8px)' }}>
+      <AppBar
+        position="static"
+        sx={{
+          bgcolor: theme.palette.background.paper,
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        }}
+      >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" component="div">
-            roadDOmap
-          </Typography>
-          <Box>
-            <IconButton onClick={handleLogout}>
-              <Logout />
-            </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar sx={{ bgcolor: theme.palette.primary.main }}>RD</Avatar>
+            <Typography variant="h6" fontWeight={600}>
+              roadDOmap
+            </Typography>
           </Box>
+          <IconButton onClick={handleLogout} sx={{ p: 1 }}>
+            <Logout />
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      <Container sx={{ flexGrow: 1, py: 2 }}>
+      <Container sx={{ flexGrow: 1, py: 3, overflow: 'auto' }}>
         <RoadmapContainer />
       </Container>
 
-      <Fab
-        color="primary"
-        aria-label="add sprint"
-        onClick={() => setIsSprintFormOpen(true)}
-        sx={{ position: 'fixed', bottom: 24, right: 24 }}
-      >
-        <Add />
-      </Fab>
+      <Slide direction="up" in mountOnEnter unmountOnExit>
+        <Fab
+          color="primary"
+          aria-label="add sprint"
+          onClick={() => setIsSprintFormOpen(true)}
+          sx={{ position: 'fixed', bottom: 24, right: 24 }}
+        >
+          <Add />
+        </Fab>
+      </Slide>
 
       <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
         <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
