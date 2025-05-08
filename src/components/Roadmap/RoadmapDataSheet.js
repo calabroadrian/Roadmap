@@ -109,7 +109,7 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
           >
             <Grid container spacing={2}>
               {statuses.map(status => (
-                <Grid item xs={12} md={4} key={status}>
+                <Grid item xs={12} sm={6} md={3} key={status}>
                   <Paper elevation={0} sx={{ p: 2, borderRadius: 2, bgcolor: theme.palette.background.paper }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
