@@ -33,7 +33,7 @@ const TAB_TESTING = 'Testing';
 const TAB_DESIGN = 'Diseño';
 const TAB_DEVELOPER = 'Desarrollador';
 
-function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal, onRefresh }) {
+function Form({ item, onAddItem, onSelectItem, onUpdateItem, onDeleteItem, onDeselectItem, onCloseModal, onRefresh }) {
   const theme = useTheme();
   const [Id, setId] = useState('');
   const [Descripcion, setDescripcion] = useState('');
@@ -96,8 +96,61 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) return;
-    // existing logic intact
+    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) {
+      console.error('Faltan campos obligatorios.');
+      return;
+    }
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+    await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    if (isNewItem) {
+      const rows = await sheet.getRows();
+      const exists = rows.some(row => row.Id === Id);
+      if (exists) {
+        setShowIdExistsError(true);
+        return;
+      }
+      setShowIdExistsError(false);
+      const newRow = await sheet.addRow({
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+        Sprint,
+      });
+      onAddItem({
+        ...newRow._rawData.reduce((o, v, i) => ({ ...o, [newRow._sheet.headerValues[i]]: v }), {}),
+        id: Date.now()
+      });
+    } else {
+      const rows = await sheet.getRows();
+      const rowToUpdate = rows.find(row => row.Id === item.Id);
+      if (!rowToUpdate) return;
+      rowToUpdate.Id = Id;
+      rowToUpdate.Descripcion = Descripcion;
+      rowToUpdate.Estado = Estado;
+      rowToUpdate.Titulo = Titulo;
+      rowToUpdate.Tags = tags.join(',');
+      rowToUpdate.UsuarioAsignado = UsuarioAsignado;
+      rowToUpdate.Prioridad = Prioridad;
+      rowToUpdate.Sprint = Sprint;
+      await rowToUpdate.save();
+      onUpdateItem({
+        ...item,
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+        Sprint,
+      });
+    }
     onCloseModal();
     onRefresh();
   };
@@ -117,44 +170,19 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
           <Typography variant='h6'>{isNewItem ? 'Agregar tarea' : 'Editar tarea'}</Typography>
           <IconButton onClick={onCloseModal}><CloseIcon /></IconButton>
         </Box>
-
-        <Tabs
-          value={activeTab}
-          onChange={(e, v) => setActiveTab(v)}
-          variant='fullWidth'
-          textColor='primary'
-          indicatorColor='primary'
-          sx={{ mb: 3 }}
-        >
+        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} variant='fullWidth' textColor='primary' indicatorColor='primary' sx={{ mb: 3 }}>
           {[TAB_GENERAL, TAB_DESIGN, TAB_DEVELOPER, TAB_TESTING].map(tab => (
             <Tab key={tab} label={tab} value={tab} sx={{ fontWeight: 600 }} />
           ))}
         </Tabs>
-
         {activeTab === TAB_GENERAL && (
           <Box component='form' onSubmit={handleSubmit} sx={{ p: 1 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  size='small'
-                  label='ID'
-                  value={Id}
-                  onChange={e => setId(e.target.value)}
-                  fullWidth
-                  disabled={!isIdEditable}
-                  error={showIdExistsError}
-                  sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }}
-                />
+                <TextField size='small' label='ID' value={Id} onChange={e => setId(e.target.value)} fullWidth disabled={!isIdEditable} error={showIdExistsError} sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }} required />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  size='small'
-                  label='Título'
-                  value={Titulo}
-                  onChange={e => setTitulo(e.target.value)}
-                  fullWidth
-                  sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }}
-                />
+                <TextField size='small' label='Título' value={Titulo} onChange={e => setTitulo(e.target.value)} fullWidth sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }} required />
               </Grid>
               <Grid item xs={12}>
                 <Typography sx={{ mb: 1 }}>Descripción</Typography>
@@ -163,7 +191,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                 </Paper>
               </Grid>
               {[
-                { label: 'Estado', value: Estado, set: setEstado, options: ['Pendiente','En Progreso','Completado'] },
+                { label: 'Estado', value: Estado, set: setEstado, options: ['Pendiente', 'En Progreso', 'Completado'] },
                 { label: 'Prioridad', value: Prioridad, set: setPrioridad, options: priorityList },
                 { label: 'Sprint', value: Sprint, set: setSprint, options: sprintList },
                 { label: 'Usuario Asignado', value: UsuarioAsignado, set: setUsuarioAsignado, options: userList }
@@ -171,46 +199,26 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
                 <Grid item xs={12} sm={6} key={label}>
                   <FormControl fullWidth size='small' sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }}>
                     <InputLabel>{label}</InputLabel>
-                    <Select value={value} label={label} onChange={e => set(e.target.value)}>
+                    <Select value={value} label={label} onChange={e => set(e.target.value)} required>
                       {options.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>
               ))}
               <Grid item xs={12} sm={6}>
-                <TextField
-                  size='small'
-                  label='Tags'
-                  placeholder='Enter to add'
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  fullWidth
-                  sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }}
-                />
+                <TextField size='small' label='Tags' placeholder='Enter to add' value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown} fullWidth sx={{ bgcolor: theme.palette.background.paper, borderRadius: 1 }} />
                 <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', '& .MuiChip-root': { m: 0.5 } }}>
-                  {tags.map((tag, i) => (
-                    <Chip key={i} label={tag} onDelete={() => removeTag(i)} size='small' />
-                  ))}
+                  {tags.map((tag, i) => <Chip key={i} label={tag} onDelete={() => removeTag(i)} size='small' />)}
                 </Box>
               </Grid>
               <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-                <Button variant='outlined' onClick={onCloseModal} size='small' disableElevation>
-                  Cancelar
-                </Button>
-                <Button variant='contained' type='submit' size='small' disableElevation>
-                  {isNewItem ? 'Agregar' : 'Actualizar'}
-                </Button>
-                {!isNewItem && (
-                  <Button color='error' onClick={onDeleteItem} size='small' disableElevation>
-                    Eliminar
-                  </Button>
-                )}
+                <Button variant='outlined' onClick={onCloseModal} size='small' disableElevation>Cancelar</Button>
+                <Button variant='contained' type='submit' size='small' disableElevation>{isNewItem ? 'Agregar' : 'Actualizar'}</Button>
+                {!isNewItem && <Button color='error' onClick={onDeleteItem} size='small' disableElevation>Eliminar</Button>}
               </Grid>
             </Grid>
           </Box>
         )}
-
         {activeTab === TAB_DESIGN && <DesignThinkingSidebar taskId={Id} />}
         {activeTab === TAB_DEVELOPER && <Typography>Sección Desarrollador</Typography>}
         {activeTab === TAB_TESTING && <Typography>Sección Testing</Typography>}
