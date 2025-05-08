@@ -5,10 +5,8 @@ import 'react-quill/dist/quill.snow.css';
 import config from '../../config/config';
 import DesignThinkingSidebar from '../DesignThinkingSidebar/DesignThinkingSidebar';
 
+
 import {
-  Box,
-  Paper,
-  Typography,
   Grid,
   TextField,
   Button,
@@ -18,23 +16,21 @@ import {
   InputLabel,
   Tabs,
   Tab,
+  Typography,
   Chip,
-  IconButton,
-  useTheme
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import './Form.css';
 
 const SPREADSHEET_ID = config.SPREADSHEET_ID;
 const CLIENT_EMAIL = config.CLIENT_EMAIL;
 const PRIVATE_KEY = config.PRIVATE_KEY;
 
-const TAB_GENERAL = 'General';
-const TAB_TESTING = 'Testing';
-const TAB_DESIGN = 'Diseño';
-const TAB_DEVELOPER = 'Desarrollador';
+const TAB_GENERAL = "General";
+const TAB_TESTING = "Testing";
+const TAB_DESIGN = "Diseño";
+const TAB_DEVELOPER = "Desarrollador";
 
 function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onCloseModal, onRefresh }) {
-  const theme = useTheme();
   const [Id, setId] = useState('');
   const [Descripcion, setDescripcion] = useState('');
   const [Estado, setEstado] = useState('');
@@ -53,20 +49,42 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
   const [activeTab, setActiveTab] = useState(TAB_GENERAL);
 
   useEffect(() => {
-    const fetchLists = async () => {
+    // Obtener el listado de usuarios
+    const fetchUserList = async () => {
       const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
       await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
       await doc.loadInfo();
-      const users = await doc.sheetsByIndex[1].getRows();
-      const sprints = await doc.sheetsByIndex[2].getRows();
-      setUserList(users.map(r => r.NombreUsuario));
-      setPriorityList(users.map(r => r.Prioridad));
-      setSprintList(sprints.map(r => r.Nombre));
+      const sheet = doc.sheetsByIndex[1]; // Supone que los usuarios están en la segunda hoja
+      const rows = await sheet.getRows();
+      const users = rows.map(row => row.NombreUsuario);
+      setUserList(users);
     };
-    fetchLists();
+
+    const fetchPriorityList = async () => {
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+      await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
+      await doc.loadInfo();
+      const sheet = doc.sheetsByIndex[1]; // Supone que las prioridades están en la segunda hoja
+      const rows = await sheet.getRows();
+      const priorities = rows.map(row => row.Prioridad);
+      setPriorityList(priorities);
+    };
+
+    const fetchSprintList = async () => {
+      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+      await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
+      await doc.loadInfo();
+      const sheet = doc.sheetsByIndex[2]; // Supone que los sprints están en la tercera hoja
+      const rows = await sheet.getRows();
+      const sprints = rows.map(row => row.Nombre);
+      setSprintList(sprints);
+    };
+
+    fetchUserList();
+    fetchPriorityList();
+    fetchSprintList();
   }, []);
 
-  // Load item
   useEffect(() => {
     if (item) {
       setId(item.Id);
@@ -74,7 +92,7 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setEstado(item.Estado);
       setTitulo(item.Titulo);
       setUsuarioAsignado(item.UsuarioAsignado);
-      setTags(item.Tags.split(',').map(t => t.trim()).filter(Boolean));
+      setTags(item.Tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''));
       setPrioridad(item.Prioridad);
       setSprint(item.Sprint);
       setIsNewItem(false);
@@ -86,120 +104,314 @@ function Form({ item, onAddItem, onDeselectItem, onUpdateItem, onDeleteItem, onC
       setTitulo('');
       setUsuarioAsignado('');
       setTags([]);
-      setPrioridad('');
       setSprint('');
       setIsNewItem(true);
       setIsIdEditable(true);
     }
   }, [item]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) return;
-    // mantener lógica existente...
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!Id || !Titulo || !Descripcion || !Estado || !Prioridad) {
+      console.error('Faltan campos obligatorios.');
+      return;
+    }
+
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+    await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+
+    if (isNewItem) {
+      const rows = await sheet.getRows();
+      const exists = rows.some(row => row.Id === Id);
+      if (exists) {
+        console.error('El ID ya existe en el sheet. Por favor, elige otro ID único.');
+        setShowIdExistsError(true);
+        return;
+      } else {
+        setShowIdExistsError(false);
+      }
+
+      await sheet.addRow({
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+        Sprint,
+      });
+
+      onAddItem({
+        id: Date.now(),
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+        Sprint,
+      });
+    } else {
+      const rows = await sheet.getRows();
+      const rowToUpdate = rows.find(row => row.Id === item.Id);
+      if (!rowToUpdate) {
+        console.error('No se encontró el elemento a actualizar en el sheet.');
+        return;
+      }
+
+      rowToUpdate.Id = Id;
+      rowToUpdate.Descripcion = Descripcion;
+      rowToUpdate.Estado = Estado;
+      rowToUpdate.Titulo = Titulo;
+      rowToUpdate.Tags = tags.join(',');
+      rowToUpdate.UsuarioAsignado = UsuarioAsignado;
+      rowToUpdate.Prioridad = Prioridad;
+      rowToUpdate.Sprint = Sprint;
+      await rowToUpdate.save();
+
+      onUpdateItem({
+        id: item.id,
+        Id,
+        Descripcion,
+        Estado,
+        Titulo,
+        Tags: tags.join(','),
+        UsuarioAsignado,
+        Prioridad,
+        Sprint,
+      });
+    }
+
+    onCloseModal();          // Cierra el modal
+    onRefresh();             // Llama al callback para refrescar la data en el roadmap
+    console.log('Formulario enviado');
+  };
+
+  const addTag = (tag) => {
+    if (tag.trim() !== '') {
+      setTags([...tags, tag]);
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (index) => {
+    const updatedTags = [...tags];
+    updatedTags.splice(index, 1);
+    setTags(updatedTags);
+  };
+
+  const handleTagKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const tag = event.target.value.trim();
+      if (tag !== '') {
+        addTag(tag);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    onDeleteItem(item);
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+    await doc.useServiceAccountAuth({ client_email: CLIENT_EMAIL, private_key: PRIVATE_KEY });
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    const rowToDelete = rows.find(row => row._rawData[0] === item.Id);
+    await rowToDelete.delete();
+    onDeselectItem();
     onCloseModal();
     onRefresh();
   };
 
-  const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-  const removeTag = idx => setTags(tags.filter((_, i) => i !== idx));
-
   return (
-    <Box sx={{ position: 'fixed', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <Paper sx={{ width: '100%', maxWidth: 700, p: 4, borderRadius: 2, bgcolor: theme.palette.background.paper }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant='h6'>{isNewItem ? 'Agregar tarea' : 'Editar tarea'}</Typography>
-          <IconButton onClick={onCloseModal}><CloseIcon /></IconButton>
-        </Box>
-
-        <Tabs
-          value={activeTab}
-          onChange={(e, v) => setActiveTab(v)}
-          textColor='primary'
-          indicatorColor='primary'
-          sx={{ mb: 3 }}
-        >
-          {[TAB_GENERAL, TAB_DESIGN, TAB_DEVELOPER, TAB_TESTING].map(tab => (
-            <Tab key={tab} label={tab} value={tab} />
-          ))}
+    <div className="form-overlay">
+      <div className="form-container">
+        <div className="form-header">
+          <Typography variant="h5">Agregar nueva tarea</Typography>
+          <Button variant="outlined" color="secondary" onClick={onCloseModal}>
+            X
+          </Button>
+        </div>
+        <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)}>
+          <Tab label="General" value={TAB_GENERAL} />
+          <Tab label="Diseño" value={TAB_DESIGN} />
+          <Tab label="Desarrollador" value={TAB_DEVELOPER} />
+          <Tab label="Testing" value={TAB_TESTING} />
         </Tabs>
-
-        {activeTab === TAB_GENERAL && (
-          <Box component='form' onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label='ID'
-                  value={Id}
-                  onChange={e => setId(e.target.value)}
-                  fullWidth
-                  disabled={!isIdEditable}
-                  error={showIdExistsError}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label='Título'
-                  value={Titulo}
-                  onChange={e => setTitulo(e.target.value)}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography>Descripción</Typography>
-                <Box sx={{ mb: 2, mt:1 }}>
-                  <ReactQuill value={Descripcion} onChange={setDescripcion} theme='snow' />
-                </Box>
-              </Grid>
-              {[
-                { label: 'Estado', value: Estado, set: setEstado, options: ['Pendiente','En Progreso','Completado'] },
-                { label: 'Prioridad', value: Prioridad, set: setPrioridad, options: priorityList },
-                { label: 'Sprint', value: Sprint, set: setSprint, options: sprintList },
-                { label: 'Usuario Asignado', value: UsuarioAsignado, set: setUsuarioAsignado, options: userList }
-              ].map(({ label, value, set, options }) => (
-                <Grid item xs={12} sm={6} key={label}>
-                  <FormControl fullWidth>
-                    <InputLabel>{label}</InputLabel>
-                    <Select value={value} label={label} onChange={e => set(e.target.value)}>
-                      {options.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>)}
-                    </Select>
-                  </FormControl>
+        <Grid container spacing={2} p={2}>
+          {activeTab === TAB_GENERAL && (
+            <Grid item xs={12}>
+              <form onSubmit={handleSubmit}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="ID"
+                      variant="outlined"
+                      fullWidth
+                      value={Id}
+                      onChange={(e) => setId(e.target.value)}
+                      error={showIdExistsError}
+                      disabled={!isIdEditable}
+                      required
+                    />
+                    {showIdExistsError && (
+                      <Typography color="error" variant="body2">
+                        El ID ya existe. Por favor, elige otro ID único.
+                      </Typography>
+                    )}
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Título"
+                      variant="outlined"
+                      fullWidth
+                      value={Titulo}
+                      onChange={(e) => setTitulo(e.target.value)}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" style={{ marginBottom: '0.5rem' }}>
+                      Descripción
+                    </Typography>
+                    <ReactQuill
+                      value={Descripcion}
+                      onChange={setDescripcion}
+                      style={{ marginBottom: '1rem' }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>Estado</InputLabel>
+                      <Select
+                        value={Estado}
+                        label="Estado"
+                        onChange={(e) => setEstado(e.target.value)}
+                        required
+                      >
+                        <MenuItem value="Pendiente">Pendiente</MenuItem>
+                        <MenuItem value="En Progreso">En Progreso</MenuItem>
+                        <MenuItem value="Completado">Completado</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>Prioridad</InputLabel>
+                      <Select
+                        value={Prioridad}
+                        label="Prioridad"
+                        onChange={(e) => setPrioridad(e.target.value)}
+                        required
+                      >
+                        {priorityList.map(priority => (
+                          <MenuItem key={priority} value={priority}>
+                            {priority}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>Sprint</InputLabel>
+                      <Select
+                        value={Sprint}
+                        label="Sprint"
+                        onChange={(e) => setSprint(e.target.value)}
+                        required
+                      >
+                        {sprintList.map(sprint => (
+                          <MenuItem key={sprint} value={sprint}>
+                            {sprint}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>Usuario Asignado</InputLabel>
+                      <Select
+                        value={UsuarioAsignado}
+                        label="Usuario Asignado"
+                        onChange={(e) => setUsuarioAsignado(e.target.value)}
+                        required
+                      >
+                        {userList.map(user => (
+                          <MenuItem key={user} value={user}>
+                            {user}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={10} sm={6}>
+                    <TextField
+                      label="Tags"
+                      variant="outlined"
+                      fullWidth
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleTagKeyDown}
+                      placeholder="Presiona Enter para agregar tags"
+                    />
+                    <div className="tags-container" style={{ marginTop: '16px' }}>
+                      {tags.map((tag, index) => (
+                        <Chip 
+                          key={index}
+                          label={tag}
+                          onDelete={() => removeTag(index)}
+                          className="tag-chip"
+                        />
+                      ))}
+                    </div>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Button type="submit" variant="contained" color="primary" style={{ marginTop: 16 }}>
+                      {isNewItem ? 'Agregar' : 'Actualizar'}
+                    </Button>
+                    {item && (
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        style={{ marginLeft: 16, marginTop: 16 }}
+                        onClick={handleDelete}
+                      >
+                        Eliminar
+                      </Button>
+                    )}
+                  </Grid>
                 </Grid>
-              ))}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label='Tags'
-                  placeholder='Enter to add'
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  fullWidth
-                />
-                <Box sx={{ mt:1, display:'flex', gap:1, flexWrap:'wrap' }}>
-                  {tags.map((tag,i)=>(
-                    <Chip key={i} label={tag} onDelete={()=>removeTag(i)} size='small' />
-                  ))}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sx={{ display:'flex', justifyContent:'flex-end', gap:2, mt:2 }}>
-                <Button variant='outlined' onClick={onCloseModal}>Cancelar</Button>
-                <Button variant='contained' type='submit'>{isNewItem?'Agregar':'Actualizar'}</Button>
-                {!isNewItem && <Button color='error' onClick={onDeleteItem}>Eliminar</Button>}
-              </Grid>
+              </form>
             </Grid>
-          </Box>
-        )}
-
-        {activeTab === TAB_DESIGN && <DesignThinkingSidebar taskId={Id} />}
-        {activeTab === TAB_DEVELOPER && <Typography>Sección Desarrollador</Typography>}
-        {activeTab === TAB_TESTING && <Typography>Sección Testing</Typography>}
-      </Paper>
-    </Box>
+          )}
+          {activeTab === TAB_DESIGN && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Contenido para Diseño</Typography>
+              <DesignThinkingSidebar taskId={Id || (item ? item.Id : '')} />
+            </Grid>
+          )}
+          {activeTab === TAB_DEVELOPER && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Contenido para Desarrollador</Typography>
+              {/* Campos específicos para Desarrollador */}
+            </Grid>
+          )}
+          {activeTab === TAB_TESTING && (
+            <Grid item xs={12}>
+              <Typography variant="h6">Contenido para Testing</Typography>
+              {/* Campos específicos para Testing */}
+            </Grid>
+          )}
+        </Grid>
+      </div>
+    </div>
   );
 }
 
