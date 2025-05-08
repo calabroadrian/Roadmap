@@ -1,131 +1,206 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Tabs,
-  Tab,
+  Paper,
   Grid,
   Card,
-  CardHeader,
   CardContent,
   Avatar,
   Chip,
-  ButtonGroup,
+  Tooltip,
+  Tabs,
+  Tab,
+  Badge,
   Button,
-  useTheme,
-  Slide
-} from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import MyTimeline from '../MyTimeline';
-import config from '../../config/config';
+} from "@mui/material";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import config from "../../config/config";
+import MyTimeline from "../MyTimeline";
 
-const { SPREADSHEET_ID, API_KEY, CLIENT_ID } = config;
+const SPREADSHEET_ID = config.SPREADSHEET_ID;
+const API_KEY = config.API_KEY;
+const CLIENT_ID = config.CLIENT_ID;
 
-const RoadmapDataSheet = ({ onEditItem, onSelectItem, refreshTrigger }) => {
-  const theme = useTheme();
+const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectItem, refreshTrigger }) => {
   const [items, setItems] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [sprints, setSprints] = useState([]);
-  const [tab, setTab] = useState(0);
-  const [view, setView] = useState('board'); // 'board' or 'timeline'
+  const [tabValue, setTabValue] = useState(0);
+  const [view, setView] = useState("vertical"); // "vertical" o "horizontal"
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
-        const res = await fetch(
+        const response = await fetch(
           `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
         );
-        const data = await res.json();
-        if (!data.values) return;
-        const [headers, ...rows] = data.values;
-        const parsed = rows.map(r => {
-          const obj = {};
-          headers.forEach((h, i) => { obj[h] = r[i] || ''; });
-          obj.tags = obj.Tags?.split(',').map(t => t.trim()) || [];
-          obj.dependencies = obj.dependencies ? [obj.dependencies] : [];
-          return obj;
-        });
-        setItems(parsed);
-        setStatuses([...new Set(parsed.map(i => i.Estado))]);
-        setSprints([...new Set(parsed.map(i => i.Sprint))]);
-      } catch { /* silent */ }
-    }
+        const data = await response.json();
+        if (data && data.values && Array.isArray(data.values) && data.values.length > 0) {
+          const headers = data.values[0];
+          const tagsColumnIndex = headers.indexOf("Tags");
+          const sprintColumnIndex = headers.indexOf("Sprint");
+          const dependenciesColumnIndex = headers.indexOf("dependencies");
+          const parsedData = data.values.slice(1).map((row) => {
+            const item = headers.reduce((obj, key, index) => {
+              obj[key] = row[index] || "";
+              return obj;
+            }, {});
+
+            // Parsear la columna de dependencias
+            const dependenciesValue = row[dependenciesColumnIndex];
+            item.dependencies = dependenciesValue ? [dependenciesValue] : []; // Convertir a array, mantener vacío si no hay valor
+            return item;
+          });
+
+          parsedData.forEach((item) => {
+            item.tags = item[headers[tagsColumnIndex]] || "";
+          });
+          setItems(parsedData);
+          setStatuses([...new Set(parsedData.map((item) => item.Estado))]);
+          setSprints([...new Set(parsedData.map((item) => item[headers[sprintColumnIndex]]))]);
+        } else {
+          console.error("No se encontraron datos válidos en la respuesta API");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
     fetchData();
   }, [refreshTrigger]);
 
-  const handleTab = (_, v) => setTab(v);
-  const countByStatus = s => items.filter(i => i.Estado === s && (tab === 0 || i.Sprint === sprints[tab-1])).length;
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
 
-  const backgroundMap = { Nuevo: theme.palette.info.light, 'En progreso': theme.palette.warning.light, Hecho: theme.palette.success.light };
+  const getBackgroundColor = (Estado) => {
+    switch (Estado) {
+      case "Nuevo":
+        return "#F9D8C7";
+      case "En progreso":
+        return "#FFF3C8";
+      case "Hecho":
+        return "#65f6b5";
+      default:
+        return "white";
+    }
+  };
+
+  const getTaskCountByStatus = (Estado) => {
+    return items.filter(
+      (item) =>
+        item.Estado === Estado &&
+        (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
+    ).length;
+  };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <ButtonGroup variant="outlined">
-          <Button onClick={() => setView('board')} selected={view==='board'}>Tablero</Button>
-          <Button onClick={() => setView('timeline')} selected={view==='timeline'}>Timeline</Button>
-        </ButtonGroup>
+    <Box sx={{ padding: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button variant={view === "vertical" ? "contained" : "outlined"} onClick={() => setView("vertical")}>
+          Tablero
+        </Button>
+        <Button variant={view === "horizontal" ? "contained" : "outlined"} onClick={() => setView("horizontal")}>
+          Roadmap Timeline
+        </Button>
       </Box>
 
-      {view === 'board' ? (
+      {view === "vertical" ? (
         <>
-          <Tabs value={tab} onChange={handleTab} variant="scrollable" scrollButtons allowScrollButtonsMobile sx={{ mb: 2 }}>
-            <Tab label={`Todos (${items.length})`} />
-            {sprints.map((s,i) => <Tab key={s} label={s} />)}
+          <Typography variant="h5" gutterBottom>
+            Tablero
+          </Typography>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            <Tab label="Todos los Sprints" value={0} />
+            {sprints.map((sprint, index) => (
+              <Tab label={sprint} key={sprint} value={index + 1} />
+            ))}
           </Tabs>
-          <Grid container spacing={2}>
-            {statuses.map(status => (
-              <Grid key={status} item xs={12} md={4}>
-                <Card variant="outlined" sx={{ borderRadius: 2, height: '100%' }}>
-                  <CardHeader
-                    avatar={<Avatar sx={{ bgcolor: theme.palette.primary.main }}><AssignmentIcon /></Avatar>}
-                    title={status}
-                    subheader={`(${countByStatus(status)})`}
-                    sx={{ pb: 0 }}
-                  />
-                  <CardContent sx={{ pt: 1 }}>
-                    {items
-                      .filter(i => i.Estado === status && (tab === 0 || i.Sprint === sprints[tab-1]))
-                      .map(item => (
-                        <Card
-                          key={item.Id}
-                          onClick={() => onSelectItem(item)}
-                          onDoubleClick={() => onEditItem(item)}
-                          sx={{
-                            mb: 2,
-                            p: 1,
-                            borderRadius: 1,
-                            bgcolor: backgroundMap[item.Estado] || theme.palette.background.paper,
-                            cursor: 'pointer',
-                            transition: 'transform .2s',
-                            '&:hover': { transform: 'translateY(-2px)', boxShadow: 2 }
-                          }}
-                        >
-                          <Typography variant="subtitle2" fontWeight={600} noWrap>{item.Titulo}</Typography>
-                          <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {item.tags.map(tag => <Chip key={tag} label={tag} size="small" />)}
+          <Grid container spacing={2} sx={{ marginTop: 2 }}>
+            {statuses.map((Estado) => (
+              <Grid item xs={12} md={4} key={Estado}>
+                <Paper elevation={0} sx={{ padding: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <Typography variant="h6" sx={{ flexGrow: 1 }}>{Estado}</Typography>
+                    <Badge badgeContent={getTaskCountByStatus(Estado)} color="primary">
+                      <AssignmentIcon />
+                    </Badge>
+                  </Box>
+                  {items
+                    .filter(
+                      (item) =>
+                        item.Estado === Estado &&
+                        (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
+                    )
+                    .map((item) => (
+                      <Card
+                        key={item.Id}
+                        sx={{ backgroundColor: getBackgroundColor(item.Estado), marginBottom: 2, cursor: "pointer", "&:hover": { backgroundColor: "#f0f0f0" } }}
+                        onClick={() => onSelectItem(item)}
+                        onDoubleClick={() => onEditItem(item)}
+                      >
+                        <CardContent>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
+                            <Typography variant="subtitle1" fontWeight="bold">{item.Titulo}</Typography>
+                            <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
+                              <Avatar>{item.UsuarioAsignado.charAt(0)}</Avatar>
+                            </Tooltip>
                           </Box>
-                        </Card>
-                      ))}
-                  </CardContent>
-                </Card>
+                          <Typography variant="body2" dangerouslySetInnerHTML={{ __html: item.Descripcion }} />
+                          <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
+                            {item.tags.split(",").map((tag) => (
+                              <Chip key={tag} label={tag.trim()} sx={{ marginRight: 1, marginBottom: 0 }} />
+                            ))}
+                            <Typography variant="body2">{item.Prioridad}</Typography>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </Paper>
               </Grid>
             ))}
           </Grid>
         </>
       ) : (
-        <Slide direction="up" in>
-          <Box>
-            <MyTimeline tasks={items.map(item => ({
-              id: item.Id,
-              title: item.Titulo,
-              startDate: item['Fecha Inicio'],
-              endDate: item['Fecha Fin'],
-              status: item.Estado,
-              dependencies: item.dependencies
-            }))} />
-          </Box>
-        </Slide>
+        <>
+          <Typography variant="h5" gutterBottom>
+            Roadmap Timeline
+          </Typography>
+          {console.log("Items passed to MyTimeline:", items.map(item => ({
+            id: item.Id,
+            title: item.Titulo,
+            startDate: item["Fecha Inicio"] || item.startDate,
+            endDate: item["Fecha Fin"] || item.endDate,
+            etapa: item["etapa"] || item.etapa,
+            Estado: item.Estado,
+            Estimacion: item.Estimacion,
+            progress: item.progress,
+            dependencies: item.dependencies,
+            Bloqueos: item.Bloqueos,
+          })))}
+          <MyTimeline
+            tasks={items.map((item) => {
+              return {
+                id: item.Id,
+                title: item.Titulo,
+                startDate: item["Fecha Inicio"] || item.startDate,
+                endDate: item["Fecha Fin"] || item.endDate,
+                etapa: item["etapa"] || item.etapa,
+                Estado: item.Estado,
+                Estimacion: item.Estimacion,
+                progress: item.progress,
+                dependencies: item.dependencies,
+                Bloqueos: item.Bloqueos,
+              };
+            })}
+          />
+        </>
       )}
     </Box>
   );
