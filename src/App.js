@@ -17,12 +17,10 @@ import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuth
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
 import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
-import { useColorMode } from './theme/ColorModeContext';
 
 function App() {
   const { user, login, logout, loginWithLinkedIn } = useAuth();
   const theme = useTheme();
-  const { toggleColorMode } = useColorMode();
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
 
   useEffect(() => {
@@ -55,9 +53,6 @@ function App() {
             roadDOmap
           </Typography>
           <Box>
-            <IconButton onClick={toggleColorMode} sx={{ mr: 1 }}>
-              {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-            </IconButton>
             <IconButton onClick={handleLogout}>
               <Logout />
             </IconButton>
