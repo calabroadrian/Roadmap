@@ -27,123 +27,99 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
   const [statuses, setStatuses] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tabValue, setTabValue] = useState(0);
-  const [view, setView] = useState("vertical"); // "vertical" o "horizontal"
+  const [view, setView] = useState("vertical");
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       try {
-        const response = await fetch(
+        const res = await fetch(
           `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/issues!A1:ZZ?key=${API_KEY}&access_token=${CLIENT_ID}`
         );
-        const data = await response.json();
-        if (data.values?.length) {
-          const [headers, ...rows] = data.values;
-          const tagsIndex = headers.indexOf("Tags");
-          const sprintIndex = headers.indexOf("Sprint");
-          const depIndex = headers.indexOf("dependencies");
+        const data = await res.json();
+        if (!data.values?.length) return;
+        const [headers, ...rows] = data.values;
+        const ti = headers.indexOf("Tags");
+        const si = headers.indexOf("Sprint");
+        const di = headers.indexOf("dependencies");
 
-          const parsed = rows.map(row => {
-            const obj = headers.reduce((acc, key, idx) => ({ ...acc, [key]: row[idx] || "" }), {});
-            obj.tags = obj[headers[tagsIndex]]?.split(",").map(t => t.trim()) || [];
-            obj.dependencies = row[depIndex] ? [row[depIndex]] : [];
-            return obj;
-          });
+        const parsed = rows.map(r => {
+          const o = headers.reduce((acc, h, i) => ({ ...acc, [h]: r[i] || "" }), {});
+          o.tags = o[headers[ti]]?.split(",").map(t => t.trim()) || [];
+          o.dependencies = r[di] ? [r[di]] : [];
+          return o;
+        });
 
-          setItems(parsed);
-          setStatuses([...new Set(parsed.map(i => i.Estado))]);
-          setSprints([...new Set(parsed.map(i => i.Sprint))]);
-        }
+        setItems(parsed);
+        setStatuses([...new Set(parsed.map(i => i.Estado))]);
+        setSprints([...new Set(parsed.map(i => i.Sprint))]);
       } catch (e) {
         console.error(e);
       }
-    };
-    fetchData();
+    })();
   }, [refreshTrigger]);
 
-  const handleTabChange = (_, newValue) => setTabValue(newValue);
-  const getBackgroundColor = estado => {
+  const handleTabChange = (_, v) => setTabValue(v);
+  const getBg = estado => {
     const map = {
-      Nuevo: theme.palette.info.light,
-      "En progreso": theme.palette.warning.light,
-      Hecho: theme.palette.success.light
+      Nuevo: theme.palette.info[50],
+      "En progreso": theme.palette.warning[50],
+      Hecho: theme.palette.success[50]
     };
     return map[estado] || theme.palette.background.paper;
   };
-  const getTaskCountByStatus = estado =>
+  const countTasks = estado =>
     items.filter(
-      i =>
-        i.Estado === estado &&
-        (tabValue === 0 || i.Sprint === sprints[tabValue - 1])
+      i => i.Estado === estado && (tabValue === 0 || i.Sprint === sprints[tabValue - 1])
     ).length;
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Vista Toggle */}
+    <Box sx={{ p: 2, bgcolor: theme.palette.background.default, borderRadius: 1 }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, gap: 1 }}>
-        <Button
-          variant={view === 'vertical' ? 'contained' : 'outlined'}
-          size="small"
-          onClick={() => setView('vertical')}
-        >
+        <Button size="small" variant={view === 'vertical' ? 'contained' : 'outlined'} onClick={() => setView('vertical')}>
           Tablero
         </Button>
-        <Button
-          variant={view === 'horizontal' ? 'contained' : 'outlined'}
-          size="small"
-          onClick={() => setView('horizontal')}
-        >
-          Roadmap Timeline
+        <Button size="small" variant={view === 'horizontal' ? 'contained' : 'outlined'} onClick={() => setView('horizontal')}>
+          Timeline
         </Button>
       </Box>
 
       {view === 'vertical' ? (
         <>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-            Tablero
-          </Typography>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
             variant="scrollable"
-            scrollButtons='auto'
+            scrollButtons
             allowScrollButtonsMobile
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, '.MuiTabs-indicator': { backgroundColor: theme.palette.primary.main } }}
           >
-            <Tab label={`Todos los Sprints (${items.length})`} value={0} />
-            {sprints.map((s, idx) => (
-              <Tab key={s} label={s} value={idx + 1} />
-            ))}
+            <Tab label={`Todos (${items.length})`} value={0} />
+            {sprints.map((s, i) => <Tab key={s} label={s} value={i + 1} />)}
           </Tabs>
 
-          <Grid container spacing={2}>
-            {statuses.map(status => (
-              <Grid item xs={12} md={4} key={status}>
-                <Paper
-                  elevation={1}
-                  sx={{ p: 2, borderRadius: 2, height: '100%' }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      mb: 1
-                    }}
-                  >
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {status}
-                    </Typography>
-                    <Badge badgeContent={getTaskCountByStatus(status)} color="primary">
-                      <AssignmentIcon />
-                    </Badge>
-                  </Box>
-                  {items
-                    .filter(
-                      item =>
-                        item.Estado === status &&
-                        (tabValue === 0 || item.Sprint === sprints[tabValue - 1])
-                    )
-                    .map(item => (
+          <Box
+            sx={{
+              maxHeight: '60vh',
+              overflowY: 'auto',
+              pr: 1,
+              '&::-webkit-scrollbar': { width: 6 },
+              '&::-webkit-scrollbar-track': { background: theme.palette.background.default },
+              '&::-webkit-scrollbar-thumb': { background: theme.palette.grey[400], borderRadius: 3 }
+            }}
+          >
+            <Grid container spacing={2}>
+              {statuses.map(status => (
+                <Grid item xs={12} md={4} key={status}>
+                  <Paper elevation={0} sx={{ p: 2, borderRadius: 2, bgcolor: theme.palette.background.paper }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {status}
+                      </Typography>
+                      <Badge badgeContent={countTasks(status)} color="primary">
+                        <AssignmentIcon />
+                      </Badge>
+                    </Box>
+                    {items.filter(i => i.Estado === status && (tabValue === 0 || i.Sprint === sprints[tabValue - 1])).map(item => (
                       <Card
                         key={item.Id}
                         onClick={() => onSelectItem(item)}
@@ -152,37 +128,24 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
                           mb: 1,
                           p: 1,
                           borderRadius: 1,
-                          bgcolor: getBackgroundColor(item.Estado),
+                          bgcolor: getBg(item.Estado),
                           cursor: 'pointer',
-                          transition: 'transform 0.2s, box-shadow 0.2s',
-                          '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: 3
-                          }
+                          '&:hover': { boxShadow: 2 }
                         }}
                       >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }} noWrap>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
                             {item.Titulo}
                           </Typography>
-                          <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}>
-                            <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 24, height: 24, fontSize: 14 }}>
+                          <Tooltip title={`Assigned to ${item.UsuarioAsignado}`}> 
+                            <Avatar sx={{ width: 24, height: 24, fontSize: 12, bgcolor: theme.palette.primary.main }}>
                               {item.UsuarioAsignado.charAt(0)}
                             </Avatar>
                           </Tooltip>
                         </Box>
-                        <Typography
-                          variant="body2"
-                          sx={{ mt: 0.5, mb: 1, color: theme.palette.text.secondary }}
-                          noWrap
-                        >
-                          {item.Descripcion.replace(/<[^>]+>/g, '')}
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {item.tags.map(tag => (
-                              <Chip key={tag} label={tag} size="small" />
-                            ))}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                            {item.tags.map(tag => <Chip key={tag} label={tag} size="small" variant="outlined" />)}
                           </Box>
                           <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
                             {item.Prioridad}
@@ -190,33 +153,29 @@ const RoadmapDataSheet = ({ selectedItem, onEditItem, onSelectItem, onDeselectIt
                         </Box>
                       </Card>
                     ))}
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </>
-      ) : (
-        <>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-            Roadmap Timeline
-          </Typography>
-          <Box sx={{ height: 500 }}>
-            <MyTimeline
-              tasks={items.map(item => ({
-                id: item.Id,
-                title: item.Titulo,
-                startDate: item['Fecha Inicio'],
-                endDate: item['Fecha Fin'],
-                etapa: item.etapa,
-                Estado: item.Estado,
-                Estimacion: item.Estimacion,
-                progress: item.progress,
-                dependencies: item.dependencies,
-                Bloqueos: item.Bloqueos
-              }))}
-            />
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
           </Box>
         </>
+      ) : (
+        <Box sx={{ height: '60vh' }}>
+          <MyTimeline
+            tasks={items.map(item => ({
+              id: item.Id,
+              title: item.Titulo,
+              startDate: item['Fecha Inicio'],
+              endDate: item['Fecha Fin'],
+              etapa: item.etapa,
+              Estado: item.Estado,
+              Estimacion: item.Estimacion,
+              progress: item.progress,
+              dependencies: item.dependencies,
+              Bloqueos: item.Bloqueos
+            }))}
+          />
+        </Box>
       )}
     </Box>
   );
