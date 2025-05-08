@@ -17,7 +17,7 @@ const Button = styled.button`
 
 const AddButton = ({ onClick }) => {
   return (
-    <Button onClick={onClick}>Agregar</Button>
+    <Button onClick={onClick}>Agrega</Button>
   );
 };
 
