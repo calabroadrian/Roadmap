@@ -426,6 +426,10 @@
     display: block
 }
 
+.bar-wrapper:hover .popup-wrapper {
+    display: block;
+  }
+
 /* Estados */
 .status-Nuevo .bar {
     fill: #ffcdd2;
