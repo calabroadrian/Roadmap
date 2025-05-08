@@ -1,35 +1,42 @@
-// src/App.js
-import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Reemplaza Switch por Routes
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+  Fab,
+  Container,
+  useTheme
+} from '@mui/material';
+import { Add, Brightness4, Brightness7, Logout } from '@mui/icons-material';
 import { AuthProvider, useAuth } from './components/AuthContext/AuthContext';
 import Login from './components/Login/Login';
 import LinkedInAuthCallback from './components/LinkedInAuthCallback/LinkedInAuthCallback';
 import Modal from './components/Modal/Modal';
 import SprintForm from './components/SprintForm/SprintForm';
 import RoadmapContainer from './components/RoadmapContainer/RoadmapContainer';
-import './App.css';
+import { useColorMode } from './theme/ColorModeContext';
 
 function App() {
   const { user, login, logout, loginWithLinkedIn } = useAuth();
+  const theme = useTheme();
+  const { toggleColorMode } = useColorMode();
   const [isSprintFormOpen, setIsSprintFormOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('user'); // Busca el token en localStorage
-    if (token) {
-      // Aquí podrías realizar alguna validación adicional o simplemente loguear
-      login(token); // Inicia sesión con el token
-    }
+    const token = localStorage.getItem('user');
+    if (token) login(token);
   }, [login]);
-  
 
   useEffect(() => {
-    if (user && user.accessToken) {
-      localStorage.setItem('accessToken', user.accessToken); // Guarda el accessToken
+    if (user?.accessToken) {
+      localStorage.setItem('accessToken', user.accessToken);
     } else {
-      localStorage.removeItem('user'); // Elimina el accessToken si no hay usuario
+      localStorage.removeItem('user');
     }
   }, [user]);
-  
 
   const handleLogout = () => {
     logout();
@@ -40,39 +47,44 @@ function App() {
     return <Login onLogin={loginWithLinkedIn} />;
   }
 
-
-  const handleOpenSprintForm = () => {
-    setIsSprintFormOpen(true);
-  };
-
-
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1 className="app-title">roadDOmap</h1>
-        <button className="app-add-button" onClick={handleLogout}>
-          Cerrar sesión
-        </button>
-      </header>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <AppBar position="static" color="transparent" elevation={0} sx={{ backdropFilter: 'blur(8px)' }}>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant="h6" component="div">
+            roadDOmap
+          </Typography>
+          <Box>
+            <IconButton onClick={toggleColorMode} sx={{ mr: 1 }}>
+              {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+            </IconButton>
+            <IconButton onClick={handleLogout}>
+              <Logout />
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
-      <div className="functions-container">
-        <button className="app-add-button" onClick={handleOpenSprintForm}>
-          Sprint
-        </button>
-      </div>
+      <Container sx={{ flexGrow: 1, py: 2 }}>
+        <RoadmapContainer />
+      </Container>
 
-      <RoadmapContainer/>
-      
-      {isSprintFormOpen && (
-        <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
-          <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
-        </Modal>
-      )}
-    </div>
+      <Fab
+        color="primary"
+        aria-label="add sprint"
+        onClick={() => setIsSprintFormOpen(true)}
+        sx={{ position: 'fixed', bottom: 24, right: 24 }}
+      >
+        <Add />
+      </Fab>
+
+      <Modal isOpen={isSprintFormOpen} onClose={() => setIsSprintFormOpen(false)}>
+        <SprintForm onCloseModal={() => setIsSprintFormOpen(false)} />
+      </Modal>
+    </Box>
   );
 }
 
-// Cambia Switch por Routes y ajusta las rutas
 const AppWithAuthProvider = () => (
   <AuthProvider>
     <Router>

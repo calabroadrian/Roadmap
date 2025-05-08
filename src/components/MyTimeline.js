@@ -75,7 +75,7 @@ export default function MyTimeline({ tasks }) {
     ganttRef.current = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
-      popup_trigger: 'mousemove',
+      popup_trigger: 'mouseover',
       on_click: task => {
         const orig = tasks.find(x => String(x.id) === task.id);
         setSelectedTask(orig);
