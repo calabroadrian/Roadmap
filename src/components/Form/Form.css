@@ -1,3 +1,86 @@
+/* Form.css */
+
+/* Overlay semi-transparente */
+.form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+/* Contenedor de formulario */
+.form-container {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.form-header h5,
+.form-header .MuiTypography-root {
+  margin: 0;
+}
+
+/* Pestañas */
+.MuiTabs-root {
+  margin-bottom: 1rem;
+}
+
+/* Inputs y selects */
+.form-container .MuiTextField-root,
+.form-container .MuiFormControl-root {
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+/* React-Quill */
+.ql-container {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* Chips de tags */
+.tags-container {
+  margin-top: 0.5rem;
+}
+.tags-container .MuiChip-root {
+  background: #eef3fb;
+  color: #334e68;
+  font-size: 0.75rem;
+}
+
+/* Botonera al pie */
+.form-container .MuiButton-root {
+  border-radius: 6px;
+  text-transform: none;
+}
+.form-container .MuiButton-contained {
+  box-shadow: none;
+}
+.form-container .MuiButton-containedPrimary {
+  background-color: #1976d2;
+}
+.form-container .MuiButton-containedSecondary {
+  background-color: #d32f2f;
+}
+
+
 .form-overlay {
   position: fixed;
   top: 0;
