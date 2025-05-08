@@ -37,7 +37,7 @@ function parseDate(val, fallback) {
 
 export default function MyTimeline({ tasks }) {
   const [filter, setFilter] = useState('');
-  const [viewModeIdx, setViewModeIdx] = useState(0);
+  const [viewModeIdx, setViewModeIdx] = useState(2);
   const [selectedTask, setSelectedTask] = useState(null);
   const containerRef = useRef(null);
   const ganttRef = useRef(null);
@@ -72,7 +72,8 @@ export default function MyTimeline({ tasks }) {
     if (!el) return;
     el.innerHTML = '';
 
-    ganttRef.current = new Gantt(el, ganttTasks, {
+    // Instantiate Gantt
+    const gantt = new Gantt(el, ganttTasks, {
       view_mode: VIEW_MODES[viewModeIdx],
       language: 'es',
       popup_trigger: 'hover',
@@ -81,8 +82,21 @@ export default function MyTimeline({ tasks }) {
         setSelectedTask(orig);
       }
     });
+    ganttRef.current = gantt;
 
-    return () => ganttRef.current && ganttRef.current.clear();
+    // Bind hover events on each bar element
+    gantt.bars.forEach(barObj => {
+      const svgBar = barObj.bar;
+      if (svgBar) {
+        svgBar.addEventListener('mouseenter', () => gantt.show_popup(barObj.task));
+        svgBar.addEventListener('mouseleave', () => gantt.hide_popup());
+      }
+    });
+
+    return () => {
+      gantt.clear();
+      setSelectedTask(null);
+    };
   }, [ganttTasks, viewModeIdx, tasks]);
 
   const zoomOut = () => setViewModeIdx(i => Math.min(i + 1, VIEW_MODES.length - 1));
