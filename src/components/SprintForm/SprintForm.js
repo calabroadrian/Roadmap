@@ -1,4 +1,4 @@
-// src/components/SprintManager.js
+// src/components/SprintForm.js
 import React, { useState, useEffect } from 'react';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import {
@@ -27,7 +27,7 @@ import config from '../../config/config';
 
 const { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } = config;
 
-export default function SprintManager() {
+export default function SprintForm() {
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -61,7 +61,7 @@ export default function SprintManager() {
         dias: r.Dias
       })));
     } catch (e) {
-      console.error(e);
+      console.error('Error al cargar sprints', e);
     }
     setLoading(false);
   };
@@ -109,7 +109,7 @@ export default function SprintManager() {
       await fetchSprints();
       closeModal();
     } catch (e) {
-      console.error(e);
+      console.error('Error al guardar sprint', e);
     }
     setSaving(false);
   };
@@ -207,5 +207,4 @@ export default function SprintManager() {
     </Box>
   );
 }
-
 export default SprintForm;
