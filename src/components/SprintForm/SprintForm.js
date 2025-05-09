@@ -27,7 +27,7 @@ import config from '../../config/config';
 
 const { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } = config;
 
-export default function SprintForm() {
+function SprintForm() {
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
