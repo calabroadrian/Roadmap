@@ -1,207 +1,210 @@
-import { useState, useEffect } from 'react';
+// src/components/SprintManager.js
+import React, { useState, useEffect } from 'react';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import {
-  TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  Dialog, DialogTitle, DialogContent, DialogActions, Typography
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  CircularProgress,
+  Typography,
+  Stack
 } from '@mui/material';
+import { Add, Edit } from '@mui/icons-material';
 import config from '../../config/config';
 
-const SPREADSHEET_ID = config.SPREADSHEET_ID;
-const CLIENT_EMAIL = config.CLIENT_EMAIL;
-const PRIVATE_KEY = config.PRIVATE_KEY;
+const { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } = config;
 
-function SprintForm({ onCloseModal }) {
-  const [nombre, setNombre] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
+export default function SprintManager() {
   const [sprints, setSprints] = useState([]);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editSprintId, setEditSprintId] = useState(null);
-  const [selectedSprintId, setSelectedSprintId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [current, setCurrent] = useState({ id: null, nombre: '', inicio: '', fin: '' });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    loadSprints();
+    fetchSprints();
   }, []);
 
-  const loadSprints = async () => {
-    try {
-      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
-      });
-      await doc.loadInfo();
+  const authenticate = async () => {
+    const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
+    await doc.useServiceAccountAuth({
+      client_email: CLIENT_EMAIL,
+      private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
+    });
+    await doc.loadInfo();
+    return doc.sheetsByTitle['Sprints'];
+  };
 
-      const sheet = doc.sheetsByTitle['Sprints'];
+  const fetchSprints = async () => {
+    setLoading(true);
+    try {
+      const sheet = await authenticate();
       const rows = await sheet.getRows();
-      setSprints(rows);
-    } catch (error) {
-      console.error('Error al cargar los sprints:', error);
+      setSprints(rows.map(r => ({
+        id: r.ID,
+        nombre: r.Nombre,
+        inicio: r.FechaDeInicio,
+        fin: r.FechaDeFin,
+        dias: r.Dias
+      })));
+    } catch (e) {
+      console.error(e);
     }
+    setLoading(false);
   };
 
-  const getNextUniqueId = () => {
-    if (sprints.length === 0) return 1;
-    const maxId = Math.max(...sprints.map((sprint) => parseInt(sprint.ID, 10)));
-    return maxId + 1;
+  const openModal = (sprint = { id: null, nombre: '', inicio: '', fin: '' }) => {
+    setCurrent(sprint);
+    setModalOpen(true);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!nombre || !fechaInicio || !fechaFin) {
-      console.error('Faltan campos obligatorios.');
-      return;
-    }
+  const closeModal = () => {
+    setModalOpen(false);
+    setCurrent({ id: null, nombre: '', inicio: '', fin: '' });
+  };
 
+  const getNextId = () => {
+    const ids = sprints.map(s => parseInt(s.id, 10));
+    return ids.length ? Math.max(...ids) + 1 : 1;
+  };
+
+  const saveSprint = async () => {
+    if (!current.nombre || !current.inicio || !current.fin) return;
+    setSaving(true);
     try {
-      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
-      });
-      await doc.loadInfo();
-
-      const sheet = doc.sheetsByTitle['Sprints'];
-
-      if (isEditMode && editSprintId !== null) {
-        const sprintToUpdate = sprints.find((sprint) => sprint.ID === editSprintId);
-        if (sprintToUpdate) {
-          sprintToUpdate.Nombre = nombre;
-          sprintToUpdate.FechaDeInicio = fechaInicio;
-          sprintToUpdate.FechaDeFin = fechaFin;
-          const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
-          sprintToUpdate.Dias = diffInDays;
-          await sprintToUpdate.save();
-          console.log(`Se actualizó el sprint con ID ${editSprintId}`);
-        }
-      } else {
-        const id = getNextUniqueId();
-        const diffInDays = Math.ceil((new Date(fechaFin) - new Date(fechaInicio)) / (1000 * 60 * 60 * 24));
-        await sheet.addRow({
-          ID: id,
-          Nombre: nombre,
-          FechaDeInicio: fechaInicio,
-          FechaDeFin: fechaFin,
-          Dias: diffInDays,
+      const sheet = await authenticate();
+      const diff = Math.ceil((new Date(current.fin) - new Date(current.inicio)) / (1000 * 60 * 60 * 24));
+      if (current.id) {
+        const rows = await sheet.getRows();
+        const row = rows.find(r => r.ID === current.id.toString());
+        Object.assign(row, {
+          Nombre: current.nombre,
+          FechaDeInicio: current.inicio,
+          FechaDeFin: current.fin,
+          Dias: diff
         });
-        console.log(`Se agregó un nuevo sprint con ID ${id}`);
+        await row.save();
+      } else {
+        await sheet.addRow({
+          ID: getNextId(),
+          Nombre: current.nombre,
+          FechaDeInicio: current.inicio,
+          FechaDeFin: current.fin,
+          Dias: diff
+        });
       }
-
-      setNombre('');
-      setFechaInicio('');
-      setFechaFin('');
-      setIsEditMode(false);
-      setEditSprintId(null);
-      await loadSprints();
-
-    } catch (error) {
-      console.error('Error al guardar el sprint:', error);
+      await fetchSprints();
+      closeModal();
+    } catch (e) {
+      console.error(e);
     }
-  };
-
-  const handleEditSprint = () => {
-    const sprintToEdit = sprints.find((sprint) => sprint.ID === selectedSprintId);
-    if (sprintToEdit) {
-      setNombre(sprintToEdit.Nombre);
-      setFechaInicio(sprintToEdit.FechaDeInicio);
-      setFechaFin(sprintToEdit.FechaDeFin);
-      setIsEditMode(true);
-      setEditSprintId(selectedSprintId);
-    }
-  };
-
-  const handleDeleteSprint = async () => {
-    try {
-      const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
-      await doc.useServiceAccountAuth({
-        client_email: CLIENT_EMAIL,
-        private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
-      });
-      await doc.loadInfo();
-
-      const sprintToDelete = sprints.find((sprint) => sprint.ID === selectedSprintId);
-      if (sprintToDelete) {
-        await sprintToDelete.delete();
-        console.log(`Se eliminó el sprint con ID ${selectedSprintId}`);
-
-        setSprints((prevSprints) => prevSprints.filter((sprint) => sprint.ID !== selectedSprintId));
-        setSelectedSprintId(null);
-      }
-    } catch (error) {
-      console.error('Error al eliminar el sprint:', error);
-    }
+    setSaving(false);
   };
 
   return (
-    <Dialog open={true} onClose={onCloseModal} fullWidth maxWidth="md">
-      <DialogTitle>{isEditMode ? 'Editar Sprint' : 'Agregar Sprint'}</DialogTitle>
-      <DialogContent>
-        <form onSubmit={handleSubmit}>
+    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h5">Sprints</Typography>
+        <Tooltip title="Agregar Sprint">
+          <IconButton onClick={() => openModal()}>
+            <Add />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Paper elevation={1}>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Nombre</TableCell>
+                  <TableCell>Inicio</TableCell>
+                  <TableCell>Fin</TableCell>
+                  <TableCell>Días</TableCell>
+                  <TableCell align="right">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {sprints.map(s => (
+                  <TableRow key={s.id} hover>
+                    <TableCell>{s.nombre}</TableCell>
+                    <TableCell>{s.inicio}</TableCell>
+                    <TableCell>{s.fin}</TableCell>
+                    <TableCell>{s.dias}</TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Editar Sprint">
+                        <IconButton size="small" onClick={() => openModal(s)}>
+                          <Edit />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {!sprints.length && (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">No hay sprints.</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      )}
+
+      <Dialog open={modalOpen} onClose={closeModal} fullWidth maxWidth="sm">
+        <DialogTitle>{current.id ? 'Editar Sprint' : 'Nuevo Sprint'}</DialogTitle>
+        <DialogContent sx={{ display: 'grid', gap: 2, pt: 1 }}>
           <TextField
             label="Nombre"
             fullWidth
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            margin="normal"
+            value={current.nombre}
+            onChange={e => setCurrent(c => ({ ...c, nombre: e.target.value }))}
           />
-          <TextField
-            label="Fecha de Inicio"
-            type="date"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={fechaInicio}
-            onChange={(e) => setFechaInicio(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            label="Fecha de Fin"
-            type="date"
-            fullWidth
-            InputLabelProps={{ shrink: true }}
-            value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
-            margin="normal"
-          />
-          <DialogActions>
-            <Button onClick={onCloseModal}>Cancelar</Button>
-            <Button type="submit" variant="contained" color="primary">
-              {isEditMode ? 'Guardar Cambios' : 'Agregar Sprint'}
-            </Button>
-          </DialogActions>
-        </form>
-        <Typography variant="h6" gutterBottom>Lista de Sprints</Typography>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Nombre</TableCell>
-                <TableCell>Inicio</TableCell>
-                <TableCell>Fin</TableCell>
-                <TableCell>Días</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sprints.map((sprint) => (
-                <TableRow
-                  key={sprint.ID}
-                  selected={selectedSprintId === sprint.ID}
-                  onClick={() => setSelectedSprintId(sprint.ID)}
-                >
-                  <TableCell>{sprint.Nombre}</TableCell>
-                  <TableCell>{sprint.FechaDeInicio}</TableCell>
-                  <TableCell>{sprint.FechaDeFin}</TableCell>
-                  <TableCell>{sprint.Dias}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleEditSprint} disabled={!selectedSprintId} color="primary">Editar Sprint</Button>
-        <Button onClick={handleDeleteSprint} disabled={!selectedSprintId} color="secondary">Eliminar Sprint</Button>
-      </DialogActions>
-    </Dialog>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <TextField
+              label="Inicio"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              value={current.inicio}
+              onChange={e => setCurrent(c => ({ ...c, inicio: e.target.value }))}
+            />
+            <TextField
+              label="Fin"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              value={current.fin}
+              onChange={e => setCurrent(c => ({ ...c, fin: e.target.value }))}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeModal} disabled={saving}>Cancelar</Button>
+          <Button onClick={saveSprint} variant="contained" disabled={saving || !current.nombre || !current.inicio || !current.fin}>
+            {saving ? 'Guardando...' : (current.id ? 'Guardar Cambios' : 'Agregar Sprint')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
 
