@@ -22,12 +22,12 @@ import {
   Typography,
   Stack
 } from '@mui/material';
-import { Add, Edit } from '@mui/icons-material';
+import { Add, Edit, Close } from '@mui/icons-material';
 import config from '../../config/config';
 
 const { SPREADSHEET_ID, CLIENT_EMAIL, PRIVATE_KEY } = config;
 
-function SprintForm() {
+export default function SprintForm() {
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,7 +42,8 @@ function SprintForm() {
     const doc = new GoogleSpreadsheet(SPREADSHEET_ID);
     await doc.useServiceAccountAuth({
       client_email: CLIENT_EMAIL,
-      private_key: PRIVATE_KEY.replace(/\\n/g, '\n'),
+      private_key: PRIVATE_KEY.replace(/\n/g, '
+'),
     });
     await doc.loadInfo();
     return doc.sheetsByTitle['Sprints'];
@@ -119,7 +120,7 @@ function SprintForm() {
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">Sprints</Typography>
         <Tooltip title="Agregar Sprint">
-          <IconButton onClick={() => openModal()}>
+          <IconButton color="primary" onClick={() => openModal()}>
             <Add />
           </IconButton>
         </Tooltip>
@@ -130,9 +131,9 @@ function SprintForm() {
           <CircularProgress />
         </Box>
       ) : (
-        <Paper elevation={1}>
-          <TableContainer>
-            <Table>
+        <Paper elevation={1} sx={{ overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 400 }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>Nombre</TableCell>
@@ -169,8 +170,23 @@ function SprintForm() {
         </Paper>
       )}
 
-      <Dialog open={modalOpen} onClose={closeModal} fullWidth maxWidth="sm">
-        <DialogTitle>{current.id ? 'Editar Sprint' : 'Nuevo Sprint'}</DialogTitle>
+      <Dialog
+        open={modalOpen}
+        onClose={closeModal}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ sx: { minHeight: 300, minWidth: 500 } }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }}>
+          {current.id ? 'Editar Sprint' : 'Nuevo Sprint'}
+          <IconButton
+            aria-label="close"
+            onClick={closeModal}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
         <DialogContent sx={{ display: 'grid', gap: 2, pt: 1 }}>
           <TextField
             label="Nombre"
@@ -207,4 +223,3 @@ function SprintForm() {
     </Box>
   );
 }
-export default SprintForm;
